@@ -1,0 +1,85 @@
+{
+  "name": "aidlc-team",
+  "version": "0.10.0",
+  "displayName": "AI-DLC Agent Team",
+  "description": "A team of AI-DLC expert agents on Kiro Crew: from a one-sentence requirement through human gates, company checks and an independent review to a local deployment, with a live team board and a CTO view.",
+  "author": "JiaDe-Wu",
+  "license": "Apache-2.0",
+  "tags": ["agents", "orchestration", "workflows", "automation", "collaboration"],
+  "highlights": [
+    "Turns one sentence into a delivery: roles work in parallel, each in its own git worktree and branch",
+    "A person decides at the gates: scope, build start and release, with each open question put one by one",
+    "Company checks run by the app, not by the agents; failures go back to the role that owns them",
+    "An independent read-only reviewer reads the whole diff before the release gate",
+    "At the last gate you tick which lessons to keep; later runs read them",
+    "A live team board, a replay of finished runs and a CTO view of all deliveries"
+  ],
+  "useCases": [
+    "Taking a web feature from a requirement to a reviewed local deployment with people deciding at the gates",
+    "Trying AI-DLC on your own standards: the team, the checks and the knowledge are plain files you replace",
+    "Showing a team how much of a delivery can run without a person, and where a person must decide"
+  ],
+  "iconPath": "assets/icon.png",
+  "screenshots": [
+    "assets/screenshots/team-board.png",
+    "assets/screenshots/gate.png",
+    "assets/screenshots/cto-view.png"
+  ],
+  "heroImage": "assets/hero-light.png",
+  "heroImageDark": "assets/hero-dark.png",
+  "heroImageDetail": "assets/hero-detail-light.png",
+  "heroImageDetailDark": "assets/hero-detail-dark.png",
+  "links": [
+    {"label": "Source and README", "url": "https://github.com/JiaDe-Wu/aidlc-team"},
+    {"label": "AI-DLC Workflows", "url": "https://github.com/awslabs/aidlc-workflows"},
+    {"label": "Samples this app comes from", "url": "https://github.com/aws-samples/sample-ai-for-software-engineering-on-aws"}
+  ],
+  "minKiroCrewVersion": "0.8.0",
+  "dependencies": {
+    "commands": ["git", "node"]
+  },
+  "l10n": {
+    "zh-CN": {
+      "displayName": "AI-DLC 多 Agent 团队",
+      "description": "一支 AI-DLC 专家 agent 团队：从一句话需求出发，经过人的关卡、公司检查和独立评审，到本机部署；带实时团队看板和 CTO 视图。",
+      "pageLabel": "AI-DLC 多 Agent 团队"
+    }
+  },
+  "backend": {
+    "hooks": {
+      "routes": "backend.routes:register_routes",
+      "on_startup": "backend.hooks:on_startup",
+      "on_shutdown": "backend.hooks:on_shutdown"
+    }
+  },
+  "ui": {
+    "entry": "dist/index.mjs",
+    "pages": [
+      {
+        "route": "/apps/aidlc-team",
+        "label": "AI-DLC Agent Team",
+        "icon": "Users"
+      }
+    ],
+    "sidebar": {
+      "section": "Apps"
+    }
+  },
+  "permissions": {
+    "api": [
+      "/api/apps/aidlc-team",
+      "/api/chat",
+      "/api/models",
+      "/api/agents",
+      "/api/knowledge"
+    ],
+    "storage": true,
+    "sessionApproval": true
+  },
+  "platform": {
+    "os": [
+      "macos",
+      "linux"
+    ]
+  }
+}

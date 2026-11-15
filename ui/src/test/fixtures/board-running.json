@@ -1,0 +1,1511 @@
+{
+  "at": 1791231500.0,
+  "runs": [
+    {
+      "id": "r1006a",
+      "title": "Event signup site",
+      "status": "running",
+      "started_at": 1791230000.0,
+      "ended_at": null,
+      "roles_done": 5,
+      "roles_total": 8,
+      "tests": {
+        "passed": 6,
+        "failed": 6,
+        "total": 12
+      },
+      "imported": false,
+      "name": "Event signup site",
+      "issue": "TY-4127"
+    }
+  ],
+  "run": {
+    "id": "r1006a",
+    "title": "Event signup site",
+    "status": "running",
+    "repo": "/Users/you/workplace/aidlc-team/runs/r1006a/repo",
+    "folder": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/_run",
+    "base": "5e1f0aa",
+    "branch": "team/r1006a/run",
+    "started_at": 1791230000.0,
+    "ended_at": null,
+    "wall_s": 1500,
+    "serial_s": 2900.0,
+    "credits": 66.5,
+    "roles": [
+      {
+        "key": "pm",
+        "title": "Product manager",
+        "emoji": "🧭",
+        "model": "claude-opus-5.5",
+        "status": "merged",
+        "depends_on": [],
+        "writable": [
+          "docs/product/**"
+        ],
+        "attempt": 1,
+        "agent": {
+          "id": "s-pm",
+          "turns": 9,
+          "tool_count": 9,
+          "last_tool": "Writing docs/product/acceptance.md",
+          "last_activity": 1791230175.0,
+          "started": 1791230000.0,
+          "elapsed_s": 1500,
+          "queued_reason": null,
+          "error": null,
+          "recent_tools": [],
+          "text_tail": null,
+          "credits": 6.1
+        },
+        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/pm",
+        "branch": "team/r1006a/pm",
+        "files": [
+          {
+            "path": "docs/product/acceptance.md",
+            "added": 64,
+            "removed": 0,
+            "status": "A"
+          }
+        ],
+        "lines": {
+          "added": 64,
+          "removed": 0
+        },
+        "commits": [
+          {
+            "sha": "a1c9e02",
+            "subject": "[pm] Acceptance criteria AC-1…AC-12",
+            "at": 1791230176.0
+          }
+        ],
+        "violations": [],
+        "owns_tests": [],
+        "started_at": 1791230000.0,
+        "done_at": 1791230180.0,
+        "active_s": 180.0,
+        "summary": "12 acceptance criteria covering the list, detail, signup validation, capacity, duplicates, the roster and mobile",
+        "credits": 6.1,
+        "phase": "",
+        "stage": "",
+        "mission": "",
+        "aidlc_agent": "",
+        "gate": null,
+        "gate_label": "",
+        "kinds": [
+          "work"
+        ],
+        "session": null,
+        "deployed": null,
+        "member": "aidlc-product-agent",
+        "member_kind": "member",
+        "assignment": "",
+        "doing": "",
+        "icon": "pm",
+        "gate_preset": "",
+        "gate_revise_preset": "",
+        "gate_revise_risk": null,
+        "optional": false,
+        "overrule": false,
+        "awaiting_member": null,
+        "delivery_gate": false,
+        "questions": [],
+        "answers": [],
+        "talk": [],
+        "can_discuss": false
+      },
+      {
+        "key": "architect",
+        "title": "Architect",
+        "emoji": "🏛️",
+        "model": "claude-opus-5.5",
+        "status": "merged",
+        "depends_on": [
+          "pm"
+        ],
+        "writable": [
+          "docs/architecture/**",
+          "contracts/**"
+        ],
+        "attempt": 1,
+        "agent": {
+          "id": "s-ar",
+          "turns": 17,
+          "tool_count": 17,
+          "last_tool": "Writing contracts/api.md",
+          "last_activity": 1791230510.0,
+          "started": 1791230190.0,
+          "elapsed_s": 1310,
+          "queued_reason": null,
+          "error": null,
+          "recent_tools": [],
+          "text_tail": null,
+          "credits": 11.8
+        },
+        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/architect",
+        "branch": "team/r1006a/architect",
+        "files": [
+          {
+            "path": "contracts/api.md",
+            "added": 118,
+            "removed": 0,
+            "status": "A"
+          },
+          {
+            "path": "docs/architecture/layout.md",
+            "added": 46,
+            "removed": 0,
+            "status": "A"
+          }
+        ],
+        "lines": {
+          "added": 164,
+          "removed": 0
+        },
+        "commits": [
+          {
+            "sha": "b7e4410",
+            "subject": "[architect] Interface contract, 6 endpoints",
+            "at": 1791230515.0
+          }
+        ],
+        "violations": [],
+        "owns_tests": [],
+        "started_at": 1791230190.0,
+        "done_at": 1791230520.0,
+        "active_s": 330.0,
+        "summary": "6 interfaces, an error code table, the directory split for four roles",
+        "credits": 11.8,
+        "phase": "",
+        "stage": "",
+        "mission": "",
+        "aidlc_agent": "",
+        "gate": null,
+        "gate_label": "",
+        "kinds": [
+          "work"
+        ],
+        "session": null,
+        "deployed": null,
+        "member": "",
+        "member_kind": null,
+        "assignment": "",
+        "doing": "",
+        "icon": "architect",
+        "gate_preset": "",
+        "gate_revise_preset": "",
+        "gate_revise_risk": null,
+        "optional": false,
+        "overrule": false,
+        "awaiting_member": null,
+        "delivery_gate": false,
+        "questions": [],
+        "answers": [],
+        "talk": [],
+        "can_discuss": false
+      },
+      {
+        "key": "designer",
+        "title": "UI design",
+        "emoji": "🎨",
+        "model": "claude-opus-5.5",
+        "status": "merged",
+        "depends_on": [
+          "pm"
+        ],
+        "writable": [
+          "docs/design/**",
+          "frontend/styles/**"
+        ],
+        "attempt": 1,
+        "agent": {
+          "id": "s-ds",
+          "turns": 21,
+          "tool_count": 21,
+          "last_tool": "Writing frontend/styles/main.css",
+          "last_activity": 1791230590.0,
+          "started": 1791230190.0,
+          "elapsed_s": 1310,
+          "queued_reason": null,
+          "error": null,
+          "recent_tools": [],
+          "text_tail": null,
+          "credits": 13.4
+        },
+        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/designer",
+        "branch": "team/r1006a/designer",
+        "files": [
+          {
+            "path": "docs/design/pages.md",
+            "added": 71,
+            "removed": 0,
+            "status": "A"
+          },
+          {
+            "path": "frontend/styles/main.css",
+            "added": 212,
+            "removed": 0,
+            "status": "A"
+          }
+        ],
+        "lines": {
+          "added": 283,
+          "removed": 0
+        },
+        "commits": [
+          {
+            "sha": "c2f8a31",
+            "subject": "[designer] Page structure and styles",
+            "at": 1791230596.0
+          }
+        ],
+        "violations": [],
+        "owns_tests": [],
+        "started_at": 1791230190.0,
+        "done_at": 1791230600.0,
+        "active_s": 410.0,
+        "summary": "4 pages, mobile breakpoints, form error states",
+        "credits": 13.4,
+        "phase": "",
+        "stage": "",
+        "mission": "",
+        "aidlc_agent": "",
+        "gate": null,
+        "gate_label": "",
+        "kinds": [
+          "work"
+        ],
+        "session": null,
+        "deployed": null,
+        "member": "",
+        "member_kind": null,
+        "assignment": "",
+        "doing": "",
+        "icon": "designer",
+        "gate_preset": "",
+        "gate_revise_preset": "",
+        "gate_revise_risk": null,
+        "optional": false,
+        "overrule": false,
+        "awaiting_member": null,
+        "delivery_gate": false,
+        "questions": [],
+        "answers": [],
+        "talk": [],
+        "can_discuss": false
+      },
+      {
+        "key": "tester",
+        "title": "Testing",
+        "emoji": "🧪",
+        "model": "claude-opus-5.5",
+        "status": "merged",
+        "depends_on": [
+          "architect"
+        ],
+        "writable": [
+          "tests/**"
+        ],
+        "attempt": 1,
+        "agent": {
+          "id": "s-ts",
+          "turns": 26,
+          "tool_count": 26,
+          "last_tool": "Running: node --test tests/",
+          "last_activity": 1791230830.0,
+          "started": 1791230530.0,
+          "elapsed_s": 970,
+          "queued_reason": null,
+          "error": null,
+          "recent_tools": [],
+          "text_tail": null,
+          "credits": 17.2
+        },
+        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/tester",
+        "branch": "team/r1006a/tester",
+        "files": [
+          {
+            "path": "tests/api-events.test.js",
+            "added": 142,
+            "removed": 0,
+            "status": "A"
+          },
+          {
+            "path": "tests/api-signup.test.js",
+            "added": 188,
+            "removed": 0,
+            "status": "A"
+          },
+          {
+            "path": "tests/web-render.test.js",
+            "added": 97,
+            "removed": 0,
+            "status": "A"
+          }
+        ],
+        "lines": {
+          "added": 427,
+          "removed": 0
+        },
+        "commits": [
+          {
+            "sha": "d91b6c7",
+            "subject": "[tester] 12 acceptance tests (red first)",
+            "at": 1791230835.0
+          }
+        ],
+        "violations": [],
+        "owns_tests": [],
+        "started_at": 1791230530.0,
+        "done_at": 1791230840.0,
+        "active_s": 310.0,
+        "summary": "12 tests, all red: the implementation is not written yet",
+        "credits": 17.2,
+        "phase": "",
+        "stage": "",
+        "mission": "",
+        "aidlc_agent": "",
+        "gate": null,
+        "gate_label": "",
+        "kinds": [
+          "work"
+        ],
+        "session": null,
+        "deployed": null,
+        "member": "",
+        "member_kind": null,
+        "assignment": "",
+        "doing": "",
+        "icon": "tester",
+        "gate_preset": "",
+        "gate_revise_preset": "",
+        "gate_revise_risk": null,
+        "optional": false,
+        "overrule": false,
+        "awaiting_member": null,
+        "delivery_gate": false,
+        "questions": [],
+        "answers": [],
+        "talk": [],
+        "can_discuss": false
+      },
+      {
+        "key": "backend",
+        "title": "Backend",
+        "emoji": "⚙️",
+        "model": "claude-opus-5.5",
+        "status": "fixing",
+        "depends_on": [
+          "architect",
+          "tester"
+        ],
+        "writable": [
+          "backend/**"
+        ],
+        "attempt": 2,
+        "agent": {
+          "id": "s-be2",
+          "turns": 11,
+          "tool_count": 14,
+          "last_tool": "Editing backend/validate.js",
+          "last_activity": 1791231495.0,
+          "started": 1791231380.0,
+          "elapsed_s": 120,
+          "queued_reason": null,
+          "error": null,
+          "recent_tools": [
+            {
+              "at": 1791231480.0,
+              "tool": "fs_read",
+              "kind": "read",
+              "detail": "backend/server.js"
+            },
+            {
+              "at": 1791231484.0,
+              "tool": "fs_write",
+              "kind": "write",
+              "detail": "backend/validate.js"
+            },
+            {
+              "at": 1791231488.0,
+              "tool": "execute_bash",
+              "kind": "shell",
+              "detail": "node --test tests/api-signup.test.js"
+            },
+            {
+              "at": 1791231492.0,
+              "tool": "fs_write",
+              "kind": "write",
+              "detail": "backend/validate.js"
+            }
+          ],
+          "text_tail": "AC-6 fails because the capacity check uses >, it should be >=; AC-7 needs a check for the same email before writing. Changing checkCapacity and checkDuplicate in validate.js...",
+          "credits": null
+        },
+        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/backend",
+        "branch": "team/r1006a/backend",
+        "files": [
+          {
+            "path": "backend/server.js",
+            "added": 186,
+            "removed": 0,
+            "status": "A"
+          },
+          {
+            "path": "backend/store.js",
+            "added": 74,
+            "removed": 0,
+            "status": "A"
+          },
+          {
+            "path": "backend/validate.js",
+            "added": 41,
+            "removed": 0,
+            "status": "A"
+          }
+        ],
+        "lines": {
+          "added": 301,
+          "removed": 0
+        },
+        "commits": [
+          {
+            "sha": "e3a07d5",
+            "subject": "[backend] Interfaces and in-memory storage",
+            "at": 1791231180.0
+          },
+          {
+            "sha": "e8b11f2",
+            "subject": "[backend] Fix: duplicate signup returns 409",
+            "at": 1791231460.0
+          }
+        ],
+        "violations": [],
+        "owns_tests": [
+          "api-signup.test.js#AC-6",
+          "api-signup.test.js#AC-7"
+        ],
+        "started_at": 1791230850.0,
+        "done_at": null,
+        "active_s": 560,
+        "summary": null,
+        "credits": 9.3,
+        "phase": "",
+        "stage": "",
+        "mission": "",
+        "aidlc_agent": "",
+        "gate": null,
+        "gate_label": "",
+        "kinds": [
+          "work",
+          "work"
+        ],
+        "session": "aidlc-team-r0101abcd-3-9f2c",
+        "deployed": null,
+        "member": "",
+        "member_kind": null,
+        "assignment": "",
+        "doing": "",
+        "icon": "backend",
+        "gate_preset": "",
+        "gate_revise_preset": "",
+        "gate_revise_risk": null,
+        "optional": false,
+        "overrule": false,
+        "awaiting_member": null,
+        "delivery_gate": false,
+        "questions": [],
+        "answers": [],
+        "talk": [],
+        "can_discuss": false
+      },
+      {
+        "key": "frontend",
+        "title": "Frontend",
+        "emoji": "🖥️",
+        "model": "claude-opus-5.5",
+        "status": "running",
+        "depends_on": [
+          "architect",
+          "designer",
+          "tester"
+        ],
+        "writable": [
+          "frontend/**"
+        ],
+        "attempt": 1,
+        "agent": {
+          "id": "s-fe",
+          "turns": 34,
+          "tool_count": 41,
+          "last_tool": "Editing frontend/app.js",
+          "last_activity": 1791231498.0,
+          "started": 1791230850.0,
+          "elapsed_s": 650,
+          "queued_reason": null,
+          "error": null,
+          "recent_tools": [
+            {
+              "at": 1791231480.0,
+              "tool": "fs_read",
+              "kind": "read",
+              "detail": "contracts/api.md"
+            },
+            {
+              "at": 1791231484.0,
+              "tool": "fs_write",
+              "kind": "write",
+              "detail": "frontend/app.js"
+            },
+            {
+              "at": 1791231488.0,
+              "tool": "execute_bash",
+              "kind": "shell",
+              "detail": "node --test tests/web-render.test.js"
+            },
+            {
+              "at": 1791231492.0,
+              "tool": "fs_write",
+              "kind": "write",
+              "detail": "frontend/app.js"
+            }
+          ],
+          "text_tail": "When signup fails the API returns 409 and a reason, and the page must show the reason under the form; first add the .error-msg rendering, then handle the remaining-capacity refresh...",
+          "credits": null
+        },
+        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/frontend",
+        "branch": "team/r1006a/frontend",
+        "files": [
+          {
+            "path": "frontend/index.html",
+            "added": 88,
+            "removed": 0,
+            "status": "A"
+          },
+          {
+            "path": "frontend/app.js",
+            "added": 203,
+            "removed": 0,
+            "status": "A"
+          },
+          {
+            "path": "frontend/event.html",
+            "added": 61,
+            "removed": 0,
+            "status": "A"
+          },
+          {
+            "path": "backend/server.js",
+            "added": 3,
+            "removed": 1,
+            "status": "M"
+          }
+        ],
+        "lines": {
+          "added": 355,
+          "removed": 1
+        },
+        "commits": [
+          {
+            "sha": "f5c2d90",
+            "subject": "[frontend] Home and detail pages",
+            "at": 1791231300.0
+          }
+        ],
+        "violations": [
+          "backend/server.js"
+        ],
+        "owns_tests": [
+          "web-render.test.js#AC-1"
+        ],
+        "started_at": 1791230850.0,
+        "done_at": null,
+        "active_s": 650,
+        "summary": null,
+        "credits": null,
+        "phase": "",
+        "stage": "",
+        "mission": "",
+        "aidlc_agent": "",
+        "gate": null,
+        "gate_label": "",
+        "kinds": [
+          "work"
+        ],
+        "session": null,
+        "deployed": null,
+        "member": "",
+        "member_kind": null,
+        "assignment": "",
+        "doing": "",
+        "icon": "frontend",
+        "gate_preset": "",
+        "gate_revise_preset": "",
+        "gate_revise_risk": null,
+        "optional": false,
+        "overrule": false,
+        "awaiting_member": null,
+        "delivery_gate": false,
+        "questions": [],
+        "answers": [],
+        "talk": [],
+        "can_discuss": false
+      },
+      {
+        "key": "ops",
+        "title": "Operations",
+        "emoji": "🚀",
+        "model": "claude-opus-5.5",
+        "status": "done",
+        "depends_on": [
+          "architect"
+        ],
+        "writable": [
+          "ops/**",
+          "Dockerfile",
+          ".dockerignore"
+        ],
+        "attempt": 1,
+        "agent": {
+          "id": "s-op",
+          "turns": 12,
+          "tool_count": 12,
+          "last_tool": "Running: sh ops/start.sh --check",
+          "last_activity": 1791230980.0,
+          "started": 1791230530.0,
+          "elapsed_s": 970,
+          "queued_reason": null,
+          "error": null,
+          "recent_tools": [],
+          "text_tail": null,
+          "credits": 8.7
+        },
+        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/ops",
+        "branch": "team/r1006a/ops",
+        "files": [
+          {
+            "path": "ops/start.sh",
+            "added": 38,
+            "removed": 0,
+            "status": "A"
+          },
+          {
+            "path": "Dockerfile",
+            "added": 14,
+            "removed": 0,
+            "status": "A"
+          },
+          {
+            "path": ".dockerignore",
+            "added": 5,
+            "removed": 0,
+            "status": "A"
+          }
+        ],
+        "lines": {
+          "added": 57,
+          "removed": 0
+        },
+        "commits": [
+          {
+            "sha": "0a6d3e1",
+            "subject": "[ops] Start script and Dockerfile",
+            "at": 1791230985.0
+          }
+        ],
+        "violations": [],
+        "owns_tests": [],
+        "started_at": 1791230530.0,
+        "done_at": 1791230990.0,
+        "active_s": 460.0,
+        "summary": "start.sh has a health check, image 52 MB",
+        "credits": 8.7,
+        "phase": "",
+        "stage": "",
+        "mission": "",
+        "aidlc_agent": "",
+        "gate": null,
+        "gate_label": "",
+        "kinds": [
+          "work"
+        ],
+        "session": null,
+        "deployed": null,
+        "member": "",
+        "member_kind": null,
+        "assignment": "",
+        "doing": "",
+        "icon": "ops",
+        "gate_preset": "",
+        "gate_revise_preset": "",
+        "gate_revise_risk": null,
+        "optional": false,
+        "overrule": false,
+        "awaiting_member": null,
+        "delivery_gate": false,
+        "questions": [],
+        "answers": [],
+        "talk": [],
+        "can_discuss": false
+      },
+      {
+        "key": "reviewer",
+        "title": "Review",
+        "emoji": "🔍",
+        "model": "claude-opus-5.5",
+        "status": "waiting",
+        "depends_on": [
+          "backend",
+          "frontend",
+          "ops"
+        ],
+        "writable": [],
+        "attempt": 1,
+        "agent": null,
+        "worktree": null,
+        "branch": null,
+        "files": [],
+        "lines": {
+          "added": 0,
+          "removed": 0
+        },
+        "commits": [],
+        "violations": [],
+        "owns_tests": [],
+        "started_at": null,
+        "done_at": null,
+        "active_s": 0,
+        "summary": null,
+        "credits": null,
+        "phase": "",
+        "stage": "",
+        "mission": "",
+        "aidlc_agent": "",
+        "gate": null,
+        "gate_label": "",
+        "kinds": [
+          "work"
+        ],
+        "session": null,
+        "deployed": null,
+        "member": "",
+        "member_kind": null,
+        "assignment": "",
+        "doing": "",
+        "icon": "reviewer",
+        "gate_preset": "",
+        "gate_revise_preset": "",
+        "gate_revise_risk": null,
+        "optional": false,
+        "overrule": false,
+        "awaiting_member": null,
+        "delivery_gate": false,
+        "questions": [],
+        "answers": [],
+        "talk": [],
+        "can_discuss": false
+      }
+    ],
+    "edges": [
+      [
+        "pm",
+        "architect"
+      ],
+      [
+        "pm",
+        "designer"
+      ],
+      [
+        "architect",
+        "tester"
+      ],
+      [
+        "architect",
+        "backend"
+      ],
+      [
+        "tester",
+        "backend"
+      ],
+      [
+        "architect",
+        "frontend"
+      ],
+      [
+        "designer",
+        "frontend"
+      ],
+      [
+        "tester",
+        "frontend"
+      ],
+      [
+        "architect",
+        "ops"
+      ],
+      [
+        "backend",
+        "reviewer"
+      ],
+      [
+        "frontend",
+        "reviewer"
+      ],
+      [
+        "ops",
+        "reviewer"
+      ]
+    ],
+    "tests": {
+      "at": 1791231470.0,
+      "command": "node --test tests/",
+      "cases": [
+        {
+          "id": "web-render.test.js#AC-1",
+          "ac": "AC-1",
+          "name": "AC-1: The home page lists all events",
+          "file": "tests/web-render.test.js",
+          "status": "pass",
+          "owner": "frontend",
+          "ms": 23,
+          "message": null
+        },
+        {
+          "id": "api-events.test.js#AC-2",
+          "ac": "AC-2",
+          "name": "AC-2: An event has a name, time, place and remaining capacity",
+          "file": "tests/api-events.test.js",
+          "status": "pass",
+          "owner": "backend",
+          "ms": 12,
+          "message": null
+        },
+        {
+          "id": "api-events.test.js#AC-3",
+          "ac": "AC-3",
+          "name": "AC-3: Event detail",
+          "file": "tests/api-events.test.js",
+          "status": "pass",
+          "owner": "backend",
+          "ms": 28,
+          "message": null
+        },
+        {
+          "id": "api-signup.test.js#AC-4",
+          "ac": "AC-4",
+          "name": "AC-4: The name cannot be empty",
+          "file": "tests/api-signup.test.js",
+          "status": "pass",
+          "owner": "backend",
+          "ms": 44,
+          "message": null
+        },
+        {
+          "id": "api-signup.test.js#AC-5",
+          "ac": "AC-5",
+          "name": "AC-5: The email format must be valid",
+          "file": "tests/api-signup.test.js",
+          "status": "pass",
+          "owner": "backend",
+          "ms": 6,
+          "message": null
+        },
+        {
+          "id": "api-signup.test.js#AC-6",
+          "ac": "AC-6",
+          "name": "AC-6: No signup when capacity is full",
+          "file": "tests/api-signup.test.js",
+          "status": "fail",
+          "owner": "backend",
+          "ms": 7,
+          "message": "expected 409, got 201"
+        },
+        {
+          "id": "api-signup.test.js#AC-7",
+          "ac": "AC-7",
+          "name": "AC-7: The same email cannot sign up twice",
+          "file": "tests/api-signup.test.js",
+          "status": "fail",
+          "owner": "backend",
+          "ms": 55,
+          "message": "expected 409, got 201"
+        },
+        {
+          "id": "web-render.test.js#AC-8",
+          "ac": "AC-8",
+          "name": "AC-8: A failure explains why",
+          "file": "tests/web-render.test.js",
+          "status": "fail",
+          "owner": "frontend",
+          "ms": 37,
+          "message": "no element .error-msg"
+        },
+        {
+          "id": "api-events.test.js#AC-9",
+          "ac": "AC-9",
+          "name": "AC-9: The organiser sees the signup list",
+          "file": "tests/api-events.test.js",
+          "status": "pass",
+          "owner": "backend",
+          "ms": 9,
+          "message": null
+        },
+        {
+          "id": "api-events.test.js#AC-10",
+          "ac": "AC-10",
+          "name": "AC-10: The list is sorted by signup time",
+          "file": "tests/api-events.test.js",
+          "status": "fail",
+          "owner": "backend",
+          "ms": 26,
+          "message": "order mismatch at index 0"
+        },
+        {
+          "id": "web-render.test.js#AC-11",
+          "ac": "AC-11",
+          "name": "AC-11: The form works at mobile width",
+          "file": "tests/web-render.test.js",
+          "status": "fail",
+          "owner": "frontend",
+          "ms": 40,
+          "message": "form wider than 375px"
+        },
+        {
+          "id": "web-render.test.js#AC-12",
+          "ac": "AC-12",
+          "name": "AC-12: Remaining capacity updates live",
+          "file": "tests/web-render.test.js",
+          "status": "fail",
+          "owner": "frontend",
+          "ms": 6,
+          "message": "count did not change"
+        }
+      ],
+      "passed": 6,
+      "failed": 6,
+      "total": 12,
+      "history": [
+        {
+          "at": 1791230840.0,
+          "passed": 0,
+          "failed": 12
+        },
+        {
+          "at": 1791231190.0,
+          "passed": 4,
+          "failed": 8
+        },
+        {
+          "at": 1791231310.0,
+          "passed": 5,
+          "failed": 7
+        },
+        {
+          "at": 1791231470.0,
+          "passed": 6,
+          "failed": 6
+        }
+      ]
+    },
+    "merges": [
+      {
+        "role": "pm",
+        "sha": "a1c9e02",
+        "at": 1791230182.0,
+        "status": "merged",
+        "files": 1,
+        "note": null
+      },
+      {
+        "role": "architect",
+        "sha": "b7e4410",
+        "at": 1791230522.0,
+        "status": "merged",
+        "files": 2,
+        "note": null
+      },
+      {
+        "role": "designer",
+        "sha": "c2f8a31",
+        "at": 1791230602.0,
+        "status": "merged",
+        "files": 2,
+        "note": null
+      },
+      {
+        "role": "tester",
+        "sha": "d91b6c7",
+        "at": 1791230842.0,
+        "status": "merged",
+        "files": 3,
+        "note": null
+      },
+      {
+        "role": "backend",
+        "sha": "e3a07d5",
+        "at": 1791231185.0,
+        "status": "merged",
+        "files": 3,
+        "note": null
+      },
+      {
+        "role": "frontend",
+        "sha": "f5c2d90",
+        "at": 1791231305.0,
+        "status": "conflict",
+        "files": 4,
+        "note": "backend/server.js"
+      }
+    ],
+    "events": [
+      {
+        "seq": 1,
+        "at": 1791230000.0,
+        "kind": "run",
+        "role": null,
+        "text": "Run started: Event signup site",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 2,
+        "at": 1791230001.0,
+        "kind": "spawned",
+        "role": "pm",
+        "text": "Product manager started",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 3,
+        "at": 1791230180.0,
+        "kind": "done",
+        "role": "pm",
+        "text": "Product manager done: 12 acceptance criteria",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 4,
+        "at": 1791230182.0,
+        "kind": "merged",
+        "role": "pm",
+        "text": "Product manager's branch merged into the run branch",
+        "from": "pm",
+        "to": "run",
+        "data": null
+      },
+      {
+        "seq": 5,
+        "at": 1791230186.0,
+        "kind": "handoff",
+        "role": "architect",
+        "text": "Product manager handed acceptance criteria to Architect",
+        "from": "pm",
+        "to": "architect",
+        "data": {
+          "carry": "acceptance criteria"
+        }
+      },
+      {
+        "seq": 6,
+        "at": 1791230186.0,
+        "kind": "handoff",
+        "role": "designer",
+        "text": "Product manager handed acceptance criteria to UI design",
+        "from": "pm",
+        "to": "designer",
+        "data": {
+          "carry": "acceptance criteria"
+        }
+      },
+      {
+        "seq": 7,
+        "at": 1791230190.0,
+        "kind": "spawned",
+        "role": "architect",
+        "text": "Architect started",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 8,
+        "at": 1791230190.0,
+        "kind": "spawned",
+        "role": "designer",
+        "text": "UI design started",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 9,
+        "at": 1791230520.0,
+        "kind": "done",
+        "role": "architect",
+        "text": "Architect done: 6 interfaces",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 10,
+        "at": 1791230522.0,
+        "kind": "merged",
+        "role": "architect",
+        "text": "Architect's branch merged into the run branch",
+        "from": "architect",
+        "to": "run",
+        "data": null
+      },
+      {
+        "seq": 11,
+        "at": 1791230526.0,
+        "kind": "handoff",
+        "role": "tester",
+        "text": "Architect handed the interface contract to Testing",
+        "from": "architect",
+        "to": "tester",
+        "data": {
+          "carry": "interface contract"
+        }
+      },
+      {
+        "seq": 12,
+        "at": 1791230526.0,
+        "kind": "handoff",
+        "role": "ops",
+        "text": "Architect handed the interface contract to Operations",
+        "from": "architect",
+        "to": "ops",
+        "data": {
+          "carry": "interface contract"
+        }
+      },
+      {
+        "seq": 13,
+        "at": 1791230600.0,
+        "kind": "done",
+        "role": "designer",
+        "text": "UI design done",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 14,
+        "at": 1791230602.0,
+        "kind": "merged",
+        "role": "designer",
+        "text": "UI design's branch merged into the run branch",
+        "from": "designer",
+        "to": "run",
+        "data": null
+      },
+      {
+        "seq": 15,
+        "at": 1791230840.0,
+        "kind": "tests",
+        "role": null,
+        "text": "Tests 0/12: the implementation is not written yet, all red",
+        "from": null,
+        "to": null,
+        "data": {
+          "passed": 0,
+          "total": 12
+        }
+      },
+      {
+        "seq": 16,
+        "at": 1791230842.0,
+        "kind": "merged",
+        "role": "tester",
+        "text": "Testing's branch merged into the run branch",
+        "from": "tester",
+        "to": "run",
+        "data": null
+      },
+      {
+        "seq": 17,
+        "at": 1791230846.0,
+        "kind": "handoff",
+        "role": "backend",
+        "text": "Testing handed the tests and contract to Backend",
+        "from": "tester",
+        "to": "backend",
+        "data": {
+          "carry": "tests and contract"
+        }
+      },
+      {
+        "seq": 18,
+        "at": 1791230846.0,
+        "kind": "handoff",
+        "role": "frontend",
+        "text": "Testing handed the tests, contract and design to Frontend",
+        "from": "tester",
+        "to": "frontend",
+        "data": {
+          "carry": "tests, contract, design"
+        }
+      },
+      {
+        "seq": 19,
+        "at": 1791230850.0,
+        "kind": "spawned",
+        "role": "backend",
+        "text": "Backend started",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 20,
+        "at": 1791230850.0,
+        "kind": "spawned",
+        "role": "frontend",
+        "text": "Frontend started",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 21,
+        "at": 1791230990.0,
+        "kind": "done",
+        "role": "ops",
+        "text": "Operations done: start.sh and Dockerfile",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 22,
+        "at": 1791231185.0,
+        "kind": "merged",
+        "role": "backend",
+        "text": "Backend's branch merged into the run branch",
+        "from": "backend",
+        "to": "run",
+        "data": null
+      },
+      {
+        "seq": 23,
+        "at": 1791231190.0,
+        "kind": "tests",
+        "role": null,
+        "text": "Tests 4/12",
+        "from": null,
+        "to": null,
+        "data": {
+          "passed": 4,
+          "total": 12
+        }
+      },
+      {
+        "seq": 24,
+        "at": 1791231305.0,
+        "kind": "conflict",
+        "role": "frontend",
+        "text": "Frontend merge conflict: backend/server.js",
+        "from": "frontend",
+        "to": "run",
+        "data": {
+          "paths": [
+            "backend/server.js"
+          ]
+        }
+      },
+      {
+        "seq": 25,
+        "at": 1791231306.0,
+        "kind": "violation",
+        "role": "frontend",
+        "text": "Frontend changed backend/server.js, which is outside its area",
+        "from": null,
+        "to": null,
+        "data": {
+          "paths": [
+            "backend/server.js"
+          ]
+        }
+      },
+      {
+        "seq": 26,
+        "at": 1791231310.0,
+        "kind": "tests",
+        "role": null,
+        "text": "Tests 5/12",
+        "from": null,
+        "to": null,
+        "data": {
+          "passed": 5,
+          "total": 12
+        }
+      },
+      {
+        "seq": 27,
+        "at": 1791231375.0,
+        "kind": "bounce",
+        "role": "backend",
+        "text": "AC-6, AC-7 failed, sent back to Backend",
+        "from": "tests",
+        "to": "backend",
+        "data": {
+          "cases": [
+            "AC-6",
+            "AC-7"
+          ]
+        }
+      },
+      {
+        "seq": 28,
+        "at": 1791231380.0,
+        "kind": "spawned",
+        "role": "backend",
+        "text": "Backend, round 2: fix AC-6, AC-7",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 29,
+        "at": 1791231470.0,
+        "kind": "tests",
+        "role": null,
+        "text": "Tests 6/12",
+        "from": null,
+        "to": null,
+        "data": {
+          "passed": 6,
+          "total": 12
+        }
+      },
+      {
+        "seq": 30,
+        "at": 1791231495.0,
+        "kind": "tool",
+        "role": "backend",
+        "text": "Backend: Editing backend/validate.js",
+        "from": null,
+        "to": null,
+        "data": null
+      },
+      {
+        "seq": 31,
+        "at": 1791231498.0,
+        "kind": "tool",
+        "role": "frontend",
+        "text": "Frontend: Editing frontend/app.js",
+        "from": null,
+        "to": null,
+        "data": null
+      }
+    ],
+    "team": {
+      "name": "AI-DLC expert team",
+      "orchestrator": "kirocrew-team"
+    },
+    "ownership": {
+      "roles": {
+        "backend": [
+          "backend/**"
+        ],
+        "frontend": [
+          "frontend/**"
+        ]
+      },
+      "test_areas": {
+        "api": "backend",
+        "web": "frontend"
+      }
+    },
+    "review_rounds": 0,
+    "gate_notes": {},
+    "standards": [
+      {
+        "id": "RULE",
+        "title": "Annual party raffle rules",
+        "kind": "standard",
+        "owner": "HR dept",
+        "doc": "21-annual-party-raffle-rules.md",
+        "rules": [
+          "RULE-1",
+          "RULE-2"
+        ],
+        "why": "Matched \"raffle\""
+      },
+      {
+        "id": "DATA-EMP",
+        "title": "Employee roster",
+        "kind": "data",
+        "owner": "HR dept",
+        "doc": "data/employee-roster.md",
+        "rules": [],
+        "why": "Matched \"employee\""
+      }
+    ],
+    "roster": null,
+    "imported": null,
+    "knowledge": {
+      "source": {
+        "name": "Taoyuan Technology",
+        "present": true,
+        "items": 9,
+        "status": "synced",
+        "files_total": 9,
+        "files_done": 9,
+        "path": "~/workplace/taoyuan/knowledge"
+      },
+      "hits": [
+        {
+          "role": "pm",
+          "at": 1791230020.0,
+          "kind": "search",
+          "text": "Annual party raffle rules RULE-1"
+        },
+        {
+          "role": "pm",
+          "at": 1791230031.0,
+          "kind": "data",
+          "text": "employees.json"
+        }
+      ]
+    },
+    "crew_members": [
+      "aidlc-product-agent",
+      "aidlc-developer-agent"
+    ],
+    "risks": [],
+    "signoff": {
+      "by": "R&D lead",
+      "note": "Checked in the staging environment",
+      "at": 1791230600.0,
+      "tests": "26/26"
+    },
+    "requirement": "Build an employee raffle page for the 2026 annual party",
+    "plan_skip": {},
+    "overruled": null,
+    "sign_block": "Signing is only possible after the run has ended",
+    "delivery": {
+      "name": "Event signup site",
+      "kind": "新应用",
+      "size": "中",
+      "line": "电商",
+      "why": "",
+      "confirmed": false
+    },
+    "issue": {
+      "id": "TY-4127",
+      "kind": "需求",
+      "reporter": "Operations dept",
+      "created_at": 1791230000.0
+    },
+    "pr": null,
+    "gate_discuss": false
+  }
+}
