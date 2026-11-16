@@ -52,7 +52,7 @@ class Service:
         self.site = Site(scrub=self.scrub, state_file=self.data_dir / "site.json")
         self._opener = opener or _open_on_this_mac
         # every role's agent is a Kiro Crew chat session, opened through the gateway's chat API
-        self.sessions = sessions or SessionManager(Gateway(self.name, APP_ROOT / ".app_secret"), app=self.name,
+        self.sessions = sessions or SessionManager(Gateway(self.name, APP_ROOT / ".app_secret", token_source=self._ctx_token), app=self.name,
                                                    state_file=self.data_dir / "sessions.json", log=self.log,
                                                    scrub=self.scrub)
         self._agents = manager if manager is not None else self.sessions
@@ -73,6 +73,11 @@ class Service:
     def manager(self) -> Any:
         """The agent manager the runs, the board and Outputs use: the role sessions."""
         return self._agents
+
+    async def _ctx_token(self) -> str:
+        """An app token from the hook context (``ctx.app_token()``), or ``""`` on a Kiro Crew that has none."""
+        fn = getattr(self.ctx, "app_token", None)
+        return (await fn() or "") if callable(fn) else ""
 
     def scrub(self, text: str) -> str:
         """KiroCrew's own outbound redaction (``ctx.scrub``) when there is one, else a few obvious patterns."""

@@ -1,8 +1,10 @@
 """The gateway's own chat API, called as this app (the backend runs inside the gateway process).
 
-Auth: the install secret ``<app dir>/.app_secret`` is exchanged at
-``POST /api/apps/<app>/token`` (header ``X-App-Secret``) for a 5-minute token sent as ``?token=``; it is renewed a
-minute early, and a credential refusal (``X-Auth-Required``) is retried once with a fresh one. Only loopback is
+Auth: the token comes from ``token_source`` (the hook context's ``app_token()``: the gateway keeps the app secret
+where no sandbox reads it, so code in its process gets a token without one). Without a token source, or when it
+returns nothing, the install secret ``<app dir>/.app_secret`` an older Kiro Crew writes is exchanged at
+``POST /api/apps/<app>/token`` (header ``X-App-Secret``) instead. Either way the token lasts 5 minutes and is sent as
+``?token=``; it is renewed a minute early, and a credential refusal (``X-Auth-Required``) is retried once with a fresh one. Only loopback is
 ever called, and neither the secret nor the token goes into a log line or an error message.
 """
 
@@ -12,7 +14,7 @@ import asyncio
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Awaitable, Callable
 from urllib.parse import quote
 
 TOKEN_MAX_AGE = 240.0
@@ -50,8 +52,10 @@ def q(key: str) -> str:
 
 class Gateway:
     def __init__(self, app: str, secret_file: Path, *, base: Callable[[], str] = base_url,
-                 clock: Callable[[], float] | None = None) -> None:
+                 clock: Callable[[], float] | None = None,
+                 token_source: Callable[[], Awaitable[str]] | None = None) -> None:
         self.app, self._secret_file, self._base = app, Path(secret_file), base
+        self._token_source = token_source
         self._clock = clock
         self._token: str | None = None
         self._token_at = 0.0
@@ -80,7 +84,18 @@ class Gateway:
             if self._token and self._now() - self._token_at < TOKEN_MAX_AGE:
                 return self._token
             path = f"/api/apps/{self.app}/token"
-            secret = (await asyncio.to_thread(self._secret_file.read_text, encoding="utf-8")).strip()
+            if self._token_source is not None:
+                try:
+                    given = await self._token_source()
+                except Exception:  # noqa: BLE001 - fall back to the secret file below
+                    given = ""
+                if isinstance(given, str) and given:
+                    self._token, self._token_at = given, self._now()
+                    return given
+            try:
+                secret = (await asyncio.to_thread(self._secret_file.read_text, encoding="utf-8")).strip()
+            except OSError:
+                raise GatewayError(0, "no app token and no app secret file", "no_secret", path) from None
             if not secret:
                 raise GatewayError(0, "the app secret is empty", "no_secret", path)
             try:
