@@ -18,13 +18,16 @@ detail** (交付详情, one delivery) and the **team board** (团队看板, how 
 
 ## Install
 
-Install **Agent R&D Team** from the App Store (Discover) in Kiro Crew, or from a clone:
+Kiro Crew installs it straight from this repository (it is not in the App Store catalog yet):
 
 ```bash
-git clone https://github.com/JiaDe-Wu/agent-rd-team
-kirocrew app install ./agent-rd-team
-kirocrew app enable agent-rd-team     # asks you to trust this app first (see below)
+kirocrew app install https://github.com/JiaDe-Wu/agent-rd-team    # or a clone: kirocrew app install ./agent-rd-team
 ```
+
+The app stays off after install. `kirocrew app enable agent-rd-team` does not turn it on: the gateway refuses
+until the app is trusted, and it also asks you to allow the app to control your chats (see below). Both are
+answered in the dashboard: open the app's page at `/apps/detail/agent-rd-team` and enable it there. The first
+refusal names the setting `agent.apps_trusted`, which trusts this one app only.
 
 Open the app from the sidebar, write a one-sentence requirement and hand it to the team.
 
