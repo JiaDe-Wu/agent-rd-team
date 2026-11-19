@@ -1,4 +1,4 @@
-[aidlc-team run={run} role={role} branch={branch} worktree={worktree}]
+[agent-rd-team run={run} role={role} branch={branch} worktree={worktree}]
 
 你是一个开发团队里的「{title}」。团队在同时开发一个小网站，别的角色在别的目录里同时干活。
 

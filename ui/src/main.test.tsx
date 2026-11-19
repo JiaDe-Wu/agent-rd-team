@@ -7,9 +7,9 @@ import { clone, emptyBoard, multiRunBoard, runningBoard, setCase, withEvent } fr
 import { TeamPage, mostActive } from './main'
 import { SCENARIOS } from './board/Header'
 
-const BOARD = 'GET /api/apps/aidlc-team/board*'
-const ROUTE = 'POST /api/apps/aidlc-team/route'
-const RUNS = '/api/apps/aidlc-team/runs'
+const BOARD = 'GET /api/apps/agent-rd-team/board*'
+const ROUTE = 'POST /api/apps/agent-rd-team/route'
+const RUNS = '/api/apps/agent-rd-team/runs'
 /** What POST /route answers for an MVP requirement: the shop team, picked by the keyword. */
 const shopPick = () => ({
   team: {
@@ -73,7 +73,7 @@ describe('the board', () => {
     expect(screen.getAllByTestId('kt-cell')).toHaveLength(12)
     expect(screen.getByTestId('kt-station')).toHaveAccessibleName('Tests 6/12')
     expect(within(screen.getByTestId('kt-graph')).getByRole('button', { name: /Backend: Fixing, round 2/ })).toBeInTheDocument()
-    expect(apiCalls[0].path).toBe('/api/apps/aidlc-team/board')
+    expect(apiCalls[0].path).toBe('/api/apps/agent-rd-team/board')
   })
 
   test('the first snapshot does not animate; a new handoff after it flies along its edge', async () => {
@@ -149,7 +149,7 @@ describe('the board', () => {
 
   test('Starting a new run posts the requirement, then shows the new run', async () => {
     const user = userEvent.setup()
-    setApiRoutes({ [BOARD]: () => runningBoard(), [ROUTE]: () => shopPick(), 'POST /api/apps/aidlc-team/runs': () => ({ run: 'r1007b' }) })
+    setApiRoutes({ [BOARD]: () => runningBoard(), [ROUTE]: () => shopPick(), 'POST /api/apps/agent-rd-team/runs': () => ({ run: 'r1007b' }) })
     render(<TeamPage pollMs={POLL} />)
     await screen.findAllByTestId('kt-lane')
     await user.click(screen.getByRole('button', { name: 'New requirement' }))
@@ -160,7 +160,7 @@ describe('the board', () => {
     await user.type(screen.getByLabelText('Requirement for the agent team'), 'Build a book club signup page')
     await user.click(screen.getByRole('button', { name: 'Hand to the team' }))
     await waitFor(() => expect(apiCalls.find((c) => c.method === 'POST' && c.path === RUNS)).toEqual({ method: 'POST', path: RUNS, body: { requirement: 'Build a book club signup page', team: 'auto' } }))
-    await waitFor(() => expect(apiCalls.some((c) => c.method === 'GET' && c.path === '/api/apps/aidlc-team/board?run=r1007b')).toBe(true))
+    await waitFor(() => expect(apiCalls.some((c) => c.method === 'GET' && c.path === '/api/apps/agent-rd-team/board?run=r1007b')).toBe(true))
     expect(screen.queryByLabelText(/^Requirement/)).toBeNull()
   })
 
@@ -169,7 +169,7 @@ describe('the board', () => {
     let ok = false
     setApiRoutes({
       [BOARD]: () => runningBoard(),
-      'POST /api/apps/aidlc-team/runs': () => {
+      'POST /api/apps/agent-rd-team/runs': () => {
         if (!ok) throw apiError(409, 'busy', 'A run is already going')
         return { run: 'r1007b' }
       },
@@ -187,7 +187,7 @@ describe('the board', () => {
 
   test('Stop asks first; only Confirm stop posts the stop', async () => {
     const user = userEvent.setup()
-    setApiRoutes({ [BOARD]: () => runningBoard(), 'POST /api/apps/aidlc-team/runs/r1006a/stop': () => ({ ok: true }) })
+    setApiRoutes({ [BOARD]: () => runningBoard(), 'POST /api/apps/agent-rd-team/runs/r1006a/stop': () => ({ ok: true }) })
     render(<TeamPage />)
     await screen.findAllByTestId('kt-lane')
     await user.click(screen.getByRole('button', { name: 'Stop' }))
@@ -200,13 +200,13 @@ describe('the board', () => {
     expect(apiCalls.some((c) => c.method === 'POST')).toBe(false)
     await user.click(screen.getByRole('button', { name: 'Stop' }))
     await user.click(screen.getByRole('button', { name: 'Confirm stop' }))
-    await waitFor(() => expect(apiCalls.filter((c) => c.method === 'POST').map((c) => c.path)).toEqual(['/api/apps/aidlc-team/runs/r1006a/stop']))
+    await waitFor(() => expect(apiCalls.filter((c) => c.method === 'POST').map((c) => c.path)).toEqual(['/api/apps/agent-rd-team/runs/r1006a/stop']))
     await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull())
   })
 
   test('no runs: an inviting start panel with the AI-DLC team and the start form', async () => {
     const user = userEvent.setup()
-    setApiRoutes({ [BOARD]: () => emptyBoard(), 'POST /api/apps/aidlc-team/runs': () => ({ id: 'r1' }) })
+    setApiRoutes({ [BOARD]: () => emptyBoard(), 'POST /api/apps/agent-rd-team/runs': () => ({ id: 'r1' }) })
     render(<TeamPage />)
     const empty = await screen.findByTestId('kt-empty')
     expect(within(empty).getByRole('heading', { name: 'Building keeps getting cheaper; good products are still scarce' })).toBeInTheDocument()
@@ -228,7 +228,7 @@ describe('the board', () => {
     expect(within(picker).getAllByRole('option')).toHaveLength(3)
     await user.selectOptions(picker, 'r1005z')
     await waitFor(() => expect(screen.getByText('Book club signup page', { selector: '.kt-run-title' })).toBeInTheDocument())
-    expect(apiCalls.some((c) => c.path === '/api/apps/aidlc-team/board?run=r1005z')).toBe(true)
+    expect(apiCalls.some((c) => c.path === '/api/apps/agent-rd-team/board?run=r1005z')).toBe(true)
     expect(screen.getByTestId('kt-tests-counter')).toHaveTextContent('12/12')
     expect(screen.queryByRole('button', { name: 'Stop' })).toBeNull()
   })

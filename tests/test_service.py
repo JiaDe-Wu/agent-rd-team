@@ -16,7 +16,7 @@ NEW_ROUTES = [("GET", "/board"), ("GET", "/runs"), ("POST", "/runs"), ("POST", "
 
 
 def make(tmp_path, mgr, **kw):
-    ctx = SimpleNamespace(name="aidlc-team", logger=logging.getLogger("kcteam-test"), data_dir=str(tmp_path / "data"))
+    ctx = SimpleNamespace(name="agent-rd-team", logger=logging.getLogger("kcteam-test"), data_dir=str(tmp_path / "data"))
     svc = service.Service(ctx, manager=mgr, work_root=tmp_path / "work", run_tests=default_tests(), **kw)
     return svc, handlers.build_routes(svc, AppRoute, web=FakeWeb, is_owner=owner_check)
 

@@ -6,7 +6,7 @@ import { apiCalls, apiError, setApiRoutes } from '../test/stubs/app-sdk'
 import { clone, runningBoard } from '../test/fixtures'
 import { TeamPage } from '../main'
 
-const API = '/api/apps/aidlc-team'
+const API = '/api/apps/agent-rd-team'
 const NEVER = 'never started: waiting for memory (macOS memory pressure did not ease in time); retry once it eases or a running agent finishes'
 
 /** The fixture run, ended: the tester never got to start. */

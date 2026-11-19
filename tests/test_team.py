@@ -8,7 +8,7 @@ import json
 from teamkit import (FIXTURE, FakeManager, act, default_tests, drive, finish, make_run, mini_team, mod, read, reload,
                      richest, same_shape, sh, team_mod, ts_types)
 
-TAG = "[aidlc-team run=r1006test role="
+TAG = "[agent-rd-team run=r1006test role="
 
 
 def kinds(run, kind):
@@ -43,7 +43,7 @@ def test_full_run_parallel_stages_merges_bounce_conflict_and_review(tmp_path):
         assert sh(repo, "log", "-1", "--format=%s").strip() == "Requirement: 活动报名小站"
         [(pm_id, pm_task, kw)] = mgr.spawned
         assert pm_task.startswith(TAG + "pm branch=team/r1006test/pm worktree=")
-        assert kw["cwd"].endswith("/wt/pm") and kw["parent_session_key"] == "aidlc-team:r1006test"
+        assert kw["cwd"].endswith("/wt/pm") and kw["parent_session_key"] == "agent-rd-team:r1006test"
         assert kw["model"] == "claude-opus-5.5" and kw["folder"].endswith(" · r1006test") and kw["title"].endswith(" agent")
         assert "docs/product/**" in pm_task and "把 README 里的需求" in pm_task
 

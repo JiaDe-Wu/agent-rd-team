@@ -7,12 +7,12 @@ import shutil as _shutil
 import subprocess as _subprocess
 from pathlib import Path as _Path
 
-APP_NAME = "aidlc-team"
-TAG_PREFIX = "[aidlc-team "  # first line of every task this app spawns: [aidlc-team run=… role=… branch=… worktree=…]
+APP_NAME = "agent-rd-team"
+TAG_PREFIX = "[agent-rd-team "  # first line of every task this app spawns: [agent-rd-team run=… role=… branch=… worktree=…]
 
 # KiroCrew only lets a sub-agent work under ~/workspace(s) or ~/workplace(s) (spawn refuses any other cwd), so every
 # run's repository and worktrees live here.
-WORK_ROOT = _Path.home() / "workplace" / "aidlc-team"
+WORK_ROOT = _Path.home() / "workplace" / "agent-rd-team"
 
 APP_ROOT = _Path(__file__).resolve().parents[2]  # the app's folder: the installed copy or the dev checkout
 TEAM_FILE = APP_ROOT / "team" / "team.json"

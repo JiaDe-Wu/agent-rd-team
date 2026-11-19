@@ -31,7 +31,7 @@ export const chatLaunches: { agent?: string; message?: string; slotKey?: string;
 let rawSupported = true
 let chatListFails = false
 
-/** Install handlers keyed `"GET /api/apps/aidlc-team/board"`. A `*` at the end matches a prefix (query strings included). */
+/** Install handlers keyed `"GET /api/apps/agent-rd-team/board"`. A `*` at the end matches a prefix (query strings included). */
 export function setApiRoutes(table: Record<string, RouteHandler>): void {
   routes.clear()
   apiCalls.length = 0
@@ -128,7 +128,7 @@ export function useNotify() {
 }
 
 export function useAppInfo() {
-  return { name: 'aidlc-team', version: '0.1.0', permissions: { api: ['/api/apps/aidlc-team'], events: [] } }
+  return { name: 'agent-rd-team', version: '0.1.0', permissions: { api: ['/api/apps/agent-rd-team'], events: [] } }
 }
 
 export function useTheme() {

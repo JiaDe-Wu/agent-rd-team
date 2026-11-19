@@ -12,7 +12,7 @@ import { RoleIcon } from './RoleIcon'
 import { money } from '../cto/metrics'
 import { zh } from '../cto/vocab'
 
-const SIGNER_KEY = 'aidlc-team:signer'
+const SIGNER_KEY = 'agent-rd-team:signer'
 
 /** Where the run's PR stands, in the sign-off sheet's words. */
 export function prState(run: RunDetail): string {

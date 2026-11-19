@@ -1,5 +1,5 @@
 /**
- * The board contract: what `GET /api/apps/aidlc-team/board?run=<id>` returns. The backend (backend/team/board.py)
+ * The board contract: what `GET /api/apps/agent-rd-team/board?run=<id>` returns. The backend (backend/team/board.py)
  * builds exactly this; the page renders only this. Times are epoch seconds. Keep both sides in step.
  */
 

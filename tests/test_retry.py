@@ -9,7 +9,7 @@ from test_service import make
 
 gitwork = mod("gitwork")
 GAVE_UP = "agent stopped: nothing was done"
-TAG = "[aidlc-team run=r1006test role="
+TAG = "[agent-rd-team run=r1006test role="
 
 
 def kinds(run, kind):

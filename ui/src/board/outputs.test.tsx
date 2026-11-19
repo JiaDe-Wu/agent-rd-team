@@ -7,12 +7,12 @@ import { clone, runningBoard } from '../test/fixtures'
 import { TeamPage } from '../main'
 import { lineKind, sortFiles, tabsFor } from './Outputs'
 
-const API = '/api/apps/aidlc-team'
+const API = '/api/apps/agent-rd-team'
 const BOARD = `GET ${API}/board*`
 
 const attempt = (over: Partial<OutputAttempt> = {}): OutputAttempt => ({
   n: 1, kind: 'work', label: '', agent: 'f84496b48dc1536a', started: 1000, ended: 1041, credits: 2.6, error: null,
-  summary: 'Wrote 21 acceptance criteria', reply: 'DONE: Wrote 21 acceptance criteria\n\n- AC-1 The home page lists events', task: '[aidlc-team run=r1006a role=pm]\n\nWrite the requirements in the README as acceptance criteria',
+  summary: 'Wrote 21 acceptance criteria', reply: 'DONE: Wrote 21 acceptance criteria\n\n- AC-1 The home page lists events', task: '[agent-rd-team run=r1006a role=pm]\n\nWrite the requirements in the README as acceptance criteria',
   calls: [{ at: 1003, tool: 'Reading', kind: 'read', detail: 'README.md' }, { at: 1020, tool: 'Creating', kind: 'edit', detail: 'acceptance.md' }],
   live: false, ...over,
 })
@@ -167,7 +167,7 @@ describe('the session runner', () => {
   test('Open session in Crew opens the role session in the dashboard (no message sent)', async () => {
     const { chatLaunches } = await import('../test/stubs/app-sdk')
     const board = runningBoard()
-    board.run!.roles.find((l) => l.key === 'pm')!.session = 'aidlc-team-r1006a-1-ab12'
+    board.run!.roles.find((l) => l.key === 'pm')!.session = 'agent-rd-team-r1006a-1-ab12'
     routes({}, board)
     render(<TeamPage />)
     const user = userEvent.setup()
@@ -175,6 +175,6 @@ describe('the session runner', () => {
     await user.click(screen.getByRole('button', { name: 'Outputs' }))
     const drawer = await screen.findByTestId('kt-outputs')
     await user.click(await within(drawer).findByRole('button', { name: 'Open session in Crew' }))
-    expect(chatLaunches).toEqual([{ slotKey: 'aidlc-team-r1006a-1-ab12', autoSend: false }])
+    expect(chatLaunches).toEqual([{ slotKey: 'agent-rd-team-r1006a-1-ab12', autoSend: false }])
   })
 })

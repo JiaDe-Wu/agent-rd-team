@@ -1,4 +1,4 @@
-"""aidlc-team: lifecycle hooks (``on_startup`` / ``on_shutdown``).
+"""agent-rd-team: lifecycle hooks (``on_startup`` / ``on_shutdown``).
 
 ``on_startup`` gets the same ctx as the routes; ``on_shutdown`` gets a fresh one, so the service is looked up by
 app name. Shutdown drops the synthetic modules so the next enable re-reads the code from disk.
@@ -64,7 +64,7 @@ async def on_startup(ctx) -> None:  # noqa: ANN001 - host contract
 
 
 async def on_shutdown(ctx) -> None:  # noqa: ANN001 - host contract
-    name = getattr(ctx, "name", "aidlc-team")
+    name = getattr(ctx, "name", "agent-rd-team")
     try:
         svc = service.discard(name)
         if svc is not None:

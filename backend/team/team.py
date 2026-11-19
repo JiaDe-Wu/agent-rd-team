@@ -621,7 +621,7 @@ class TeamRun:
                 info, why = None, f"{type(exc).__name__}: {exc}"
             if info is not None and not (getattr(info, "done", False) and why):
                 return info
-            self.d.log.info("aidlc-team: %s/%s cannot continue its session (%s): a new one takes over",
+            self.d.log.info("agent-rd-team: %s/%s cannot continue its session (%s): a new one takes over",
                             self.rid, key, why[:160])
             att["via"] = "fresh"
             if self.ended:
@@ -655,7 +655,7 @@ class TeamRun:
         lane = self.lane(key)
         wt = Path(lane["worktree"])
         if not await gitwork.fast_forward(wt, self.s["branch"]):
-            self.d.log.info("aidlc-team: %s/%s cannot fast-forward to the run branch", self.rid, key)
+            self.d.log.info("agent-rd-team: %s/%s cannot fast-forward to the run branch", self.rid, key)
             return False
         head = await gitwork.head(wt)
         lane["prior"] = {"files": lane["files"], "lines": lane["lines"], "commits": lane["commits"],
@@ -1280,7 +1280,7 @@ class TeamRun:
             await gitwork.git(run_wt, "commit", "-q", "-m", "[run] Decisions made by people at the gates", "--", DECISIONS_FILE, ok=(0, 1))
             self._head = None
         except Exception as exc:  # noqa: BLE001  (the tasks say the same: the run goes on without the file)
-            self.d.log.info("aidlc-team: %s cannot write %s: %s", self.rid, DECISIONS_FILE, exc)
+            self.d.log.info("agent-rd-team: %s cannot write %s: %s", self.rid, DECISIONS_FILE, exc)
 
     async def _remember(self, key: str) -> None:
         """Lessons: the options the person ticked at *key*'s gate are written, word for word, to the lessons file (what a
@@ -1318,7 +1318,7 @@ class TeamRun:
             await gitwork.git(run_wt, "commit", "-q", "-m", "[run] Lessons", "--", KNOWLEDGE_FILE, ok=(0, 1))
             self._head = None
         except Exception as exc:  # noqa: BLE001  (the lessons are already kept: the record is a courtesy)
-            self.d.log.info("aidlc-team: %s cannot write %s: %s", self.rid, KNOWLEDGE_FILE, exc)
+            self.d.log.info("agent-rd-team: %s cannot write %s: %s", self.rid, KNOWLEDGE_FILE, exc)
 
     def _delivery_defaults(self) -> dict[str, Any]:
         return delivery_mod.defaults(self.team, self.s.get("title") or "", on_source=bool(self.s.get("source")),
@@ -1372,7 +1372,7 @@ class TeamRun:
                 return ""
             return await gitwork.short_head(repo)
         except Exception:  # noqa: BLE001 - the signature stands; the PR then says it was not merged here
-            self.d.log.warning("aidlc-team: %s cannot merge its PR into main", self.rid, exc_info=True)
+            self.d.log.warning("agent-rd-team: %s cannot merge its PR into main", self.rid, exc_info=True)
             return ""
 
     def overrule_review(self, key: str) -> str:

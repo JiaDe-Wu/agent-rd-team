@@ -22,7 +22,7 @@ class FakeGateway:
         return list(self.folder_rows)
 
     async def create_folder(self, name, parent_id=None, project_dir=None):
-        f = {"id": f"f{next(self.ids)}", "name": name, "parent_id": parent_id, "owner_app": "aidlc-team"}
+        f = {"id": f"f{next(self.ids)}", "name": name, "parent_id": parent_id, "owner_app": "agent-rd-team"}
         self.folder_rows.append(f)
         self.calls.append(("folder", name, parent_id))
         return f
@@ -45,7 +45,7 @@ class FakeGateway:
         if agent and agent_kind == "template" and self.templates is not None and agent not in self.templates:
             raise GatewayError(409, "no such template", "agent_choice_unavailable")
         self.calls.append(("agent", agent, agent_kind))
-        self.slot_rows[name] = {"key": name, "title": title, "folder_id": folder_id, "app": "aidlc-team", "running": False}
+        self.slot_rows[name] = {"key": name, "title": title, "folder_id": folder_id, "app": "agent-rd-team", "running": False}
         self.msgs[name] = []
         self.calls.append(("slot", name, title, model))
         return {"key": name}
@@ -83,7 +83,7 @@ class FakeGateway:
 
 def make(tmp_path, gw=None):
     gw = gw or FakeGateway()
-    return gw, sessions.SessionManager(gw, app="aidlc-team", state_file=tmp_path / "sessions.json",
+    return gw, sessions.SessionManager(gw, app="agent-rd-team", state_file=tmp_path / "sessions.json",
                                        log=logging.getLogger("t"))
 
 
@@ -100,7 +100,7 @@ def test_a_role_session_is_opened_in_the_run_folder_sent_its_task_and_read_back(
         gw, mgr = make(tmp_path)
         gw.script = [[{"role": "tool", "content": "🔧 pwd", "meta": {"tool_name": "shell", "input": '{"command": "pwd"}'}},
                       {"role": "assistant", "content": "改好了\nDONE: 商品列表页写完", "meta": {"turn_stats": {"credits": 1.25}}}]]
-        info = mgr.spawn_session("[aidlc-team run=r1 role=catalog]\n写页面", parent_session_key="aidlc-team:r1",
+        info = mgr.spawn_session("[agent-rd-team run=r1 role=catalog]\n写页面", parent_session_key="agent-rd-team:r1",
                                  cwd=str(tmp_path / "runs" / "r1" / "wt" / "catalog"), model="claude-sonnet-5.5",
                                  title="前端·商品列表 agent", folder="网上小店 · r1")
         assert sessions.agent_fields(info)["queued"] is True
@@ -128,9 +128,9 @@ def test_a_role_boots_its_crew_member_or_the_template_of_that_name_and_its_knowl
                        "meta": {"tool_name": "local_knowledge_search", "mcp_server": "kirocrew-core",
                                 "input": '{"query": "年会抽奖规则 RULE-1"}'}},
                       {"role": "assistant", "content": "DONE: 写好了需求", "meta": {}}]] * 2
-        product = mgr.spawn_session("t", parent_session_key="aidlc-team:r9", cwd=str(tmp_path / "a" / "b" / "c"),
+        product = mgr.spawn_session("t", parent_session_key="agent-rd-team:r9", cwd=str(tmp_path / "a" / "b" / "c"),
                                     title="产品 agent", agent="aidlc-product-agent")
-        motion = mgr.spawn_session("t", parent_session_key="aidlc-team:r9", cwd=str(tmp_path / "a" / "b" / "d"),
+        motion = mgr.spawn_session("t", parent_session_key="agent-rd-team:r9", cwd=str(tmp_path / "a" / "b" / "d"),
                                    title="动效 agent", agent="taoyuan-motion-agent")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
@@ -150,7 +150,7 @@ def test_on_kiro_crew_0_11_a_role_boots_its_member_template(tmp_path):
         gw, mgr = make(tmp_path)
         gw.templates = {"aidlc-product-agent-template"}  # scripts/install-example.sh: <member>-template
         gw.script = [[{"role": "assistant", "content": "DONE: ok", "meta": {}}]]
-        info = mgr.spawn_session("t", parent_session_key="aidlc-team:r9", cwd=str(tmp_path / "a" / "b" / "c"),
+        info = mgr.spawn_session("t", parent_session_key="agent-rd-team:r9", cwd=str(tmp_path / "a" / "b" / "c"),
                                  title="产品 agent", agent="aidlc-product-agent")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
@@ -165,7 +165,7 @@ def test_a_turn_kiro_crew_refused_to_start_is_sent_again(tmp_path):
         gw, mgr = make(tmp_path)
         gw.script = [[{"role": "error", "content": "Execution memory is unavailable", "meta": {"code": "memory_unavailable"}}],
                      [{"role": "assistant", "content": "DONE: ok", "meta": {}}]]
-        info = mgr.spawn_session("t", parent_session_key="aidlc-team:r2", cwd=str(tmp_path / "a" / "b" / "c"), title="x")
+        info = mgr.spawn_session("t", parent_session_key="agent-rd-team:r2", cwd=str(tmp_path / "a" / "b" / "c"), title="x")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         gw.finish(info.slot)
@@ -180,18 +180,18 @@ def test_a_turn_kiro_crew_refused_to_start_is_sent_again(tmp_path):
 def test_a_fix_round_continues_the_same_session_and_a_deleted_session_fails_the_turn(tmp_path):
     async def go():
         gw, mgr = make(tmp_path)
-        first = mgr.spawn_session("t", parent_session_key="aidlc-team:r3", cwd=str(tmp_path / "a" / "b" / "c"), title="后端 agent")
+        first = mgr.spawn_session("t", parent_session_key="agent-rd-team:r3", cwd=str(tmp_path / "a" / "b" / "c"), title="后端 agent")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         await settle(mgr, gw, first.slot)
-        fix = await mgr.continue_conversation_async(first.id, "修 SEC-1", parent_session_key="aidlc-team:r3", cwd="", model=None)
+        fix = await mgr.continue_conversation_async(first.id, "修 SEC-1", parent_session_key="agent-rd-team:r3", cwd="", model=None)
         assert fix.slot == first.slot and fix.id != first.id and not fix.done
         assert sessions.find_agent(mgr, fix.id) is fix and mgr.slot_of(fix.id) == first.slot
         gw.slot_rows.pop(first.slot)
         for _ in range(sessions.MISSING_POLLS):
             await mgr.poll()
         assert fix.done and "gone from Crew" in fix.error
-        gone = await mgr.continue_conversation_async("s-nope", "x", parent_session_key="aidlc-team:r3", cwd="", model=None)
+        gone = await mgr.continue_conversation_async("s-nope", "x", parent_session_key="agent-rd-team:r3", cwd="", model=None)
         assert gone.done and gone.error.startswith("conversation_gone")
 
     asyncio.run(go())
@@ -200,17 +200,17 @@ def test_a_fix_round_continues_the_same_session_and_a_deleted_session_fails_the_
 def test_state_survives_a_reload_and_cleanup_keeps_a_running_run(tmp_path):
     async def go():
         gw, mgr = make(tmp_path)
-        a = mgr.spawn_session("t", parent_session_key="aidlc-team:old", cwd=str(tmp_path / "a" / "b" / "c"), title="a")
-        b = mgr.spawn_session("t", parent_session_key="aidlc-team:live", cwd=str(tmp_path / "a" / "b" / "d"), title="b")
+        a = mgr.spawn_session("t", parent_session_key="agent-rd-team:old", cwd=str(tmp_path / "a" / "b" / "c"), title="a")
+        b = mgr.spawn_session("t", parent_session_key="agent-rd-team:live", cwd=str(tmp_path / "a" / "b" / "d"), title="b")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         await mgr.poll()
         _, again = make(tmp_path, gw)
         again.load()
         assert again.get(a.id).slot == a.slot and again.get(b.id).slot == b.slot
-        done = await again.cleanup({"aidlc-team:live"})
+        done = await again.cleanup({"agent-rd-team:live"})
         assert done == {"sessions": 1, "folders": 1} and a.slot not in gw.slot_rows and b.slot in gw.slot_rows
-        assert [f["name"] for f in gw.folder_rows if f.get("hidden")] == ["aidlc-team:old"]  # the old run folder, not the live one
+        assert [f["name"] for f in gw.folder_rows if f.get("hidden")] == ["agent-rd-team:old"]  # the old run folder, not the live one
         assert again.get(a.id).slot is None and again.get(b.id).slot == b.slot
 
     asyncio.run(go())
@@ -230,12 +230,12 @@ def test_a_turn_cut_short_by_a_transient_model_error_or_a_hang_is_continued_in_t
     async def go():
         clock = [1000.0]
         gw = FakeGateway()
-        mgr = sessions.SessionManager(gw, app="aidlc-team", state_file=tmp_path / "sessions.json",
+        mgr = sessions.SessionManager(gw, app="agent-rd-team", state_file=tmp_path / "sessions.json",
                                       log=logging.getLogger("t"), now=lambda: clock[0])
         tool = {"role": "tool", "content": "🔧 cat a.js", "meta": {"tool_name": "shell", "input": '{"command": "cat a.js"}'}}
         gw.script = [[tool, {"role": "error", "content": "❌ The model backend hit a transient error (HTTP 5xx).", "meta": {}}],
                      [tool, {"role": "assistant", "content": "DONE: 测试写完", "meta": {}}]]
-        info = mgr.spawn_session("写测试", parent_session_key="aidlc-team:r7", cwd=str(tmp_path / "a" / "b" / "c"), title="测试 agent")
+        info = mgr.spawn_session("写测试", parent_session_key="agent-rd-team:r7", cwd=str(tmp_path / "a" / "b" / "c"), title="测试 agent")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         gw.finish(info.slot)
@@ -247,7 +247,7 @@ def test_a_turn_cut_short_by_a_transient_model_error_or_a_hang_is_continued_in_t
 
         # a hang: busy and nothing new for STUCK_S: stopped, then continued
         gw.script = [[tool], [{"role": "assistant", "content": "DONE: 好了", "meta": {}}]]
-        hung = mgr.spawn_session("写页面", parent_session_key="aidlc-team:r7", cwd=str(tmp_path / "a" / "b" / "d"), title="前端 agent")
+        hung = mgr.spawn_session("写页面", parent_session_key="agent-rd-team:r7", cwd=str(tmp_path / "a" / "b" / "d"), title="前端 agent")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         await mgr.poll()

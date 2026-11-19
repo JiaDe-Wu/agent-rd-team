@@ -1,4 +1,4 @@
-"""aidlc-team: in-gateway route entry point (``backend.hooks.routes = backend.routes:register_routes``).
+"""agent-rd-team: in-gateway route entry point (``backend.hooks.routes = backend.routes:register_routes``).
 
 KiroCrew loads this file by path and calls ``register_routes(ctx) -> list[AppRoute]``. The app's code lives in
 ``backend/team/`` and is imported through a private namespace package, so its relative imports resolve the same
@@ -66,5 +66,5 @@ def register_routes(ctx):  # noqa: ANN001, ANN201 - host contract
 
     svc = service.get_or_build(ctx)
     routes = handlers.build_routes(svc, AppRoute)
-    ctx.logger.info("aidlc-team: %d routes registered", len(routes))
+    ctx.logger.info("agent-rd-team: %d routes registered", len(routes))
     return routes

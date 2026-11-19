@@ -94,7 +94,7 @@ class Service:
             try:
                 self.runs[state["id"]] = TeamRun(state, self._deps, events)
             except Exception:  # noqa: BLE001
-                self.log.exception("aidlc-team: run %s cannot be loaded", state.get("id"))
+                self.log.exception("agent-rd-team: run %s cannot be loaded", state.get("id"))
         for run in self.runs.values():  # signed off before the signature merged the PR (0.6.0): it does now, once
             sig = run.s.get("signoff")
             if isinstance(sig, dict) and "merged" not in sig and not run.s.get("imported"):
@@ -104,7 +104,7 @@ class Service:
         self.started = True
         self._redeploy_task = asyncio.create_task(self._redeploy_latest())
         self._loop = asyncio.create_task(self._forever())
-        self.log.info("aidlc-team: started, %d runs, data in %s", len(self.runs), self.data_dir)
+        self.log.info("agent-rd-team: started, %d runs, data in %s", len(self.runs), self.data_dir)
 
     async def stop(self) -> None:
         self.started = False
@@ -123,7 +123,7 @@ class Service:
             except asyncio.CancelledError:
                 raise
             except Exception:  # noqa: BLE001
-                self.log.exception("aidlc-team: background pulse failed")
+                self.log.exception("agent-rd-team: background pulse failed")
             await asyncio.sleep(self.tick_s)
 
     async def pulse(self) -> None:
@@ -131,7 +131,7 @@ class Service:
         try:
             await self.sessions.poll()
         except Exception:  # noqa: BLE001
-            self.log.exception("aidlc-team: polling the role sessions failed")
+            self.log.exception("agent-rd-team: polling the role sessions failed")
         if time.monotonic() - self.crew["at"] >= CREW_REFRESH_S:
             await self.refresh_crew()
         for rid in list(self._live_runs):
@@ -152,7 +152,7 @@ class Service:
         except Exception:  # noqa: BLE001
             n = self._failures[run.rid] = self._failures.get(run.rid, 0) + 1
             if n in (1, 5) or n % 50 == 0:
-                self.log.exception("aidlc-team: tick of %s failed (%d in a row)", run.rid, n)
+                self.log.exception("agent-rd-team: tick of %s failed (%d in a row)", run.rid, n)
         finally:
             if self._ticks.get(run.rid) is asyncio.current_task():
                 self._ticks.pop(run.rid, None)
@@ -466,9 +466,9 @@ class Service:
             if time.time() - float(run.lane(key)["deployed"].get("at") or 0) > float(spec.get("ttl_min") or 120) * 60:
                 return
             res = await self._deploy(run.rid, Path(run.s["run_wt"]), spec)
-            self.log.info("aidlc-team: redeployed %s after a restart: %s", run.rid, res.get("url") or res.get("error"))
+            self.log.info("agent-rd-team: redeployed %s after a restart: %s", run.rid, res.get("url") or res.get("error"))
         except Exception:  # noqa: BLE001
-            self.log.exception("aidlc-team: redeploying after a restart failed")
+            self.log.exception("agent-rd-team: redeploying after a restart failed")
 
     async def _deploy(self, rid: str, wt: Path, spec: dict[str, Any]) -> dict[str, Any]:
         """Deploy execution for a deploy role: the port and health path from the role's ``deploy/local.json`` (else the team's

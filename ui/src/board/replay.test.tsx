@@ -9,7 +9,7 @@ import { TeamPage } from '../main'
 import { pickSpeed } from './Replay'
 import { replayAt, replaySpan } from './timeline'
 
-const API = '/api/apps/aidlc-team'
+const API = '/api/apps/agent-rd-team'
 
 /** A real finished run: the Private IM password rules, sent back once at the security gate (r1012307c). It stays as recorded (the backend wrote it in Chinese; older runs look like this), so some expected values below are Chinese data. */
 const im = () => clone(raw) as unknown as { run: RunDetail; events: TeamEvent[] }

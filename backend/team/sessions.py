@@ -318,7 +318,7 @@ class SessionManager:
             try:
                 await self.gw.stop(info.slot)
             except Exception as exc:  # noqa: BLE001
-                self.log.info("aidlc-team: stopping session %s: %s", info.slot, exc)
+                self.log.info("agent-rd-team: stopping session %s: %s", info.slot, exc)
         info.done, info.user_stopped = True, True
         self._dirty = True
         return True
@@ -390,7 +390,7 @@ class SessionManager:
             raise
         except Exception as exc:  # noqa: BLE001
             info.done, info.error = True, f"Could not open a Crew session: {exc}"[:300]
-            self.log.warning("aidlc-team: opening a session for %s failed: %s", info.title, exc)
+            self.log.warning("agent-rd-team: opening a session for %s failed: %s", info.title, exc)
         self._dirty = True
 
     async def _create(self, info: SessionInfo, name: str, folder_id: str) -> dict[str, Any]:
@@ -406,7 +406,7 @@ class SessionManager:
                                                 agent=agent, agent_kind=kind)
             except GatewayError as exc:
                 if kind and exc.status in (400, 404, 409):
-                    self.log.info("aidlc-team: %s as a %s is not there (%s), trying the next", agent, kind, exc.code)
+                    self.log.info("agent-rd-team: %s as a %s is not there (%s), trying the next", agent, kind, exc.code)
                     continue
                 raise
             info.agent_kind = kind
@@ -440,7 +440,7 @@ class SessionManager:
         info.last_activity = info.sent_at
         info.last_tool = f"Interrupted ({why}); the orchestrator asked it to carry on (time {info.nudges})"
         self._dirty = True
-        self.log.info("aidlc-team: session %s was cut short (%s), continuing (%d)", info.slot, why, info.nudges)
+        self.log.info("agent-rd-team: session %s was cut short (%s), continuing (%d)", info.slot, why, info.nudges)
         # agent-facing text: stays in Chinese
         await self.gw.send(str(info.slot), "（编排器）你上一轮被中断了：" + why + "。你已经做的改动都在工作目录里：先 `git status`、"
                            "`git log --oneline -3` 看一眼做到哪了，再接着把原来的任务做完；做完照原来的要求提交，最后一条回复的第一行写 `DONE: ` 加一句话总结。", sid)
@@ -452,7 +452,7 @@ class SessionManager:
             try:
                 rows = {str(r.get("key") or ""): r for r in await self.gw.slots()}
             except Exception as exc:  # noqa: BLE001
-                self.log.info("aidlc-team: listing sessions failed: %s", exc)
+                self.log.info("agent-rd-team: listing sessions failed: %s", exc)
                 rows = None
             if rows is not None:
                 await asyncio.gather(*(self._update(i, rows.get(str(i.slot))) for i in live), return_exceptions=True)
@@ -472,7 +472,7 @@ class SessionManager:
         try:
             msgs = await self.gw.messages(str(info.slot), limit=300)
         except Exception as exc:  # noqa: BLE001
-            self.log.info("aidlc-team: reading session %s failed: %s", info.slot, exc)
+            self.log.info("agent-rd-team: reading session %s failed: %s", info.slot, exc)
             return
         mine = None
         for idx in range(len(msgs) - 1, -1, -1):
@@ -500,7 +500,7 @@ class SessionManager:
             try:
                 await self.gw.stop(str(info.slot))
             except Exception as exc:  # noqa: BLE001
-                self.log.info("aidlc-team: stopping stuck session %s: %s", info.slot, exc)
+                self.log.info("agent-rd-team: stopping stuck session %s: %s", info.slot, exc)
             await self._nudge(info, f"no activity for {int(quiet)} s")
             return
         last = after[-1] if after else None
@@ -511,7 +511,7 @@ class SessionManager:
         if errors and not replies and not calls and not busy:
             if info.resends < RESENDS:  # KiroCrew did not start the turn (memory_unavailable at turn start and the like)
                 info.resends += 1
-                self.log.info("aidlc-team: session %s refused the turn (%s), sending again", info.slot,
+                self.log.info("agent-rd-team: session %s refused the turn (%s), sending again", info.slot,
                               ((errors[-1].get("meta") or {}).get("code") or "error"))
                 await self._send(info)
                 return
@@ -548,7 +548,7 @@ class SessionManager:
                 await self.gw.delete_slot(str(r.get("key")))
                 deleted += 1
             except Exception as exc:  # noqa: BLE001
-                self.log.info("aidlc-team: deleting session %s: %s", r.get("key"), exc)
+                self.log.info("agent-rd-team: deleting session %s: %s", r.get("key"), exc)
         folders = await self.gw.folders()
         root_ids = {str(f.get("id")) for f in folders if f.get("name") == ROOT_FOLDER and not f.get("parent_id")}
         gone = 0
@@ -560,7 +560,7 @@ class SessionManager:
                     await self.gw.hide_folder(fid)
                     gone += 1
                 except Exception as exc:  # noqa: BLE001
-                    self.log.info("aidlc-team: hiding folder %s: %s", fid, exc)
+                    self.log.info("agent-rd-team: hiding folder %s: %s", fid, exc)
         for parent in [k for k in self._folders if k not in keep_parents]:
             self._folders.pop(parent, None)
         for info in self._infos.values():

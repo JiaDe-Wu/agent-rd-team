@@ -1,5 +1,5 @@
 /**
- * The CTO view's contract: what `GET /api/apps/aidlc-team/cto` returns (backend/team/cto.py). The offline page
+ * The CTO view's contract: what `GET /api/apps/agent-rd-team/cto` returns (backend/team/cto.py). The offline page
  * (cto/offline.html) reads the same shape. Dates are local calendar days (YYYY-MM-DD).
  */
 

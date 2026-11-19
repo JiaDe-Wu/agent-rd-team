@@ -8,7 +8,7 @@ import { TeamPage } from '../main'
 import { layoutGraph } from './layout'
 import { SCENARIOS, StartForm } from './Header'
 
-const API = '/api/apps/aidlc-team'
+const API = '/api/apps/agent-rd-team'
 
 /** The fixture run, finished green and not signed yet. */
 function doneBoard(signed = false): Board {

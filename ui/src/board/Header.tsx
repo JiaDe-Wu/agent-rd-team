@@ -586,7 +586,7 @@ export function StartForm({ onStart, onCancel, preview, models, refreshMs = PREV
       <div className="kt-start-row">
         <label className="kt-start-field">
           <span>Code directory of an existing project (for bug fixes or taking over an existing product; leave empty for a new project)</span>
-          <input type="text" value={source} onChange={(e) => setSource(e.target.value)} placeholder="Absolute path of the directory, for example /Users/you/workplace/aidlc-team/runs/r1009abcd/wt/_run" />
+          <input type="text" value={source} onChange={(e) => setSource(e.target.value)} placeholder="Absolute path of the directory, for example /Users/you/workplace/agent-rd-team/runs/r1009abcd/wt/_run" />
         </label>
         <label className="kt-start-field is-narrow">
           <span>Team</span>

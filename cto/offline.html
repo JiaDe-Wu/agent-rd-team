@@ -243,7 +243,7 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
 <body class="viz-root">
 <div class="wrap">
   <header class="appbar">
-    <span class="brand">AI-DLC 多 Agent 团队</span>
+    <span class="brand">Agent 研发团队</span>
     <div class="tabs" role="tablist" aria-label="视图">
       <button role="tab" aria-selected="true" title="交付结果与需求流动">CTO 视图</button>
       <button role="tab" aria-selected="false" id="toBoard" title="多 agent 团队怎么交付：角色、关卡、检查、签字">团队看板</button>
@@ -689,7 +689,7 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
       nav.append(b);
     });
   }
-  const crew = (where) => toast(document.documentElement.dataset.snapshot ? `离线快照：请在 Kiro Crew 中打开 CTO 视图后再跳转（${where}）` : `请在 Kiro Crew 中打开：AI-DLC 多 Agent 团队 › ${where}`);
+  const crew = (where) => toast(document.documentElement.dataset.snapshot ? `离线快照：请在 Kiro Crew 中打开 CTO 视图后再跳转（${where}）` : `请在 Kiro Crew 中打开：Agent 研发团队 › ${where}`);
   const waited = (h) => (h < 1 ? `${Math.max(1, Math.round(h * 60))} 分钟` : `${h.toFixed(1)} 小时`);
   const COLS = [['需求池', '已提交，待组队'], ['构思', '意图 · 约束 · 范围'], ['启动', '需求 · 设计 · 分工'], ['构建', '代码 · 测试 · 独立审查'], ['运维', '部署 · 上线 · 签字'], ['已交付', '近 7 天 · 实测可点开']];
   const STAGES = ['构思', '启动', '构建', '运维'];

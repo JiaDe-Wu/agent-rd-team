@@ -16,7 +16,7 @@ from typing import Any
 
 from .constants import GIT_BIN
 
-AUTHOR = ("aidlc-team", "team@localhost")
+AUTHOR = ("agent-rd-team", "team@localhost")
 # Appended to each run repo's .git/config, so the role agents' own commits behave the same way: no hooks, no
 # signing prompt, no background gc while several worktrees commit at once.
 REPO_CONFIG = (f"[user]\n\tname = {AUTHOR[0]}\n\temail = {AUTHOR[1]}\n[commit]\n\tgpgsign = false\n[tag]\n\tgpgsign = false\n"

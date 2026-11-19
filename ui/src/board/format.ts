@@ -6,7 +6,7 @@
  */
 import type { Lane, LaneStatus, RunDetail, RunStatus, TeamEventKind, TestCase } from '../types'
 
-export const BASE = '/api/apps/aidlc-team'
+export const BASE = '/api/apps/agent-rd-team'
 export const POLL_MS = 2000
 const enc = encodeURIComponent
 

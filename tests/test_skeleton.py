@@ -12,7 +12,7 @@ class Route:
 
 
 def build(owner=True):
-    ctx = SimpleNamespace(name="aidlc-team", logger=None, data_dir="/tmp/kcteam-test")
+    ctx = SimpleNamespace(name="agent-rd-team", logger=None, data_dir="/tmp/kcteam-test")
     svc = routes.service.get_or_build(ctx)
     return {(r.method, r.path): r.handler for r in routes.handlers.build_routes(svc, Route, web=FakeWeb(), is_owner=lambda _r: owner)}
 

@@ -1,8 +1,8 @@
 {
-  "name": "aidlc-team",
+  "name": "agent-rd-team",
   "version": "0.10.0",
-  "displayName": "AI-DLC Agent Team",
-  "description": "A team of AI-DLC expert agents on Kiro Crew: from a one-sentence requirement through human gates, company checks and an independent review to a local deployment, with a live team board and a CTO view.",
+  "displayName": "Agent R&D Team",
+  "description": "An agent R&D team on Kiro Crew, built on AI-DLC and your own standards: from a one-sentence requirement through human gates, company checks and an independent review to a local deployment, keeping the lessons you tick for later runs. With a live team board and a CTO view.",
   "author": "JiaDe-Wu",
   "license": "Apache-2.0",
   "tags": ["agents", "orchestration", "workflows", "automation", "collaboration"],
@@ -30,7 +30,7 @@
   "heroImageDetail": "assets/hero-detail-light.png",
   "heroImageDetailDark": "assets/hero-detail-dark.png",
   "links": [
-    {"label": "Source and README", "url": "https://github.com/JiaDe-Wu/aidlc-team"},
+    {"label": "Source and README", "url": "https://github.com/JiaDe-Wu/agent-rd-team"},
     {"label": "AI-DLC Workflows", "url": "https://github.com/awslabs/aidlc-workflows"},
     {"label": "Samples this app comes from", "url": "https://github.com/aws-samples/sample-ai-for-software-engineering-on-aws"}
   ],
@@ -40,9 +40,9 @@
   },
   "l10n": {
     "zh-CN": {
-      "displayName": "AI-DLC 多 Agent 团队",
-      "description": "一支 AI-DLC 专家 agent 团队：从一句话需求出发，经过人的关卡、公司检查和独立评审，到本机部署；带实时团队看板和 CTO 视图。",
-      "pageLabel": "AI-DLC 多 Agent 团队"
+      "displayName": "Agent 研发团队",
+      "description": "基于 AI-DLC 和你自己的企业标准的 Agent 研发团队：从一句话需求出发，经过人的关卡、公司检查和独立评审，到本机部署，并把你勾选的经验留给之后的交付；带实时团队看板和 CTO 视图。",
+      "pageLabel": "Agent 研发团队"
     }
   },
   "backend": {
@@ -56,8 +56,8 @@
     "entry": "dist/index.mjs",
     "pages": [
       {
-        "route": "/apps/aidlc-team",
-        "label": "AI-DLC Agent Team",
+        "route": "/apps/agent-rd-team",
+        "label": "Agent R&D Team",
         "icon": "Users"
       }
     ],
@@ -67,7 +67,7 @@
   },
   "permissions": {
     "api": [
-      "/api/apps/aidlc-team",
+      "/api/apps/agent-rd-team",
       "/api/chat",
       "/api/models",
       "/api/agents",

@@ -3,7 +3,7 @@
  * browser's back and forward step between them: a move to another view is a history entry, a change inside a view —
  * a filter, the run picked — replaces the current one):
  *
- *   /apps/aidlc-team                         CTO view (the default): every delivery of the company
+ *   /apps/agent-rd-team                         CTO view (the default): every delivery of the company
  *     ?line=0..4&kind=app|feat|fix&size=S|M|L&week=<YYYY-MM-DD>&real=1&defect=1   …its filters (business line, type, size, week, measured only, has post-release defects)
  *     ?hl=<run | TY-1234>                    …that delivery picked out (its ledger row or its kanban card)
  *     ?at=more|fast|cheap|steady|weekly|flow|ledger …scrolled to that part

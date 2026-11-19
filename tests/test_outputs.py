@@ -33,7 +33,7 @@ def test_each_role_shows_its_task_reply_and_delivered_files(tmp_path):
                                 "output": True, "owner": "pm"}]
         [att] = pm["attempts"]
         assert att["reply"].endswith("DONE: 做完了") and att["summary"] == "做完了" and not att["live"]
-        assert att["task"].startswith("[aidlc-team run=r1006test role=pm ") and att["calls"] == []
+        assert att["task"].startswith("[agent-rd-team run=r1006test role=pm ") and att["calls"] == []
 
         designer = await outputs.role_output(run, "designer", mgr=mgr, scrub=str)
         assert {f["path"]: f["output"] for f in designer["files"]} == {"docs/design/pages.md": True, "frontend/styles/main.css": True}

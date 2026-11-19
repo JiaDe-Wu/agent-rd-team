@@ -1,22 +1,29 @@
-# aidlc-team: the Kiro Crew app
+# Agent R&D Team: the Kiro Crew app
 
-The app turns a one-sentence requirement into a run of an agent team defined by a team file. Every role is a
-Kiro Crew chat session running as a Kiro Crew member, working in its own git worktree and branch. The app
-dispatches the roles by their dependencies, merges their work, runs the checks itself, sends failures back to
-the role that owns them, stops at human gates, deploys on the local machine, and draws all of it on a live
-board. A finished run can be replayed and signed off.
+An agent R&D team built on [AI-DLC](https://github.com/awslabs/aidlc-workflows) that works from your own
+standards and keeps what its people decide. It turns a one-sentence requirement into a run of an agent team
+defined by a team file. Every role is a Kiro Crew chat session running as a Kiro Crew member, working in its own
+git worktree and branch. The app dispatches the roles by their dependencies, merges their work, runs your
+company checks itself, sends failures back to the role that owns them, stops at human gates, deploys on the
+local machine, and draws all of it on a live board. A finished run can be replayed and signed off.
+
+**What it uses from you.** Company standards (`standards.json` and the checks under `tests/enterprise/`),
+business rules in the team's knowledge source, and the team file itself. All are plain files you replace.
+
+**What it keeps.** Decisions made at a gate are written to `docs/aidlc/decisions.md` on the run branch. At the
+last gate you tick which lessons to keep; later runs read them. See [Roadmap](#roadmap) for what is not done yet.
 
 The page has three views that share one app bar: the **CTO view** (CTO 视图, all deliveries), **delivery
 detail** (交付详情, one delivery) and the **team board** (团队看板, how the team delivered it).
 
 ## Install
 
-Install **AI-DLC Agent Team** from the App Store (Discover) in Kiro Crew, or from a clone:
+Install **Agent R&D Team** from the App Store (Discover) in Kiro Crew, or from a clone:
 
 ```bash
-git clone https://github.com/JiaDe-Wu/aidlc-team
-kirocrew app install ./aidlc-team
-kirocrew app enable aidlc-team     # asks you to trust this app first (see below)
+git clone https://github.com/JiaDe-Wu/agent-rd-team
+kirocrew app install ./agent-rd-team
+kirocrew app enable agent-rd-team     # asks you to trust this app first (see below)
 ```
 
 Open the app from the sidebar, write a one-sentence requirement and hand it to the team.
@@ -34,7 +41,7 @@ Kiro Crew runs this app's Python only after you trust it. Its manifest asks for:
 
 | Permission | Used for |
 | --- | --- |
-| `/api/apps/aidlc-team` | The app's own routes (runs, gates, board, CTO view) |
+| `/api/apps/agent-rd-team` | The app's own routes (runs, gates, board, CTO view) |
 | `/api/chat` | Opening one Kiro Crew chat session per role, and reading its state |
 | `/api/models` | The model picker in the start form |
 | `/api/agents` | Checking which team members exist on the Agents page |
@@ -44,13 +51,13 @@ Kiro Crew runs this app's Python only after you trust it. Its manifest asks for:
 
 `sessionApproval` is the one to think about: the sessions the app opens run file edits and shell commands without
 asking you each time. Other Kiro Crew sessions are not changed. Each role works in its own git worktree under
-`~/workplace/aidlc-team/`. Its task lists the paths it may write and tells it not to push; the app records a change
+`~/workplace/agent-rd-team/`. Its task lists the paths it may write and tells it not to push; the app records a change
 outside those paths as a violation, but it does not sandbox the session.
 
 ### Lessons
 
 The last role, **Lessons**, lists what the delivery taught and asks you which of it to keep: a multiple-choice
-question at its gate. Only what you tick is written, word for word, to `~/workplace/aidlc-team/lessons.json`. Runs
+question at its gate. Only what you tick is written, word for word, to `~/workplace/agent-rd-team/lessons.json`. Runs
 that start later read that file once and name its cards in every role's task. Delete or edit the file at any time.
 
 ### Language
@@ -72,7 +79,7 @@ Apache-2.0.
 | --- | --- | --- |
 | 1 Requirement | The team is chosen by the words in the requirement: every team file with a `scope` and without `"routable": false` matches when one of its `keywords` occurs; the lowest `priority` wins; with no match the `fallback` team runs. The start form may pick the run's model from the models Kiro Crew offers (`GET /models`); every role then uses it, a role with its own `model` included. One run at a time | `routing.route`, `service.create_run`, `service.models` |
 | 2 Team | The team file is validated (dependency order, keys, gates, paths inside the app). The task template, the company standards that match, the roster and the knowledge source are read. An optional role whose member is missing sits the run out | `team.check_team`, `standards.py`, `team.leave_out_unhired` |
-| 3 Repository | `~/workplace/aidlc-team/runs/<run>/repo` starts from the team's `starter`, its `source` or `demo/target-template`; the requirement goes into the README; the `spec_pack` is overlaid, including its `tests/enterprise/` checks | `team._setup`, `gitwork.create_repo` |
+| 3 Repository | `~/workplace/agent-rd-team/runs/<run>/repo` starts from the team's `starter`, its `source` or `demo/target-template`; the requirement goes into the README; the `spec_pack` is overlaid, including its `tests/enterprise/` checks | `team._setup`, `gitwork.create_repo` |
 | 4 Tick | Every 2 seconds the sessions are polled and each live run advances one step | `service.pulse`, `team.TeamRun.tick` |
 | 5 Start | A role starts when everything it depends on is merged and, where there is a human gate, approved. A deploy role waits for all checks to pass; a read-only reviewer waits for every writing role upstream. A writing role gets a worktree `wt/<role>` on branch `team/<run>/<role>` | `team._ready`, `team._start` |
 | 6 Task | The task template filled in with the role, its branch, the paths it may write, upstream outputs, matching standards, the role's `brief`, the approved work split, and the person's notes and decisions at the gates. A fix round continues the role's own session | `team._work_task`, `team._launch` |
@@ -134,6 +141,18 @@ Role level:
 | `optional` | Sits the run out when its member does not exist or the approved work split leaves it out |
 | `deploy` `{mode: local, port, health}` | Deploy on this machine |
 | `model` | The role's own model (a model picked in the start form replaces it for that run) |
+
+## Roadmap
+
+The aim is a team that needs fewer human decisions each time it is used, because what people decided at the
+gates is kept as knowledge the next run reads. What exists today is narrower:
+
+- Kept today: the lessons a person ticks at the last gate (`lessons.json`, read by every later run), and each
+  run's gate decisions in `docs/aidlc/decisions.md`. The latter stays on that run's branch and is not read by
+  other runs.
+- Not done: feeding gate decisions back into the knowledge source automatically, counting how many gates a
+  later run needed compared with an earlier one, and letting a gate pass without a person when a similar
+  decision has been approved before. Today every gate in the team file still waits for a person.
 
 ## Test
 

@@ -71,17 +71,17 @@ function cto(): CtoData {
 }
 
 setApiRoutes({
-  'GET /api/apps/aidlc-team/cto': () => cto(),
-  'GET /api/apps/aidlc-team/cto/offline': () => ({ name: 'CTO视图-离线版-预览.html', html: '<p>预览：离线版由后端生成</p>' }),
-  'GET /api/apps/aidlc-team/cto/flow*': (_body, path) => ({ ...ctoFlow(), run: new URL(path, location.origin).searchParams.get('run') ?? 'r1013f04d' }),
-  'GET /api/apps/aidlc-team/board*': (_body, path) => snapshot(new URL(path, location.origin).searchParams.get('run')),
-  'POST /api/apps/aidlc-team/runs': (body) => {
+  'GET /api/apps/agent-rd-team/cto': () => cto(),
+  'GET /api/apps/agent-rd-team/cto/offline': () => ({ name: 'CTO视图-离线版-预览.html', html: '<p>预览：离线版由后端生成</p>' }),
+  'GET /api/apps/agent-rd-team/cto/flow*': (_body, path) => ({ ...ctoFlow(), run: new URL(path, location.origin).searchParams.get('run') ?? 'r1013f04d' }),
+  'GET /api/apps/agent-rd-team/board*': (_body, path) => snapshot(new URL(path, location.origin).searchParams.get('run')),
+  'POST /api/apps/agent-rd-team/runs': (body) => {
     const requirement = (body as { requirement?: string } | null)?.requirement?.trim()
     const title = requirement ? requirement.split('\n')[0].slice(0, 24) : '活动报名小站'
     override = shiftTimes(asRun(startedBoard(), 'r1007b', title, 0), Date.now() / 1000 - startedBoard().at)
     return { id: 'r1007b' }
   },
-  'POST /api/apps/aidlc-team/runs/*': (_body, path) => {
+  'POST /api/apps/agent-rd-team/runs/*': (_body, path) => {
     if (path.endsWith('/stop')) {
       const b = snapshot(null)
       const r = b.run
@@ -100,7 +100,7 @@ setApiRoutes({
     }
     return { ok: true }
   },
-  'GET /api/apps/aidlc-team/probe': () => ({
+  'GET /api/apps/agent-rd-team/probe': () => ({
     kirocrew_version: 'preview',
     subagent_manager: 'SubagentManager（预览：假数据）',
     manager_methods: ['all_agents', 'spawn'],

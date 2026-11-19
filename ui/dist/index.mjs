@@ -3,7 +3,7 @@ import { useAppApi as c, useChatLauncher as l, useNavigate as u } from "@kirocre
 import { Fragment as d, jsx as f, jsxs as p } from "react/jsx-runtime";
 import { MarkdownRenderer as m } from "@kirocrew/app-sdk/ui";
 //#region src/board/format.ts
-var h = "/api/apps/aidlc-team", g = 2e3, _ = encodeURIComponent, v = {
+var h = "/api/apps/agent-rd-team", g = 2e3, _ = encodeURIComponent, v = {
 	board: (e) => `${h}/board${e ? `?run=${_(e)}` : ""}`,
 	runs: () => `${h}/runs`,
 	stop: (e) => `${h}/runs/${_(e)}/stop`,
@@ -3689,7 +3689,7 @@ function vn({ onStart: e, onCancel: t, preview: n, models: i, refreshMs: a = _n 
 							type: "text",
 							value: l,
 							onChange: (e) => u(e.target.value),
-							placeholder: "Absolute path of the directory, for example /Users/you/workplace/aidlc-team/runs/r1009abcd/wt/_run"
+							placeholder: "Absolute path of the directory, for example /Users/you/workplace/agent-rd-team/runs/r1009abcd/wt/_run"
 						})]
 					}), /* @__PURE__ */ p("label", {
 						className: "kt-start-field is-narrow",
@@ -7406,7 +7406,7 @@ function $r(e) {
 	}
 	return e;
 }
-var ei = $r, ti = $r, ni = "aidlc-team:signer";
+var ei = $r, ti = $r, ni = "agent-rd-team:signer";
 function ri(e) {
 	let t = e.pr;
 	return t ? t.state === "open" ? "Waiting to merge: merged into main when signed off" : t.state === "merged" ? `Merged into main (${t.sha})` : e.imported ? "Signed off; the run was imported from another computer and the code repository is not here, so nothing was merged here" : "Signed off; main got new commits during the run, so it could not be merged directly" : "";

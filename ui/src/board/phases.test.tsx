@@ -6,7 +6,7 @@ import { TeamPage } from '../main'
 import { apiCalls, setApiRoutes } from '../test/stubs/app-sdk'
 import { aidlcBoard } from '../test/fixtures'
 
-const BOARD = 'GET /api/apps/aidlc-team/board*'
+const BOARD = 'GET /api/apps/agent-rd-team/board*'
 
 afterEach(() => vi.restoreAllMocks())
 
@@ -27,7 +27,7 @@ describe('a phased team', () => {
 
   test('a gate waits for the person: Approve Scope posts the answer with the note', async () => {
     const user = userEvent.setup()
-    setApiRoutes({ [BOARD]: () => aidlcBoard(true), 'POST /api/apps/aidlc-team/runs/*': () => ({ ok: true }) })
+    setApiRoutes({ [BOARD]: () => aidlcBoard(true), 'POST /api/apps/agent-rd-team/runs/*': () => ({ ok: true }) })
     render(<TeamPage pollMs={60_000} />)
     const gate = await screen.findByTestId('kt-gate')
     await user.click(within(gate).getByRole('button', { name: /Approve Scope/ }))
@@ -58,7 +58,7 @@ describe('a gate where the team offers Discuss and the role put questions to the
 
   test('Approve · Discuss · Send back under it; Discuss sends what the person asks, the gate stays', async () => {
     const user = userEvent.setup()
-    setApiRoutes({ [BOARD]: () => asked(), 'POST /api/apps/aidlc-team/runs/*': () => ({ ok: true }) })
+    setApiRoutes({ [BOARD]: () => asked(), 'POST /api/apps/agent-rd-team/runs/*': () => ({ ok: true }) })
     render(<TeamPage pollMs={60_000} />)
     const gate = await screen.findByTestId('kt-gate')
     expect(within(gate).getAllByRole('button').map((b) => b.textContent)).toEqual(['✓ Approve Scope', 'Discuss', 'Send back'])
@@ -78,7 +78,7 @@ describe('a gate where the team offers Discuss and the role put questions to the
 
   test('Approve answers each question: its recommendation picked first, another choice marked, Other needs words', async () => {
     const user = userEvent.setup()
-    setApiRoutes({ [BOARD]: () => asked(), 'POST /api/apps/aidlc-team/runs/*': () => ({ ok: true }) })
+    setApiRoutes({ [BOARD]: () => asked(), 'POST /api/apps/agent-rd-team/runs/*': () => ({ ok: true }) })
     render(<TeamPage pollMs={60_000} />)
     await user.click(within(await screen.findByTestId('kt-gate')).getByRole('button', { name: /Approve Scope/ }))
     const qs = within(await screen.findByTestId('kt-gate-dialog')).getByTestId('kt-gate-questions')

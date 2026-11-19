@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install or update aidlc-team into the LOCAL running KiroCrew gateway, grant narrow per-app trust, enable it,
+# Install or update agent-rd-team into the LOCAL running KiroCrew gateway, grant narrow per-app trust, enable it,
 # and print hook health. Idempotent: re-run after every change.
 #
 #   scripts/dev-install.sh             # check + build UI, install-or-update, trust, enable, health
@@ -18,7 +18,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$(pwd -P)"  # physical path: KiroCrew records it as the install source
-APP="aidlc-team"
+APP="agent-rd-team"
 KCAPI="$ROOT/scripts/kcapi.sh"
 # node's folder: $NODE_BIN, else the first node 22+ on PATH, Homebrew (Apple or Intel), or nvm (newest first)
 node_ok() { [ -x "$1/node" ] && [ "$("$1/node" -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)" -ge 22 ]; }

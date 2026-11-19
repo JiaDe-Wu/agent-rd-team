@@ -9,5 +9,5 @@ mkdir -p "$dest"
 cp -R "$here/target-template/." "$dest/"
 git -C "$dest" init -q -b main
 git -C "$dest" add -A
-git -C "$dest" -c user.name="aidlc-team" -c user.email="team@localhost" commit -q -m "需求：活动报名小站"
+git -C "$dest" -c user.name="agent-rd-team" -c user.email="team@localhost" commit -q -m "需求：活动报名小站"
 echo "created $dest at $(git -C "$dest" rev-parse --short HEAD)"

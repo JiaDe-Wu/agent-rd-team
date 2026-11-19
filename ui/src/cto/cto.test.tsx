@@ -12,7 +12,7 @@ import { CtoView } from './CtoView'
 import { segAt } from './stream'
 import { ctoData, ctoFlow } from './testdata'
 
-const API = '/api/apps/aidlc-team'
+const API = '/api/apps/agent-rd-team'
 
 function routes(data = ctoData()) {
   setApiRoutes({ [`GET ${API}/cto`]: () => clone(data), [`GET ${API}/cto/flow*`]: () => clone(ctoFlow()), [`GET ${API}/board*`]: () => clone(runningBoard()) })
@@ -112,7 +112,7 @@ describe('the CTO view and the board, both ways', () => {
   test('each segment and moment of the value stream opens the board at that phase or gate, at that moment', async () => {
     const user = userEvent.setup()
     routes()
-    window.history.replaceState(null, '', '/apps/aidlc-team?view=item&run=r1013f04d')
+    window.history.replaceState(null, '', '/apps/agent-rd-team?view=item&run=r1013f04d')
     render(<AidlcTeamApp pollMs={60_000} />)
     const stream = await screen.findByTestId('item-stream')
     await user.click(within(stream).getByRole('button', { name: /^Construction/ }))
@@ -122,7 +122,7 @@ describe('the CTO view and the board, both ways', () => {
   test('a moment of the value stream and its PR open the board too', async () => {
     const user = userEvent.setup()
     routes()
-    window.history.replaceState(null, '', '/apps/aidlc-team?view=item&run=r1013f04d')
+    window.history.replaceState(null, '', '/apps/agent-rd-team?view=item&run=r1013f04d')
     render(<AidlcTeamApp pollMs={60_000} />)
     const stream = await screen.findByTestId('item-stream')
     await user.click(within(stream).getByRole('button', { name: /Sent back Release: replay the board to this moment/ }))
@@ -147,7 +147,7 @@ describe('the CTO view and the board, both ways', () => {
   test('the CTO view picks out the delivery it comes back to; its checks and signature open the board', async () => {
     const user = userEvent.setup()
     routes()
-    window.history.replaceState(null, '', '/apps/aidlc-team?hl=TY-2790')
+    window.history.replaceState(null, '', '/apps/agent-rd-team?hl=TY-2790')
     render(<AidlcTeamApp pollMs={60_000} />)
     const table = within(await screen.findByRole('region', { name: 'Delivery list' })).getByRole('table')
     await waitFor(() => expect(within(table).getByText('Product spec comparison (refrigerators)').closest('tr')).toHaveClass('is-hl'))
@@ -309,7 +309,7 @@ describe('moving between the three views', () => {
     await user.click(within(ledgerOf()).getByText('Product spec comparison (refrigerators)'))
     expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'TY-2790', from: 'cto' })
     expect(window.history.length).toBe(length + 1)  // the move is a new entry
-    expect(navigations).toEqual(['/apps/aidlc-team?view=item&issue=TY-2790&from=cto'])  // made by the host's router (its ← → know about it)
+    expect(navigations).toEqual(['/apps/agent-rd-team?view=item&issue=TY-2790&from=cto'])  // made by the host's router (its ← → know about it)
     expect((window.history.state as { ktDepth?: number }).ktDepth).toBe(1)
     window.history.back()
     await waitFor(() => expect(window.location.search).toBe('?line=0&kind=feat&hl=TY-2790'))
@@ -334,7 +334,7 @@ describe('moving between the three views', () => {
 
   test('a row not under the filters it comes back to: they are relaxed, and the page says so', async () => {
     routes()
-    window.history.replaceState(null, '', '/apps/aidlc-team?line=3&hl=TY-2790')  // Supply chain, but the spec comparison is E-commerce
+    window.history.replaceState(null, '', '/apps/agent-rd-team?line=3&hl=TY-2790')  // Supply chain, but the spec comparison is E-commerce
     render(<AidlcTeamApp pollMs={60_000} />)
     expect(await screen.findByText('This item was not in the previous filter; now showing all business lines and types')).toBeInTheDocument()
     await waitFor(() => expect(within(ledgerOf()).getByText('Product spec comparison (refrigerators)').closest('tr')).toHaveClass('is-hl'))
@@ -354,11 +354,11 @@ describe('moving between the three views', () => {
     const user = userEvent.setup()
     setApiRoutes({ [`GET ${API}/cto`]: () => clone(ctoData()), [`GET ${API}/cto/flow*`]: () => clone(ctoFlow()),
       [`GET ${API}/board*`]: (_b: unknown, path: string) => multiRunBoard(new URL(path, 'http://x').searchParams.get('run')) })
-    window.history.replaceState(null, '', '/apps/aidlc-team?view=board&run=r1006a')
+    window.history.replaceState(null, '', '/apps/agent-rd-team?view=board&run=r1006a')
     render(<AidlcTeamApp pollMs={60_000} />)
     await user.selectOptions(await screen.findByRole('combobox', { name: 'Select run' }), 'r1005z')
     expect(window.location.search).toBe('?view=board&run=r1005z')
-    window.history.replaceState(null, '', '/apps/aidlc-team?view=item&run=r1013f04d')
+    window.history.replaceState(null, '', '/apps/agent-rd-team?view=item&run=r1013f04d')
     window.dispatchEvent(new PopStateEvent('popstate'))
     await user.click(await screen.findByRole('button', { name: 'See each member\'s usage ↗' }))
     expect(parseView(window.location.search)).toEqual({ kind: 'board', run: 'r1013f04d', focus: 'lanes', from: 'item' })
@@ -371,7 +371,7 @@ describe('moving between the three views', () => {
 
   test('back on Delivery detail at a moment of the board: that segment of the value stream is picked out', async () => {
     routes()
-    window.history.replaceState(null, '', '/apps/aidlc-team?view=item&run=r1013f04d&at=300')
+    window.history.replaceState(null, '', '/apps/agent-rd-team?view=item&run=r1013f04d&at=300')
     render(<AidlcTeamApp pollMs={60_000} />)
     const stream = await screen.findByTestId('item-stream')
     const picked = stream.querySelector('[data-hl="true"]')
@@ -382,7 +382,7 @@ describe('moving between the three views', () => {
   test('Delivery detail opened from the board has its way back there, beside its actions', async () => {
     const user = userEvent.setup()
     routes()
-    window.history.replaceState(null, '', '/apps/aidlc-team?view=board&run=r1006a')
+    window.history.replaceState(null, '', '/apps/agent-rd-team?view=board&run=r1006a')
     render(<AidlcTeamApp pollMs={60_000} />)
     await screen.findByTestId('kt-graph')
     await user.click(screen.getByRole('tab', { name: 'Delivery detail' }))

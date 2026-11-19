@@ -1,5 +1,5 @@
 /**
- * aidlc-team page: the live mission control of the 8-role agent team.
+ * agent-rd-team page: the live mission control of the 8-role agent team.
  *
  * Polls GET /board every 2 s (board/useBoard.ts) and renders only that contract (types.ts): the
  * header with the live counters, the team graph (the hero, with the particle layer), the merge

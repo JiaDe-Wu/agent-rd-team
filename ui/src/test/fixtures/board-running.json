@@ -23,8 +23,8 @@
     "id": "r1006a",
     "title": "Event signup site",
     "status": "running",
-    "repo": "/Users/you/workplace/aidlc-team/runs/r1006a/repo",
-    "folder": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/_run",
+    "repo": "/Users/you/workplace/agent-rd-team/runs/r1006a/repo",
+    "folder": "/Users/you/workplace/agent-rd-team/runs/r1006a/wt/_run",
     "base": "5e1f0aa",
     "branch": "team/r1006a/run",
     "started_at": 1791230000.0,
@@ -58,7 +58,7 @@
           "text_tail": null,
           "credits": 6.1
         },
-        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/pm",
+        "worktree": "/Users/you/workplace/agent-rd-team/runs/r1006a/wt/pm",
         "branch": "team/r1006a/pm",
         "files": [
           {
@@ -142,7 +142,7 @@
           "text_tail": null,
           "credits": 11.8
         },
-        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/architect",
+        "worktree": "/Users/you/workplace/agent-rd-team/runs/r1006a/wt/architect",
         "branch": "team/r1006a/architect",
         "files": [
           {
@@ -232,7 +232,7 @@
           "text_tail": null,
           "credits": 13.4
         },
-        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/designer",
+        "worktree": "/Users/you/workplace/agent-rd-team/runs/r1006a/wt/designer",
         "branch": "team/r1006a/designer",
         "files": [
           {
@@ -321,7 +321,7 @@
           "text_tail": null,
           "credits": 17.2
         },
-        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/tester",
+        "worktree": "/Users/you/workplace/agent-rd-team/runs/r1006a/wt/tester",
         "branch": "team/r1006a/tester",
         "files": [
           {
@@ -442,7 +442,7 @@
           "text_tail": "AC-6 fails because the capacity check uses >, it should be >=; AC-7 needs a check for the same email before writing. Changing checkCapacity and checkDuplicate in validate.js...",
           "credits": null
         },
-        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/backend",
+        "worktree": "/Users/you/workplace/agent-rd-team/runs/r1006a/wt/backend",
         "branch": "team/r1006a/backend",
         "files": [
           {
@@ -500,7 +500,7 @@
           "work",
           "work"
         ],
-        "session": "aidlc-team-r0101abcd-3-9f2c",
+        "session": "agent-rd-team-r0101abcd-3-9f2c",
         "deployed": null,
         "member": "",
         "member_kind": null,
@@ -573,7 +573,7 @@
           "text_tail": "When signup fails the API returns 409 and a reason, and the page must show the reason under the form; first add the .error-msg rendering, then handle the remaining-capacity refresh...",
           "credits": null
         },
-        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/frontend",
+        "worktree": "/Users/you/workplace/agent-rd-team/runs/r1006a/wt/frontend",
         "branch": "team/r1006a/frontend",
         "files": [
           {
@@ -680,7 +680,7 @@
           "text_tail": null,
           "credits": 8.7
         },
-        "worktree": "/Users/you/workplace/aidlc-team/runs/r1006a/wt/ops",
+        "worktree": "/Users/you/workplace/agent-rd-team/runs/r1006a/wt/ops",
         "branch": "team/r1006a/ops",
         "files": [
           {

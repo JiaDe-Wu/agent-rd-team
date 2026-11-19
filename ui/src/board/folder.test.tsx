@@ -5,7 +5,7 @@ import { apiCalls, apiError, setApiRoutes } from '../test/stubs/app-sdk'
 import { runningBoard } from '../test/fixtures'
 import { TeamPage } from '../main'
 
-const API = '/api/apps/aidlc-team'
+const API = '/api/apps/agent-rd-team'
 
 describe('Open folder', () => {
   test('the top bar shows where the project is and opens it in Finder or Kiro', async () => {
@@ -21,7 +21,7 @@ describe('Open folder', () => {
     await screen.findAllByTestId('kt-lane')
     await user.click(screen.getByRole('button', { name: '📁 Folder' }))
     const panel = screen.getByRole('region', { name: 'Project folder' })
-    expect(within(panel).getByText('/Users/you/workplace/aidlc-team/runs/r1006a/wt/_run')).toBeInTheDocument()
+    expect(within(panel).getByText('/Users/you/workplace/agent-rd-team/runs/r1006a/wt/_run')).toBeInTheDocument()
     await user.click(within(panel).getByRole('button', { name: '📁 Open in Finder' }))
     expect(await within(panel).findByRole('status')).toHaveTextContent('Opened in Finder')
     await user.click(within(panel).getByRole('button', { name: 'Open in Kiro' }))

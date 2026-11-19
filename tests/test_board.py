@@ -33,7 +33,7 @@ def rich_run(tmp_path, mgr, tools, rid="r1006rich", started=NOW - 1500):
          "ended": started + 1180, "credits": 9.3},
         {"n": 2, "kind": "fix", "label": "修 AC-6", "agent": "s-be2", "requested_at": started + 1380,
          "started": started + 1380, "ended": None, "credits": None}]
-    mgr.agents["s-be2"] = info("s-be2", "[aidlc-team run=x role=backend]", started=started + 1380, turns=11,
+    mgr.agents["s-be2"] = info("s-be2", "[agent-rd-team run=x role=backend]", started=started + 1380, turns=11,
                                tool_count=14, last_tool="Editing backend/validate.js", streaming_text="AC-6 失败是因为……")
     mgr.add([("s-be2", {"at": NOW - 5, "tool": "Editing", "kind": "edit", "detail": "backend/validate.js"})])
     state["tests"].update(at=NOW - 30, passed=1, failed=1, total=2, history=[{"at": NOW - 30, "passed": 1, "failed": 1}],

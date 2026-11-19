@@ -1,4 +1,4 @@
-"""HTTP routes, served under ``/api/apps/aidlc-team/``. All but ``/health`` are for the dashboard owner only:
+"""HTTP routes, served under ``/api/apps/agent-rd-team/``. All but ``/health`` are for the dashboard owner only:
 they start agents and spend credits."""
 
 from __future__ import annotations
