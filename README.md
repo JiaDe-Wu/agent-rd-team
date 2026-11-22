@@ -29,6 +29,10 @@ until the app is trusted, and it also asks you to allow the app to control your 
 answered in the dashboard: open the app's page at `/apps/detail/agent-rd-team` and enable it there. The first
 refusal names the setting `agent.apps_trusted`, which trusts this one app only.
 
+The app has executable parts (a Python backend, and its tasks run shell commands in git worktrees), so a Kiro Crew
+with `agent.apps_allow_third_party` off refuses it with `app_execution_denied`. Trust this app alone with
+`agent.apps_trusted: ["agent-rd-team"]`, or set `agent.apps_allow_third_party` to `true` to allow every third-party app.
+
 Open the app from the sidebar, write a one-sentence requirement and hand it to the team.
 
 ### Requirements
