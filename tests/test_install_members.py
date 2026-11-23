@@ -55,3 +55,7 @@ def test_the_kiro_agent_file_is_named_like_the_template_the_app_boots():
     d = json.loads(install_members.template_json(text, "aidlc-quality-agent", "/x/kirocrew"))
     assert d["name"] == "aidlc-quality-agent-template"
     assert d["mcpServers"]["kirocrew-core"]["command"] == "/x/kirocrew"
+
+
+def test_the_team_files_share_one_workspace_and_the_installer_uses_it():
+    assert install_members.team_workspace(ROOT / "team") == "taoyuan"

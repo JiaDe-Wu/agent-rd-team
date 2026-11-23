@@ -27,7 +27,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PLACEHOLDER = "__KIROCREW_BIN__"
 TEMPLATE_SUFFIX = "-template"  # Kiro Crew 0.11 refuses a member named like a template, so the template gets a suffix
-WORKSPACE_NAME = "agent-rd-team"
 
 
 def member_names(agents_dir: Path) -> list[str]:
@@ -54,6 +53,15 @@ def roles_members(team_dir: Path) -> set[str]:
             if role.get("member"):
                 names.add(role["member"])
     return names
+
+
+def team_workspace(team_dir: Path) -> str:
+    """The Crew workspace the team files put their members in. The app only counts a member that sits in it."""
+    names = {json.loads(f.read_text(encoding="utf-8")).get("workspace") for f in team_dir.glob("team-*.json")}
+    names.discard(None)
+    if len(names) != 1:
+        sys.exit(f"the team files must name one workspace, found {sorted(map(str, names))}")
+    return names.pop()
 
 
 class Gateway:
@@ -89,13 +97,16 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--port", type=int, default=int(os.environ.get("KIROCREW_PORT") or 5476))
     ap.add_argument("--kirocrew-bin", default=shutil.which("kirocrew") or "")
     ap.add_argument("--kiro-agents", type=Path, default=Path.home() / ".kiro" / "agents")
-    ap.add_argument("--workspace-dir", type=Path, default=Path.home() / "workplace" / "agent-rd-team" / "workspace")
+    ap.add_argument("--workspace-dir", type=Path, default=None,
+                    help="the workspace's folder (default ~/workplace/<workspace name>)")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)
     if not a.kirocrew_bin:
         sys.exit("`kirocrew` is not on PATH: pass --kirocrew-bin /path/to/kirocrew")
 
     names = member_names(ROOT / "agents")
+    workspace = team_workspace(ROOT / "team")
+    workspace_dir = a.workspace_dir or Path.home() / "workplace" / workspace
     for n in names:
         target = a.kiro_agents / f"{n}{TEMPLATE_SUFFIX}.json"
         if target.exists():
@@ -109,21 +120,21 @@ def main(argv: list[str] | None = None) -> int:
             print(f"template {n}{TEMPLATE_SUFFIX}: written")
 
     if a.dry_run:
-        print(f"would add {len(names)} members to the gateway on port {a.port}, workspace '{WORKSPACE_NAME}' -> {a.workspace_dir}")
+        print(f"would add {len(names)} members to the gateway on port {a.port}, workspace '{workspace}' -> {workspace_dir}")
         return 0
 
     gw = Gateway(a.port, a.kirocrew_bin)
-    if WORKSPACE_NAME not in {w.get("name") for w in gw.open("/api/workspaces").get("workspaces", [])}:
-        a.workspace_dir.mkdir(parents=True, exist_ok=True)
-        gw.open("/api/workspaces", {"name": WORKSPACE_NAME, "dir": str(a.workspace_dir)})
-        print(f"workspace {WORKSPACE_NAME}: added")
+    if workspace not in {w.get("name") for w in gw.open("/api/workspaces").get("workspaces", [])}:
+        workspace_dir.mkdir(parents=True, exist_ok=True)
+        gw.open("/api/workspaces", {"name": workspace, "dir": str(workspace_dir)})
+        print(f"workspace {workspace}: added")
     have = {m.get("name") for m in gw.open("/api/agents").get("agents", [])}
     for n in names:
         if n in have:
             print(f"member {n}: already there")
             continue
         desc = json.loads((ROOT / "agents" / f"{n}.json").read_text(encoding="utf-8"))["description"]
-        gw.open("/api/agents", {"name": n, "kiro_agent": "kirocrew", "workspace": WORKSPACE_NAME,
+        gw.open("/api/agents", {"name": n, "kiro_agent": "kirocrew", "workspace": workspace,
                                 "display_name": desc.split(" · ")[0], "description": desc})
         print(f"member {n}: added")
     return 0
