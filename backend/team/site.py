@@ -276,8 +276,10 @@ async def _cwd_of(pid: int) -> str | None:
         os.kill(pid, 0)
     except (ProcessLookupError, PermissionError, OSError):
         return None
+    if not LSOF:
+        return None
     try:
-        proc = await asyncio.create_subprocess_exec("/usr/sbin/lsof", "-a", "-p", str(pid), "-d", "cwd", "-Fn",
+        proc = await asyncio.create_subprocess_exec(LSOF, "-a", "-p", str(pid), "-d", "cwd", "-Fn",
                                                     stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL)
         out, _ = await asyncio.wait_for(proc.communicate(), 5)
     except (OSError, asyncio.TimeoutError):
