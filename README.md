@@ -40,10 +40,10 @@ Open the app from the sidebar, write a one-sentence requirement and hand it to t
 - Kiro Crew 0.8.0 or newer, on macOS or Linux. Windows is not supported.
 - `git`, and Node 22 or newer: the company checks run with `node --test`.
 - The Kiro Crew members the team files name (for example `aidlc-product-agent`) on the Agents page. A role whose
-  `python3 scripts/install_members.py` writes the member templates from `agents/` (as `<member>-template`) into
-  `~/.kiro/agents` and adds the 14 members to a running Kiro Crew, using its `kirocrew` command; it never overwrites
-  a template or member that already exists (`--dry-run` shows what it would do).
-  member is missing waits, unless the team file marks it `optional`.
+  member is missing waits, unless the team file marks it `optional`. `python3 scripts/install_members.py` writes the
+  member templates from `agents/` (as `<member>-template`) into `~/.kiro/agents` and adds the 14 members to a running
+  Kiro Crew, using its `kirocrew` command; it never overwrites a template or member that already exists, and
+  `--dry-run` shows what it would do.
 
 ### What the app is allowed to do, and why
 
