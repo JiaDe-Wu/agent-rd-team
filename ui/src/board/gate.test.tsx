@@ -18,18 +18,18 @@ test('Fill in the preset comment puts the demo note in, and Confirm approval sen
 test('a review gate shows the review, and Send back fills in its own preset (who is sent back, and why)', async () => {
   const user = userEvent.setup()
   const onConfirm = vi.fn(async () => {})
-  const back = 'Sent back on the risk notes.\n打回：Frontend #2. Add one line about data use to the draw records page.' // protocol token: 打回： kept in Chinese
-  render(<GateDialog label="Compliance" decision="revise" preset={back} report="可以交付: 2 non-blocking risk notes" onConfirm={onConfirm} onCancel={() => {}} />) // protocol token: 可以交付 kept in Chinese
-  expect(screen.getByText(/可以交付: 2 non-blocking risk notes/)).toBeInTheDocument()
+  const back = 'Sent back on the risk notes.\nSend back: Frontend #2. Add one line about data use to the draw records page.'
+  render(<GateDialog label="Compliance" decision="revise" preset={back} report="ready to deliver: 2 non-blocking risk notes" onConfirm={onConfirm} onCancel={() => {}} />)
+  expect(screen.getByText(/ready to deliver: 2 non-blocking risk notes/)).toBeInTheDocument()
   await user.click(screen.getByRole('button', { name: 'Fill in the preset comment' }))
   await user.click(screen.getByRole('button', { name: 'Confirm send back' }))
   expect(onConfirm).toHaveBeenCalledWith(back.trim())
 })
 
-test('over a review that still says 要改, approving is overruling it: it takes a reason', async () => {
+test('over a review that still says changes needed, approving is overruling it: it takes a reason', async () => {
   const user = userEvent.setup()
   const onConfirm = vi.fn(async () => {})
-  render(<GateDialog label="Release" decision="approve" overrule report="要改：F-1 price-protection refund above 300,000" onConfirm={onConfirm} onCancel={() => {}} />) // protocol token: 要改 kept in Chinese
+  render(<GateDialog label="Release" decision="approve" overrule report="changes needed：F-1 price-adjustment refund above 300,000" onConfirm={onConfirm} onCancel={() => {}} />)
   expect(screen.getByText('Approve Release anyway')).toBeInTheDocument()
   expect(screen.getByText('The review still says changes are needed:')).toBeInTheDocument()
   await user.click(screen.getByRole('button', { name: 'Confirm overrule and approve' }))
@@ -43,7 +43,7 @@ test('over a review that still says 要改, approving is overruling it: it takes
 test('sending it back over such a review needs no note: the members the review named do one more round', async () => {
   const user = userEvent.setup()
   const onConfirm = vi.fn(async () => {})
-  render(<GateDialog label="Release" decision="revise" overrule report="要改：F-1" onConfirm={onConfirm} onCancel={() => {}} />) // protocol token: 要改 kept in Chinese
+  render(<GateDialog label="Release" decision="revise" overrule report="changes needed：F-1" onConfirm={onConfirm} onCancel={() => {}} />)
   expect(screen.getByText('Send back Release for another round')).toBeInTheDocument()
   await user.click(screen.getByRole('button', { name: 'Confirm send back' }))
   expect(onConfirm).toHaveBeenCalledWith('')
@@ -74,9 +74,9 @@ test('the start form says an optional post whose member is not on Crew sits the 
   const role = (key: string, title: string, member: string, extra: Partial<RouteRole> = {}): RouteRole =>
     ({ key, title, phase: 'construction', stage: '3.5 Code generation', aidlc_agent: member, member, icon: key, assignment: '', gate: false, on_crew: false, ...extra })
   const pick = {
-    team: { file: 'team-taoyuan-promo.json', name: 'Taoyuan Technology R&D team · Singles Day sale', scope: 'mvp', keywords: [], priority: 35, fallback: false, official_stages: null, needs_source: false, starter: 'starters/mall', source: null,
+    team: { file: 'team-taoyuan-promo.json', name: 'Larkspur Outfitters R&D team · Black Friday sale', scope: 'mvp', keywords: [], priority: 35, fallback: false, official_stages: null, needs_source: false, starter: 'starters/mall', source: null,
       roles: [role('motion', 'Motion designer', 'taoyuan-motion-agent', { optional: true }), role('tester', 'Test engineer', 'aidlc-quality-agent')], agents: [], stages: [], extra_stages: [], extra_note: '' },
-    matched: ['Singles Day'], why: '', others: [], roster: [], teams: [],
+    matched: ['Black Friday'], why: '', others: [], roster: [], teams: [],
   } as RoutePick
   render(<TeamPick pick={pick} />)
   expect(screen.getByTestId('kt-pick-unhired')).toHaveTextContent('Motion designer not on Crew, so not in this run (add taoyuan-motion-agent under Crew Agents, then hand the requirement to the team to include it)')

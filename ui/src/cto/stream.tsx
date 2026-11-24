@@ -8,7 +8,7 @@
 import { useState } from 'react'
 import { RoleGlyph } from '../board/RoleIcon'
 import { fmtClock } from '../board/format'
-import { decisionLabel, segLabel, zh } from './vocab'
+import { decisionLabel, segLabel, word } from './vocab'
 import type { BoardEntry } from '../nav'
 import { Hit, Tip, fmtSec, useWidth, type TipState } from './charts'
 import type { CtoFlow, FlowMark, FlowSegment } from './types'
@@ -16,7 +16,7 @@ import type { CtoFlow, FlowMark, FlowSegment } from './types'
 export type SegKind = 'agent' | 'rework' | 'person'
 export const VS_COLOR: Record<SegKind, string> = { agent: 'var(--vs-agent)', rework: 'var(--vs-rework)', person: 'var(--vs-person)' }
 export const VS_NAME: Record<SegKind, string> = { agent: 'Agent working', rework: 'Rework', person: 'Awaiting approval · sign-off' }
-export const segKind = (s: FlowSegment): SegKind => (s.who === 'person' ? 'person' : s.label === '返工' /* protocol token: kept in Chinese */ ? 'rework' : 'agent')
+export const segKind = (s: FlowSegment): SegKind => (s.who === 'person' ? 'person' : s.label === 'Rework' ? 'rework' : 'agent')
 export const MARK_ICON: Record<FlowMark['kind'], string> = { gate: 'wait', approved: 'approved', bounce: 'bounce', check: 'tester', review: 'reviewer', deployed: 'deploy', signoff: 'sign', merged: 'merge' }
 export const MARK_TONE: Record<FlowMark['kind'], string> = { gate: 'is-wait', approved: 'is-ok', bounce: 'is-back', check: 'is-back', review: 'is-back', deployed: 'is-ok', signoff: 'is-ok', merged: 'is-ok' }
 
@@ -95,7 +95,7 @@ export function StreamChart({ flow, run, onBoard, hlAt }: { flow: CtoFlow; run: 
               {w >= 58 && (
                 <>
                   <text x={x0} y={BAND + BH + 18} className="is-strong">{label.length * 13 > w ? `${label.slice(0, Math.max(1, Math.floor(w / 13) - 1))}…` : label}</text>
-                  <text x={x0} y={BAND + BH + 34}>{fmtSec(s.to - s.from)}{s.decision && s.decision !== '签字' /* protocol token: kept in Chinese */ ? ` · ${decisionLabel(s.decision)}` : ''}</text>
+                  <text x={x0} y={BAND + BH + 34}>{fmtSec(s.to - s.from)}{s.decision && s.decision !== 'Signed' ? ` · ${decisionLabel(s.decision)}` : ''}</text>
                 </>
               )}
               <Hit x={x0} y={BAND - 30} w={Math.max(6, w)} h={BH + 72} onTip={setTip} tipY={BAND + BH + 40}
@@ -110,8 +110,8 @@ export function StreamChart({ flow, run, onBoard, hlAt }: { flow: CtoFlow; run: 
             <line x1={mx} x2={mx} y1={BAND + BH} y2={my - 11} className="cto-vs-tick" />
             <circle cx={mx} cy={my} r={11} />
             <RoleGlyph role={MARK_ICON[m.kind]} cx={mx} cy={my} size={14} />
-            <Hit x={mx - 13} y={my - 13} w={26} h={26} onTip={setTip} tipY={my + 16} when={fmtClock(m.at)} rows={[[zh(m.label), ''], ['Click', 'Replay the board to this moment']]}
-              onPick={() => onBoard(markAt(run, m))} label={`${fmtClock(m.at)} ${zh(m.label)}: replay the board to this moment`} />
+            <Hit x={mx - 13} y={my - 13} w={26} h={26} onTip={setTip} tipY={my + 16} when={fmtClock(m.at)} rows={[[word(m.label), ''], ['Click', 'Replay the board to this moment']]}
+              onPick={() => onBoard(markAt(run, m))} label={`${fmtClock(m.at)} ${word(m.label)}: replay the board to this moment`} />
           </g>
         ))}
       </svg>

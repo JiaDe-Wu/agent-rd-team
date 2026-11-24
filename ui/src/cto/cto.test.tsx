@@ -71,11 +71,11 @@ describe('the CTO view and the board, both ways', () => {
     await screen.findByTestId('cto-more')
     const table = within(screen.getByRole('region', { name: 'Delivery list' })).getByRole('table')
     const row = within(table).getByText('Product spec comparison (refrigerators)').closest('tr') as HTMLElement
-    expect(row).toHaveTextContent('TY-2790')
-    expect(row).toHaveTextContent('TY-2790 Merchandising deptPR #2990')
-    expect(row).toHaveTextContent('Post-release defects 1 · fixes in TY-2801')
-    expect(within(table).getByText('Singles Day appliance sale campaign page').closest('tr')).toHaveTextContent('PR #5123')
-    expect(screen.getByTestId('cto-live-card')).toHaveTextContent('E-commerce · TY-4130')
+    expect(row).toHaveTextContent('LO-2790')
+    expect(row).toHaveTextContent('LO-2790 MerchandisingPR #2990')
+    expect(row).toHaveTextContent('Post-release defects 1 · fixes in LO-2801')
+    expect(within(table).getByText('Black Friday appliance sale page').closest('tr')).toHaveTextContent('PR #5123')
+    expect(screen.getByTestId('cto-live-card')).toHaveTextContent('E-commerce · LO-4130')
   })
 
   test('a run of this app waiting at its gate is a card that opens the board at that gate', async () => {
@@ -95,16 +95,16 @@ describe('the CTO view and the board, both ways', () => {
     routes()
     render(<AidlcTeamApp pollMs={60_000} />)
     const flow = await screen.findByRole('region', { name: 'Requirement flow' })
-    await user.click(within(flow).getByRole('button', { name: /Singles Day appliance sale campaign page/ }))
+    await user.click(within(flow).getByRole('button', { name: /Black Friday appliance sale page/ }))
     expect(parseView(window.location.search)).toEqual({ kind: 'item', run: 'r1013f04d', from: 'cto' })
     expect(await screen.findByTestId('item-cycle')).toHaveTextContent('17 min')
     const item = screen.getByTestId('item-root')
     expect(within(item).getByRole('article', { name: 'Where the time went' })).toHaveTextContent('8 minAgent working · awaiting approval 9 min (3 gates)')
     expect(within(item).getByRole('article', { name: 'More stable' })).toHaveTextContent('Checks 37/37')
     expect(within(item).getByRole('article', { name: 'More stable' })).toHaveTextContent('Sent back 1×: people 1 · review 0 · checks 0')
-    expect(within(item).getByTestId('cto-item-risk')).toHaveTextContent('Risk stopped: Price-protection refund above the 300,000 approval limit ¥206.0k (Release gate) ↗')
+    expect(within(item).getByTestId('cto-item-risk')).toHaveTextContent('Risk stopped: Price-adjustment refund above the $42,000 approval limit $29.0k (Release gate) ↗')
     const decided = within(item).getByRole('region', { name: 'Owner decisions' })
-    expect(decided).toHaveTextContent('Sent back ReleasePrice-protection refund 486,000 yuan, above 300,000 needs CFO approval')
+    expect(decided).toHaveTextContent('Sent back ReleasePrice-adjustment refund $68,000, above $42,000 needs CFO approval')
     await user.click(within(decided).getAllByRole('button', { name: 'Board · replay to this moment ↗' })[1])
     expect(parseView(window.location.search)).toEqual({ kind: 'board', run: 'r1013f04d', gate: 'compliance', at: 731, from: 'item' })
   })
@@ -135,11 +135,11 @@ describe('the CTO view and the board, both ways', () => {
     render(<AidlcTeamApp pollMs={60_000} />)
     const table = within(await screen.findByRole('region', { name: 'Delivery list' })).getByRole('table')
     await user.click(within(table).getByText('Product spec comparison (refrigerators)'))
-    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'TY-2790', from: 'cto' })
+    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'LO-2790', from: 'cto' })
     expect(await screen.findByText('Simulated delivery with no run record: the step details only exist for real runs.')).toBeInTheDocument()
     const twin = screen.getByTestId('item-twin')
-    expect(twin).toHaveTextContent('Singles Day appliance sale campaign page')
-    expect(screen.getByRole('article', { name: 'More stable' })).toHaveTextContent('Post-release defects 1:TY-2801')
+    expect(twin).toHaveTextContent('Black Friday appliance sale page')
+    expect(screen.getByRole('article', { name: 'More stable' })).toHaveTextContent('Post-release defects 1:LO-2801')
     await user.click(within(twin).getByRole('button', { name: 'See its value stream ↗' }))
     expect(parseView(window.location.search)).toEqual({ kind: 'item', run: 'r1013f04d' })
   })
@@ -147,7 +147,7 @@ describe('the CTO view and the board, both ways', () => {
   test('the CTO view picks out the delivery it comes back to; its checks and signature open the board', async () => {
     const user = userEvent.setup()
     routes()
-    window.history.replaceState(null, '', '/apps/agent-rd-team?hl=TY-2790')
+    window.history.replaceState(null, '', '/apps/agent-rd-team?hl=LO-2790')
     render(<AidlcTeamApp pollMs={60_000} />)
     const table = within(await screen.findByRole('region', { name: 'Delivery list' })).getByRole('table')
     await waitFor(() => expect(within(table).getByText('Product spec comparison (refrigerators)').closest('tr')).toHaveClass('is-hl'))
@@ -221,7 +221,7 @@ describe('the CTO view and the board, both ways', () => {
     const text = await new Promise<string>((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result)); r.readAsText(made[0]) })
     expect(text).toContain('r1013f04d')
     expect(text.split('\r\n')[0]).toContain('Issue,Raised by,Issue created,Release date')
-    expect(text).toContain('TY-4127,Operations dept,2026-10-19')
+    expect(text).toContain('LO-4127,Operations,2026-10-19')
     expect(screen.getByRole('status')).toHaveTextContent('Exported 2 rows (All business lines · measured only)')
   })
 
@@ -230,7 +230,7 @@ describe('the CTO view and the board, both ways', () => {
     setApiRoutes({
       [`GET ${API}/cto`]: () => {
         const d = ctoData()
-        if (++calls > 1) d.items.unshift({ ...d.items[0], t: 'Singles Day official store sale', real: 'r1020gate', ship: '2026-10-20' })
+        if (++calls > 1) d.items.unshift({ ...d.items[0], t: 'Black Friday store sale', real: 'r1020gate', ship: '2026-10-20' })
         return d
       },
     })
@@ -250,7 +250,7 @@ describe('the CTO view and the board, both ways', () => {
 })
 
 describe('the board side of it', () => {
-  const proposal: Delivery = { name: 'Singles Day appliance sale campaign page', kind: '新功能', size: '中', line: '电商', why: 'The official store sale campaign page', confirmed: false }
+  const proposal: Delivery = { name: 'Black Friday appliance sale page', kind: 'New feature', size: 'Medium', line: 'E-commerce', why: 'The official store sale campaign page', confirmed: false }
 
   test('approving the planner’s gate confirms its delivery tag, as proposed or changed', async () => {
     const user = userEvent.setup()
@@ -258,9 +258,9 @@ describe('the board side of it', () => {
     render(<GateDialog label="Requirements" decision="approve" delivery={proposal} onConfirm={onConfirm} onCancel={() => {}} />)
     const box = screen.getByTestId('kt-gate-delivery')
     expect(box).toHaveTextContent('Delivery tag (proposed: The official store sale campaign page)')
-    await user.selectOptions(within(box).getByLabelText('Size'), '大')
+    await user.selectOptions(within(box).getByLabelText('Size'), 'Large')
     await user.click(screen.getByRole('button', { name: 'Confirm approval' }))
-    expect(onConfirm).toHaveBeenCalledWith('', { name: 'Singles Day appliance sale campaign page', kind: '新功能', size: '大', line: '电商' })
+    expect(onConfirm).toHaveBeenCalledWith('', { name: 'Black Friday appliance sale page', kind: 'New feature', size: 'Large', line: 'E-commerce' })
   })
 
   test('sending the gate back asks nothing about labels', () => {
@@ -280,11 +280,11 @@ describe('the board side of it', () => {
 
   test('the sign-off sheet and the top bar carry the run’s Issue and PR: Waiting to merge until the signature, then merged into main', () => {
     const run = clone(finishedBoard()).run!
-    run.issue = { id: 'TY-4127', kind: '需求', reporter: 'Operations dept', created_at: run.started_at }
+    run.issue = { id: 'LO-4127', kind: 'Requirement', reporter: 'Operations', created_at: run.started_at }
     run.pr = { number: 5123, head: `team/${run.id}/run`, base: 'main', state: 'open', opened_at: run.ended_at ?? 0, merged_at: null, merged_by: null,
       sha: '', files: 12, added: 340, removed: 8, checks: '37/37', review: 'The review says it can be merged' }
     const { rerender } = render(<SignOff run={run} onSign={async () => {}} />)
-    expect(screen.getByTestId('kt-sign-pr')).toHaveTextContent(`Issue TY-4127 (Requirement · raised by Operations dept) → PR #5123: team/${run.id}/run → main · Waiting to merge: merged into main when signed off`)
+    expect(screen.getByTestId('kt-sign-pr')).toHaveTextContent(`Issue LO-4127 (Requirement · raised by Operations) → PR #5123: team/${run.id}/run → main · Waiting to merge: merged into main when signed off`)
     run.signoff = { by: 'R&D lead', note: '', at: run.ended_at ?? 0, tests: '37/37' }
     run.pr = { ...run.pr, state: 'merged', sha: 'a1b2c3d' }
     rerender(<SignOff run={clone(run)} />)
@@ -307,16 +307,16 @@ describe('moving between the three views', () => {
     expect(window.location.search).toBe('?line=0&kind=feat')  // a filter rewrites the entry
     const length = window.history.length
     await user.click(within(ledgerOf()).getByText('Product spec comparison (refrigerators)'))
-    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'TY-2790', from: 'cto' })
+    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'LO-2790', from: 'cto' })
     expect(window.history.length).toBe(length + 1)  // the move is a new entry
-    expect(navigations).toEqual(['/apps/agent-rd-team?view=item&issue=TY-2790&from=cto'])  // made by the host's router (its ← → know about it)
+    expect(navigations).toEqual(['/apps/agent-rd-team?view=item&issue=LO-2790&from=cto'])  // made by the host's router (its ← → know about it)
     expect((window.history.state as { ktDepth?: number }).ktDepth).toBe(1)
     window.history.back()
-    await waitFor(() => expect(window.location.search).toBe('?line=0&kind=feat&hl=TY-2790'))
+    await waitFor(() => expect(window.location.search).toBe('?line=0&kind=feat&hl=LO-2790'))
     expect(await screen.findByTestId('cto-ledger-count')).toHaveTextContent('3 items')
     await waitFor(() => expect(within(ledgerOf()).getByText('Product spec comparison (refrigerators)').closest('tr')).toHaveClass('is-hl'))
     window.history.forward()
-    await waitFor(() => expect(window.location.search).toBe('?view=item&issue=TY-2790&from=cto'))
+    await waitFor(() => expect(window.location.search).toBe('?view=item&issue=LO-2790&from=cto'))
     expect(await screen.findByTestId('item-root')).toBeInTheDocument()
   })
 
@@ -328,13 +328,13 @@ describe('moving between the three views', () => {
     await user.click(screen.getByRole('button', { name: /^E-commerce/ }))
     await user.click(within(ledgerOf()).getByText('Product spec comparison (refrigerators)'))
     await user.click(await screen.findByRole('button', { name: 'CTO view' }))
-    expect(parseView(window.location.search)).toEqual({ kind: 'cto', line: 0, hl: 'TY-2790' })
+    expect(parseView(window.location.search)).toEqual({ kind: 'cto', line: 0, hl: 'LO-2790' })
     expect(await screen.findByTestId('cto-ledger-count')).toHaveTextContent('3 items')
   })
 
   test('a row not under the filters it comes back to: they are relaxed, and the page says so', async () => {
     routes()
-    window.history.replaceState(null, '', '/apps/agent-rd-team?line=3&hl=TY-2790')  // Supply chain, but the spec comparison is E-commerce
+    window.history.replaceState(null, '', '/apps/agent-rd-team?line=3&hl=LO-2790')  // Supply chain, but the spec comparison is E-commerce
     render(<AidlcTeamApp pollMs={60_000} />)
     expect(await screen.findByText('This item was not in the previous filter; now showing all business lines and types')).toBeInTheDocument()
     await waitFor(() => expect(within(ledgerOf()).getByText('Product spec comparison (refrigerators)').closest('tr')).toHaveClass('is-hl'))
@@ -347,7 +347,7 @@ describe('moving between the three views', () => {
     await screen.findByTestId('cto-more')
     within(ledgerOf()).getByText('Product spec comparison (refrigerators)').closest('tr')!.focus()
     await user.keyboard('{Enter}')
-    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'TY-2790', from: 'cto' })
+    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'LO-2790', from: 'cto' })
   })
 
   test('the run picked in the board picker is what the URL says; See each member usage opens the lanes', async () => {
@@ -396,7 +396,7 @@ describe('More stable: the fourth outcome, defects after release and what was ca
     const user = userEvent.setup()
     routes()
     render(<AidlcTeamApp pollMs={60_000} />)
-    expect(await screen.findByRole('heading', { name: 'The same R&D team delivers more, ships faster, costs less and is more stable.' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Same 60 people: the last 12 weeks against the 12 weeks before AI-DLC' })).toBeInTheDocument()
     const card = screen.getByRole('article', { name: 'More stable' })
     expect(within(card).getByTestId('cto-steady')).toHaveTextContent('0.0 → 50.0') // the test data: none before, 1 of 2 since
     expect(within(card).getByText('Post-release defects per 100 new apps and new features')).toBeInTheDocument()
@@ -424,13 +424,13 @@ describe('More stable: the fourth outcome, defects after release and what was ca
   test('a send-back can note the risk it keeps from going live; the preset fills it in; without one nothing extra is sent', async () => {
     const user = userEvent.setup()
     const onConfirm = vi.fn(async () => undefined)
-    const { unmount } = render(<GateDialog label="Release" decision="revise" preset="Sent back on the pre-release check. 打回：Backend #1" presetRisk={{ what: 'Price-protection refund above the 300,000 approval limit', amount: 206000 }} report="" onConfirm={onConfirm} onCancel={() => undefined} />)
+    const { unmount } = render(<GateDialog label="Release" decision="revise" preset="Sent back on the pre-release check. Send back: Backend #1" presetRisk={{ what: 'Price-adjustment refund above the $42,000 approval limit', amount: 29000 }} report="" onConfirm={onConfirm} onCancel={() => undefined} />)
     const risk = screen.getByTestId('kt-gate-risk')
     await user.click(screen.getByRole('button', { name: 'Fill in the preset comment' }))
-    expect(within(risk).getByLabelText('Risk stopped')).toHaveValue('Price-protection refund above the 300,000 approval limit')
-    expect(within(risk).getByLabelText('Amount (10,000 yuan)')).toHaveValue(20.6)
+    expect(within(risk).getByLabelText('Risk stopped')).toHaveValue('Price-adjustment refund above the $42,000 approval limit')
+    expect(within(risk).getByLabelText('Amount (USD thousands)')).toHaveValue(29)
     await user.click(screen.getByRole('button', { name: 'Confirm send back' }))
-    expect(onConfirm).toHaveBeenCalledWith('Sent back on the pre-release check. 打回：Backend #1', undefined, undefined, { what: 'Price-protection refund above the 300,000 approval limit', amount: 206000 })
+    expect(onConfirm).toHaveBeenCalledWith('Sent back on the pre-release check. Send back: Backend #1', undefined, undefined, { what: 'Price-adjustment refund above the $42,000 approval limit', amount: 29000 })
     unmount()
     const plain = vi.fn(async () => undefined)
     render(<GateDialog label="Requirements" decision="revise" onConfirm={plain} onCancel={() => undefined} />)
@@ -444,8 +444,8 @@ describe('More stable: the fourth outcome, defects after release and what was ca
     render(<GateDialog label="Requirements" decision="approve" onConfirm={async () => undefined} onCancel={() => undefined} />)
     expect(screen.queryByTestId('kt-gate-risk')).toBeNull() // …Approve does not: nothing was kept from going live
     const run = clone(finishedBoard()).run!
-    run.risks = [{ what: 'Price-protection refund above the 300,000 approval limit', amount: 206000, gate: '上线', role: 'compliance', at: 1 }]
+    run.risks = [{ what: 'Price-adjustment refund above the $42,000 approval limit', amount: 29000, gate: 'Release', role: 'compliance', at: 1 }]
     render(<SignOff run={run} />)
-    expect(screen.getByTestId('kt-sign-risks')).toHaveTextContent('Price-protection refund above the 300,000 approval limit ¥206.0k (noted when Release was sent back)')
+    expect(screen.getByTestId('kt-sign-risks')).toHaveTextContent('Price-adjustment refund above the $42,000 approval limit $29.0k (noted when Release was sent back)')
   })
 })

@@ -5,10 +5,10 @@
  *
  *   /apps/agent-rd-team                         CTO view (the default): every delivery of the company
  *     ?line=0..4&kind=app|feat|fix&size=S|M|L&week=<YYYY-MM-DD>&real=1&defect=1   …its filters (business line, type, size, week, measured only, has post-release defects)
- *     ?hl=<run | TY-1234>                    …that delivery picked out (its ledger row or its kanban card)
+ *     ?hl=<run | LO-1234>                    …that delivery picked out (its ledger row or its kanban card)
  *     ?at=more|fast|cheap|steady|weekly|flow|ledger …scrolled to that part
  *   ?view=item&run=<id>                      Delivery detail of a run of this app (measured, or still going)
- *   ?view=item&issue=TY-1234                 Delivery detail of a delivery of the simulated history
+ *   ?view=item&issue=LO-1234                 Delivery detail of a delivery of the simulated history
  *     &at=<seconds>                          …the segment of its value stream at that moment picked out
  *     &from=cto|board                        …opened from that view: the way back is beside its actions
  *   ?view=board                              Team board (the newest active run, else the newest)
@@ -20,7 +20,7 @@
  *     &focus=signoff|tests|cost|lanes        …its sign-off sheet, its test wall, its counters, its lanes (each member's use)
  *     &from=cto|item                         …opened from that view: the board says where it is and the way back
  *     &pick=latest                           …the newest measured delivery stands in (no run of this app was where the link points)
- *   ?view=board&new=promo                    the New requirement form (the Singles Day · appliance sale scenario is its first)
+ *   ?view=board&new=promo                    the New requirement form (the Black Friday · appliance sale scenario is its first)
  */
 
 export type BoardFocus = 'signoff' | 'tests' | 'cost' | 'lanes'
@@ -37,7 +37,7 @@ export type View = ({ kind: 'cto' } & CtoEntry) | ({ kind: 'item' } & ItemEntry)
 
 const RID = /^r[0-9a-z]{4,12}$/
 const ROLE = /^[a-z][a-z0-9-]{0,23}$/
-const ISSUE = /^TY-\d{4}$/
+const ISSUE = /^(?:LO|TY)-\d{4}$/
 const DAY = /^\d{4}-\d{2}-\d{2}$/
 export const PHASE_KEYS = ['ideation', 'inception', 'construction', 'review', 'operation'] as const
 const FOCUS: readonly string[] = ['signoff', 'tests', 'cost', 'lanes']

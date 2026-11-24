@@ -93,7 +93,7 @@ describe('Who sits this run out, what can be signed off', () => {
     const reviewer = r.roles.find((l) => l.key === 'reviewer')!
     pm.gate_label = 'Requirements'
     reviewer.gate_label = 'Release'
-    r.gate_notes = { pm: 'Added a rule: at most 2 units each', reviewer: 'Price-protection refund reserved at 280,000' }
+    r.gate_notes = { pm: 'Added a rule: at most 2 units each', reviewer: 'Price-adjustment refund reserved at 280,000' }
     const ev = (seq: number, kind: string, role: string, text: string, from: string | null = null) =>
       ({ seq, at: 1791230000 + seq, kind, role, text, from, to: null, data: null }) as (typeof r.events)[number]
     r.events = [...r.events, ev(900, 'approved', 'pm', 'A person approved Requirements'), ev(901, 'bounce', 'backend', 'A person sent it back at the Release gate: TVs get 10% off', 'person'),
@@ -102,12 +102,12 @@ describe('Who sits this run out, what can be signed off', () => {
     render(<TeamPage pollMs={60_000} />)
     const card = await screen.findByTestId('kt-sign')
     const items = within(card).getAllByRole('listitem').map((li) => li.textContent)
-    expect(items.slice(0, 3)).toEqual(['Approved Requirements: Added a rule: at most 2 units each', 'A person sent it back at the Release gate: TVs get 10% off', 'Approved Release: Price-protection refund reserved at 280,000'])
+    expect(items.slice(0, 3)).toEqual(['Approved Requirements: Added a rule: at most 2 units each', 'A person sent it back at the Release gate: TVs get 10% off', 'Approved Release: Price-adjustment refund reserved at 280,000'])
   })
 
   test('an overruled review is one of the decisions people made, on the sign-off card', async () => {
     const b = doneBoard()
-    b.run!.overruled = { role: 'reviewer', note: 'I accept the risk; finance reviews after the campaign', review: '要改：F-1' }
+    b.run!.overruled = { role: 'reviewer', note: 'I accept the risk; finance reviews after the campaign', review: 'changes needed：F-1' }
     const reviewer = b.run!.roles.find((l) => l.key === 'reviewer')!
     reviewer.gate_label = 'Release'
     setApiRoutes({ [`GET ${API}/board*`]: () => clone(b) })

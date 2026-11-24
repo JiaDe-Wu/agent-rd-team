@@ -220,7 +220,6 @@ function TestsKpi({ tests, reducedMotion }: { tests: TestWall; reducedMotion: bo
 /** A team laid out by AI-DLC phase (team-aidlc.json): the board leads with the gates, not the time saved. */
 const phased = (run: RunDetail) => run.roles.length > 0 && run.roles.every((l) => !!l.phase)
 
-
 /** What this run's gates caught: the same checks first and now, and every round a gate sent work back. */
 function GatesKpi({ run }: { run: RunDetail }) {
   const first = run.tests.history[0]
@@ -361,7 +360,6 @@ function RolesKpi({ run, onRole }: { run: RunDetail; onRole?: (key: string) => v
   )
 }
 
-
 function CreditsKpi({ credits, reducedMotion }: { credits: number | null; reducedMotion: boolean }) {
   const shown = useTween(credits ?? 0, 900, reducedMotion)
   return (
@@ -398,14 +396,14 @@ export function modelLabel(m: ModelChoice): string {
   return m.rate != null ? `${m.name} · ${m.rate}x credits` : m.name
 }
 
-/** Ready-made requirements at the example company Taoyuan Technology (fictitious): one fills the requirement box. */
+/** Ready-made requirements at the example company Larkspur Outfitters (fictitious): one fills the requirement box. */
 export const SCENARIOS: ReadonlyArray<{ label: string; hint: string; text: string }> = [
-  { label: 'Singles Day · appliance sale', hint: 'Taoyuan Technology official store: starts from the campaign template, a person approves going live', text: 'Singles Day official store sale: pick 20 appliances for discounts and spend-and-save offers, show a countdown, the struck-through price and the final price on the campaign page, and let operations configure it in the back office and go live with one click.' },
+  { label: 'Black Friday · storewide sale', hint: 'Larkspur Outfitters online store: starts from the campaign template, a person approves going live', text: 'Black Friday sale: discount 20 products with spend-and-save offers, show a countdown, the reference price and the final price on the campaign page, and let operations configure it in the back office and go live with one click.' },
 ]
 
 const TEAM_CHOICES: ReadonlyArray<{ value: string; label: string }> = [
   { value: 'auto', label: 'Pick the team from the requirement automatically (recommended)' },
-  { value: 'team-taoyuan-promo.json', label: 'Taoyuan Technology · Singles Day appliance sale' },
+  { value: 'team-promo.json', label: 'Larkspur Outfitters · Black Friday sale' },
   { value: 'team-aidlc.json', label: 'AI-DLC expert team (13 roles, any new requirement)' },
   { value: 'team-bugfix.json', label: 'Bug fix · two-person squad (project directory required)' },
 ]
@@ -487,7 +485,7 @@ export function TeamPick({ pick }: { pick: RoutePick | null }) {
       )}
       {kb && (
         <p className={kb.present === false ? 'kt-warn' : 'kt-dim'}>
-          Knowledge base "{kb.name}": {kb.present === false ? `not attached yet; add ${kb.path || '~/workplace/taoyuan/knowledge'} in the Crew sidebar under Knowledge base > Sources` : kb.present === null ? 'Reading' : `${kb.items ?? 0} document${kb.items === 1 ? '' : 's'}${kb.status === 'synced' ? ' · synced' : ' · indexing'}`}
+          Knowledge base "{kb.name}": {kb.present === false ? `not attached yet; add ${kb.path || 'knowledge/larkspur'} in the Crew sidebar under Knowledge base > Sources` : kb.present === null ? 'Reading' : `${kb.items ?? 0} document${kb.items === 1 ? '' : 's'}${kb.status === 'synced' ? ' · synced' : ' · indexing'}`}
         </p>
       )}
       {t.source && <p className="kt-dim">Code repository: {t.source}</p>}
@@ -657,18 +655,18 @@ export function StopConfirm({ run, onConfirm, onCancel }: { run: RunDetail; onCo
 
 /** Delivery tag as the person confirms them at the gate of the role that proposed them (they count on the CTO view). */
 export type DeliveryPick = Pick<Delivery, 'name' | 'kind' | 'size' | 'line'>
-// protocol token: kept in Chinese (the backend's delivery tag values; shown through deliveryLabel)
-const DELIVERY_KINDS: Delivery['kind'][] = ['新应用', '新功能', '修复']
-const DELIVERY_SIZES: Delivery['size'][] = ['小', '中', '大']
-const DELIVERY_LINES: Delivery['line'][] = ['电商', '移动应用', '客户关系管理', '供应链', '内部系统']
+
+const DELIVERY_KINDS: Delivery['kind'][] = ['New app', 'New feature', 'Fix']
+const DELIVERY_SIZES: Delivery['size'][] = ['Small', 'Medium', 'Large']
+const DELIVERY_LINES: Delivery['line'][] = ['E-commerce', 'Mobile app', 'CRM', 'Supply chain', 'Internal systems']
 
 /** A person at a gate, inside the page (the desktop app has no window.prompt): approve with an optional note for
  * everyone after it, or send it back with what to change. *skips*: the optional members the proposal leaves out (they
- * sit the run out once approved). *overrule*: a review that still says 要改 (protocol token: kept in Chinese) with its rounds used up: approving it is
+ * sit the run out once approved). *overrule*: a review that still says "changes needed" with its rounds used up: approving it is
  * overruling the review (a reason is required), sending it back is one more round as the review says. */
 /** The person's choice for each question of a gate, by question id (sent with Approve). */
 export type GateAnswers = Record<string, { choice: string; text: string; choices?: string[] }>
-/** Risk stopped, sent with Send back: what the send-back keeps from going live, the amount in yuan (or none). */
+/** Risk stopped, sent with Send back: what the send-back keeps from going live, the amount in USD (or none). */
 export type GateRisk = { what: string; amount: number | null }
 
 /** A gate: Approve (with an answer for each question the role put to the person), Discuss (it answers; the gate stays open),
@@ -680,7 +678,7 @@ export function GateDialog({ label, who = '', decision, preset, presetRisk, spli
   onConfirm: (note: string, delivery?: DeliveryPick, answers?: GateAnswers, risk?: GateRisk) => Promise<void>; onCancel: () => void
 }) {
   const [note, setNote] = useState('')
-  const [risk, setRisk] = useState({ what: '', wan: '' }) // Send back: what it keeps from going live, the amount in 10,000 yuan
+  const [risk, setRisk] = useState({ what: '', k: '' }) // Send back: what it keeps from going live, the amount in thousands of USD
   const [pick, setPick] = useState<DeliveryPick | null>(delivery ? { name: delivery.name, kind: delivery.kind, size: delivery.size, line: delivery.line } : null)
   const [answers, setAnswers] = useState<GateAnswers>(() => Object.fromEntries(questions.map((q) => [q.id, q.multi ? { choice: '', text: '', choices: [] } : { choice: q.recommend || q.options[0]?.key || '', text: '' }])))
   const [busy, setBusy] = useState(false)
@@ -690,8 +688,8 @@ export function GateDialog({ label, who = '', decision, preset, presetRisk, spli
   const asking = approve && questions.length > 0
   const back = !approve && !discuss
   const riskOut = (): GateRisk | undefined => {
-    const what = risk.what.trim(), wan = Number(risk.wan)
-    return back && (what || wan > 0) ? { what, amount: wan > 0 ? Math.round(wan * 1e4) : null } : undefined
+    const what = risk.what.trim(), k = Number(risk.k)
+    return back && (what || k > 0) ? { what, amount: k > 0 ? Math.round(k * 1e3) : null } : undefined
   }
   const answer = (id: string, a: Partial<{ choice: string; text: string }>) => setAnswers((x) => ({ ...x, [id]: { ...x[id], ...a } }))
   const tick = (id: string, key: string) =>
@@ -731,7 +729,7 @@ export function GateDialog({ label, who = '', decision, preset, presetRisk, spli
   const lead = discuss
     ? `Write what you want to ask or discuss. ${who || 'It'} will answer and, if needed, change its own documents; the gate stays open, so approve or send back when you are done.`
     : overrule ? (approve ? 'The review still says changes are needed and the send-back rounds are used up. Approving means you overrule the review and let it through: give a reason, it goes on the sign-off sheet, then it deploys.' : 'One more round as the review says: if you do not say who to send it back to, the members the review names get it; your comments go to them too, and yours win if they conflict with the review. The review looks again after the changes, then it comes back here.')
-      : report !== undefined ? (approve ? 'It deploys after approval. Your comment goes on the sign-off sheet.' : 'Say who to send it back to and what to change (for example 打回：Frontend #2; the 打回： prefix stays in Chinese). The review looks again after the changes, then it comes back here.')
+      : report !== undefined ? (approve ? 'It deploys after approval. Your comment goes on the sign-off sheet.' : 'Say who to send it back to and what to change (for example "Send back: Frontend #2"). The review looks again after the changes, then it comes back here.')
         : approve ? (asking ? 'After approval, the orchestrator starts the next phase with this work split. Pick an answer for each item below (the default is its recommendation); your decisions and comments go to every agent after it.' : 'After approval, the orchestrator starts the next phase with this work split. You can write comments here and they go to every agent after it (optional).')
           : 'Write what to change; it rewrites according to your comments and hands it back for your approval.'
   return (
@@ -863,16 +861,16 @@ export function GateDialog({ label, who = '', decision, preset, presetRisk, spli
       {back && (
         <fieldset className="kt-gate-delivery kt-gate-risk" data-testid="kt-gate-risk">
           <legend title="Counts toward 'More stable' on the CTO view and the sign-off sheet">Risk stopped (optional)</legend>
-          <input aria-label="Risk stopped" className="kt-gate-what" value={risk.what} maxLength={60} onChange={(e) => setRisk({ ...risk, what: e.target.value })} placeholder="For example: price-protection refunds above the approval limit" />
+          <input aria-label="Risk stopped" className="kt-gate-what" value={risk.what} maxLength={60} onChange={(e) => setRisk({ ...risk, what: e.target.value })} placeholder="For example: price-adjustment refunds above the approval limit" />
           <label>
-            Amount <input aria-label="Amount (10,000 yuan)" className="kt-gate-amount" type="number" min={0} step={0.1} value={risk.wan} onChange={(e) => setRisk({ ...risk, wan: e.target.value })} placeholder="Optional" /> ×10,000 yuan
+            Amount <input aria-label="Amount (USD thousands)" className="kt-gate-amount" type="number" min={0} step={0.1} value={risk.k} onChange={(e) => setRisk({ ...risk, k: e.target.value })} placeholder="Optional" /> × 1,000 USD
           </label>
         </fieldset>
       )}
-      <textarea className="kt-gate-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder={discuss ? 'For example: why is B recommended for question 2? What changes if it becomes A?' : overrule && approve ? 'For example: I accept the risk; 280,000 yuan is reserved for price-protection refunds, and finance reviews after the campaign' : approve ? 'For example: add one business rule' : 'For example: an acceptance criterion is missing'} autoFocus aria-label={discuss ? 'Discussion' : 'Comment'} />
+      <textarea className="kt-gate-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder={discuss ? 'For example: why is B recommended for question 2? What changes if it becomes A?' : overrule && approve ? 'For example: I accept the risk; $39,000 is reserved for price-adjustment refunds, and finance reviews after the campaign' : approve ? 'For example: add one business rule' : 'For example: an acceptance criterion is missing'} autoFocus aria-label={discuss ? 'Discussion' : 'Comment'} />
       <span className="kt-confirm-actions">
         {preset && note !== preset && !discuss && (
-          <button type="button" className="kt-btn" onClick={() => { setNote(preset); if (back && presetRisk) setRisk({ what: presetRisk.what, wan: presetRisk.amount != null ? String(presetRisk.amount / 1e4) : '' }) }} title={preset}>
+          <button type="button" className="kt-btn" onClick={() => { setNote(preset); if (back && presetRisk) setRisk({ what: presetRisk.what, k: presetRisk.amount != null ? String(presetRisk.amount / 1e3) : '' }) }} title={preset}>
             Fill in the preset comment
           </button>
         )}

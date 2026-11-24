@@ -1,11 +1,17 @@
-"""CTO 视图的模拟历史：桃源科技研发中心（5 条业务线 × 12 人）近 12 周与引入 AI-DLC 之前 12 周的交付清单，以及此刻
-进行中的需求（需求池、agent 在做、停在人的关卡上）。每项交付带 Issue（提出方、创建日）和合入 main 的 PR；部分修复是
-某项新应用/新功能上线后的缺陷，两边互相链接。写到 cto/history.json，随 app 打包；后端（backend/team/cto.py）
-把日期平移到今天，再并入这台 Mac 上签过字的运行（实测）和还没签字的运行（进行中）。
+"""Simulated history for the CTO view: Larkspur Outfitters' R&D centre (5 business lines x 12 people), the delivery list
+of the last 12 weeks and of the 12 weeks before AI-DLC was introduced, and what is in progress right now (the backlog,
+what the agents are working on, what waits at a human gate). Every delivery carries an Issue (who raised it, when) and the
+PR that took it into main; some fixes are post-release defects of an app or feature that shipped earlier, and the two link
+to each other. The result is written to cto/history.json, which ships with the app. The backend (backend/team/cto.py)
+moves the dates so that the last day is today, then adds the runs of this app that a person signed off (measured) and the
+runs that are not signed off yet (in progress).
 
     python3 scripts/cto_history.py
 
-固定随机种子，每次生成结果相同。这些数字是示例，用来让 CTO 视图开箱有内容，不代表任何实测的效率提升。
+The random seed is fixed, so every run writes the same file. THESE NUMBERS ARE GENERATED, NOT MEASURED. They exist so
+that the CTO view has something to show the first time it opens. They are not evidence of any efficiency gain: the arrival
+rates, cycle times and defect rates below are assumptions chosen for the example, and the cost model (the "meta" block
+at the foot of main()) is described in docs/cto-view-data.md.
 """
 from __future__ import annotations
 
@@ -18,48 +24,51 @@ from pathlib import Path
 OUT = Path(__file__).resolve().parents[1] / "cto" / "history.json"
 SEED = 20261016
 TODAY = date(2026, 10, 16)
-AGENT_START = TODAY - timedelta(days=83)       # 近 12 周的第一天
-BASE_START = AGENT_START - timedelta(days=84)  # 前 12 周的第一天
+AGENT_START = TODAY - timedelta(days=83)       # the first day of the last 12 weeks
+BASE_START = AGENT_START - timedelta(days=84)  # the first day of the 12 weeks before
+ISSUE_PREFIX = "LO"                            # Larkspur Outfitters
 rng = random.Random(SEED)
 
-# 每条业务线每周的交付量（泊松均值）。基线按 v0.2 原型的 12 人小组校准；近 12 周为满负荷时的量，乘以逐周推广系数
+# Deliveries per business line per week (Poisson mean). The baseline is calibrated to a 12-person group; the last 12 weeks
+# are the full-capacity rate times a week-by-week roll-out factor.
 BASE_RATE = {"S": 68 / 12, "M": 19 / 12, "L": 2 / 12}
 AGENT_RATE = {"S": 18.4, "M": 9.3, "L": 0.85}
 RAMP = [0.40, 0.48, 0.56, 0.64, 0.72, 0.80, 0.88, 0.96, 1.0, 1.0, 1.0, 1.0]
-# 交付周期（日历天，均匀分布）：示例值
+# Cycle time in calendar days (uniform): example values
 CYCLE = {"base": {"S": (1, 3), "M": (7, 13), "L": (26, 34)}, "agent": {"S": (0.3, 1.3), "M": (1.5, 3.5), "L": (5, 9)}}
-# 规模 → 类型
+# size -> kind
 KIND = {"S": [("fix", 1.0)], "M": [("feat", 0.9), ("app", 0.1)], "L": [("app", 0.8), ("feat", 0.2)]}
 
 LINES = [
-    {"key": "ec", "name": "电商", "signers": ["Zhang Min", "Liu Yang"],
-     "app": ["以旧换新回收平台", "新品预售系统", "直播带货选品后台", "会员积分商城", "企业团购专区", "门店自提预约", "商品评价审核后台", "价格巡检工具", "优惠券中心", "套购组合配置后台", "安装服务预约"],
-     "feat": ["商品详情页视频展示", "满减凑单推荐", "购物车价格明细", "以旧换新估价", "预售定金尾款", "商品参数对比", "限时秒杀", "晒单返券", "优惠券叠加规则", "搜索联想词", "分期免息展示", "价保自助申请", "收货地址智能识别", "发票自助开具", "到手价计算"],
-     "fix": ["活动页首屏加载过慢", "划线价取数口径修正", "限购提示在小屏上被遮挡", "支付回调超时重试", "搜索结果排序异常", "优惠券过期提示文案", "商品图片懒加载失效", "订单导出字段缺失"],
-     "var": ["空调", "冰箱", "洗衣机", "电视", "厨电", "小家电"]},
-    {"key": "mob", "name": "移动应用", "signers": ["Chen Jing", "Zhou Tao"],
-     "app": ["门店导购 App", "安装师傅接单 App", "门店巡检移动端", "会员小程序", "售后上门预约小程序", "经销商移动订货 App", "店长移动看板", "产品说明书小程序", "家电焕新小程序", "员工内购小程序"],
-     "feat": ["扫码购", "一键登录", "导购客户标签", "消息推送分组", "直播间", "安装预约", "维修进度查询", "深色模式", "分享返券", "附近门店导航", "电子保修卡", "以旧换新拍照估价"],
-     "fix": ["通知角标不更新", "支付页闪退", "分享卡片图片缺失", "弱网下单重复提交", "登录态过期", "推送点击跳转错误"],
-     "var": ["iOS", "安卓", "小程序", "鸿蒙"]},
-    {"key": "crm", "name": "客户关系管理", "signers": ["Wang Lei", "Xu Na"],
-     "app": ["会员积分体系", "客服知识库", "售后工单系统", "会员分层营销平台", "客户之声分析", "400 来电助手", "延保管理", "会员权益中心", "投诉升级管理", "NPS 调研"],
-     "feat": ["会员等级权益页", "生日礼券自动发放", "沉睡会员唤醒", "客服工单自动分派", "售后回访问卷", "积分到期提醒", "会员分层标签", "来电弹屏", "工单超时预警", "积分兑换审核", "客户画像标签"],
-     "fix": ["积分到账延迟", "工单状态不同步", "会员手机号脱敏位数修正", "优惠券重复发放", "回访短信发送失败"],
-     "var": ["金卡会员", "新客", "华东大区", "华南大区", "线上渠道", "门店渠道"]},
-    {"key": "sc", "name": "供应链", "signers": ["Zhao Qiang", "Sun Peng"],
-     "app": ["供应商对账平台", "经销商订货平台", "门店库存同步服务", "智能补货系统", "到货预约平台", "退货质检系统", "仓储作业看板", "供应商协同门户", "运费结算系统", "物料追溯"],
-     "feat": ["安全库存预警", "订货额度控制", "补货建议", "物流轨迹查询", "退货入库质检", "仓间调拨审批", "供应商交期看板", "缺货自动提醒", "批次效期管理", "运单批量打印"],
-     "fix": ["对账单金额四舍五入误差", "库存预警阈值配置", "调拨单重复生成", "运单号校验错误", "库存同步延迟"],
-     "var": ["华东仓", "华南仓", "华北仓", "西南仓", "华中仓"]},
-    {"key": "int", "name": "内部系统", "signers": ["Huang Li", "Wu Hao"],
-     "app": ["会议室预订", "培训报名", "设备领用登记", "价保退差月报", "访客登记", "差旅报销查询", "部门周报汇总", "促销费用核算表", "合同审批台账", "新人入职清单"],
-     "feat": ["加班申请审批", "会议室冲突提示", "通讯录按部门筛选", "报销单据拍照识别", "权限变更审批", "离职账号自动停用", "两步验证接入", "登录异常提醒", "月报自动推送"],
-     "fix": ["通讯录部门排序", "月报导出金额格式", "退货订单口径修正", "锁定时长配置修正", "审批提醒重复发送"],
-     "var": ["财务部", "行政部", "人力资源部", "法务部", "信息安全组"]},
+    {"key": "ec", "name": "E-commerce", "signers": ["Maya Chen", "Daniel Ortiz"],
+     "app": ["Gear trade-in platform", "Pre-order system", "Live-stream product picker", "Rewards points store", "Corporate group-buy page", "In-store pickup booking", "Review moderation console", "Price patrol tool", "Coupon centre", "Bundle configuration console", "Installation service booking"],
+     "feat": ["Product page video", "Spend-more-save-more suggestions", "Cart price breakdown", "Trade-in value estimate", "Pre-order deposit and balance", "Product spec comparison", "Flash sale", "Photo-review coupon", "Coupon stacking rules", "Search suggestions", "Interest-free instalment display", "Price-adjustment self-service", "Smart address recognition", "Self-service invoicing", "Final price calculation"],
+     "fix": ["Campaign page slow on first screen", "Reference price source corrected", "Purchase-limit notice hidden on small screens", "Payment callback timeout retry", "Search result ordering wrong", "Coupon expiry notice wording", "Product image lazy loading broken", "Order export missing fields"],
+     "var": ["Tents", "Backpacks", "Footwear", "Jackets", "Cookware", "Climbing gear"]},
+    {"key": "mob", "name": "Mobile app", "signers": ["Priya Nair", "Tom Becker"],
+     "app": ["Store associate app", "Installer job app", "Store inspection mobile app", "Member mini-program", "After-sales visit booking", "Dealer ordering app", "Store manager dashboard", "Product manual mini-program", "Gear refresh mini-program", "Staff purchase mini-program"],
+     "feat": ["Scan to buy", "One-tap sign-in", "Associate customer tags", "Notification grouping", "Live room", "Installation booking", "Repair progress lookup", "Dark mode", "Share for coupon", "Nearby store navigation", "Digital warranty card", "Trade-in photo estimate"],
+     "fix": ["Notification badge not updating", "Crash on payment page", "Share card image missing", "Duplicate order on weak network", "Session expired too early", "Push tap opens the wrong page"],
+     "var": ["iOS", "Android", "Mini-program", "HarmonyOS"]},
+    {"key": "crm", "name": "CRM", "signers": ["Hannah Reed", "Samuel Okafor"],
+     "app": ["Member points programme", "Support knowledge base", "After-sales ticket system", "Member segmentation marketing", "Voice of customer analysis", "Call centre assistant", "Extended warranty management", "Member benefits centre", "Complaint escalation", "NPS survey"],
+     "feat": ["Member tier benefits page", "Birthday coupon auto-issue", "Dormant member win-back", "Ticket auto-assignment", "After-sales follow-up survey", "Points expiry reminder", "Member segment tags", "Incoming call screen pop", "Ticket overdue alert", "Points redemption approval", "Customer profile tags"],
+     "fix": ["Points credited late", "Ticket status out of sync", "Member phone number masking digits corrected", "Duplicate coupon issue", "Follow-up SMS failed"],
+     "var": ["Gold members", "New customers", "East region", "South region", "Online channel", "Store channel"]},
+    {"key": "sc", "name": "Supply chain", "signers": ["Lucas Meyer", "Aisha Rahman"],
+     "app": ["Supplier reconciliation platform", "Dealer ordering platform", "Store stock sync service", "Smart replenishment", "Delivery appointment platform", "Returns inspection system", "Warehouse operations board", "Supplier collaboration portal", "Freight settlement system", "Material traceability"],
+     "feat": ["Safety stock alert", "Order quota control", "Replenishment suggestions", "Shipment tracking", "Returns receiving inspection", "Inter-warehouse transfer approval", "Supplier lead-time board", "Stock-out auto reminder", "Batch expiry management", "Bulk waybill printing"],
+     "fix": ["Reconciliation rounding error", "Stock alert threshold setting", "Duplicate transfer orders", "Waybill number validation error", "Stock sync delay"],
+     "var": ["East warehouse", "South warehouse", "North warehouse", "Southwest warehouse", "Central warehouse"]},
+    {"key": "int", "name": "Internal systems", "signers": ["Grace Liu", "Noah Fischer"],
+     "app": ["Meeting room booking", "Training sign-up", "Equipment checkout log", "Price-adjustment refund monthly report", "Visitor registration", "Travel expense lookup", "Department weekly report roll-up", "Promotion cost sheet", "Contract approval ledger", "New hire checklist"],
+     "feat": ["Overtime request approval", "Meeting room conflict notice", "Directory filter by department", "Receipt photo recognition", "Permission change approval", "Auto-disable leaver accounts", "Two-step verification", "Sign-in anomaly alert", "Monthly report auto-send"],
+     "fix": ["Directory department order", "Monthly report amount format", "Returns order definition corrected", "Lockout duration setting corrected", "Duplicate approval reminders"],
+     "var": ["Finance", "Administration", "HR", "Legal", "Information security"]},
 ]
 LINE_IDX = {ln["key"]: i for i, ln in enumerate(LINES)}
-GATES = ["需求关卡", "范围关卡", "上线关卡", "签字放行"]  # 模拟的进行中需求停在哪个人的关卡上
+GATES = ["Requirements gate", "Scope gate", "Release gate", "Sign-off"]  # where a simulated in-progress item waits for a person
+
 
 def poisson(lam: float) -> int:
     l, k, p = math.exp(-lam), 0, 1.0
@@ -84,38 +93,39 @@ def title_for(line: dict, kind: str, used: dict) -> str:
         base = rng.choice(line["app"])
         n = used.get(base, 0) + 1
         used[base] = n
-        return base if n == 1 else f"{base}（{'二三四五六七八九十'[min(n - 2, 8)]}期）"
-    return f"{rng.choice(line[kind])}（{rng.choice(line['var'])}）"
+        return base if n == 1 else f"{base} (phase {n})"
+    return f"{rng.choice(line[kind])} ({rng.choice(line['var'])})"
 
 
-# 需求流动看板的列（AI-DLC 阶段）；人的关卡落在哪一列
-GATE_COL = {"范围关卡": "构思", "需求关卡": "启动", "上线关卡": "运维", "签字放行": "运维"}
-AGENT_COL = (["构思", "启动", "构建", "运维"], [2, 2, 5, 1])
-SCOPE_Q = ["毛利率按销售额还是成本计", "统计窗口从哪天起算", "已退货订单是否计入", "外包人员是否可见", "手机号显示几位", "跨大区数据能否合并"]
+# The columns of the requirement flow board (the AI-DLC phases); where each human gate sits
+GATE_COL = {"Scope gate": "Ideation", "Requirements gate": "Inception", "Release gate": "Operation", "Sign-off": "Operation"}
+AGENT_COL = (["Ideation", "Inception", "Construction", "Operation"], [2, 2, 5, 1])
+SCOPE_Q = ["Gross margin on revenue or on cost", "Which day the window starts", "Whether returned orders count", "Whether contractors can see it", "How many digits of the phone number to show", "Whether data from different regions may be combined"]
+PRICE_LIMIT_USD = 42  # thousands: refunds above this need CFO approval (the example company's rule)
 
 
 def focus(gate: str, line: dict) -> str:
-    """卡片上「人要决定什么」。"""
-    if gate == "范围关卡":
+    """What the person is to decide, as the card says it."""
+    if gate == "Scope gate":
         n = rng.randint(1, 3)
-        return f"{n} 个口径待答复：{rng.choice(SCOPE_Q)}" + ("等" if n > 1 else "")
-    if gate == "需求关卡":
-        return f"确认分工与验收标准（{rng.randint(4, 8)} 位成员）"
-    if gate == "上线关卡":
+        return f"{n} open question{'s' if n > 1 else ''}: {rng.choice(SCOPE_Q)}" + (" and more" if n > 1 else "")
+    if gate == "Requirements gate":
+        return f"Confirm the work split and the acceptance criteria ({rng.randint(4, 8)} members)"
+    if gate == "Release gate":
         if line["key"] == "ec":
-            return f"上线前核算：价保退差 {rng.randint(31, 60)} 万元，超过 30 万需 CFO 审批"
-        return "独立审查已通过，待批准上线"
-    return "已部署并通过健康检查，待签字放行"
+            return f"Pre-release check: price-adjustment refunds ${round(rng.randint(31, 60) * 10 / 7.1)}k, above ${PRICE_LIMIT_USD}k needs CFO approval"
+        return "Independent review passed; waiting for release approval"
+    return "Deployed and healthy; waiting for the sign-off"
 
 
 def wip(used: dict) -> list[dict]:
-    """此刻的需求流动（模拟）：需求池里待组队的，agent 在做的，停在人的关卡上等人决定的。"""
+    """The requirement flow right now (simulated): the backlog, what the agents are working on, what waits at a human gate."""
     out = []
     for li, line in enumerate(LINES):
         for _ in range(rng.randint(1, 2)):
             size = rng.choices("SML", weights=[5, 4, 1])[0]
             kind = pick_kind(size)
-            out.append({"t": title_for(line, kind, used), "line": li, "kind": kind, "size": size, "state": "pool", "col": "需求池",
+            out.append({"t": title_for(line, kind, used), "line": li, "kind": kind, "size": size, "state": "pool", "col": "Backlog",
                         "mins": rng.randint(1, 50)})
         for _ in range(rng.randint(5, 7)):
             size = rng.choices("SML", weights=[5, 4, 1])[0]
@@ -131,23 +141,23 @@ def wip(used: dict) -> list[dict]:
     return out
 
 
-# Issue 的提出方（按业务线）；上线后缺陷由谁报
-REPORTERS = {"ec": ["运营部", "商品部", "市场部"], "mob": ["用户体验组", "门店运营部"], "crm": ["会员运营部", "客服中心"],
-             "sc": ["供应链管理部", "仓储物流部"], "int": ["行政部"]}
-DEFECT_FROM = ["客服中心", "线上监控"]
-DEFECT_RATE = {"base": 0.08, "agent": 0.05}  # 新应用/新功能上线后 30 天内报出缺陷的比例
+# Who raises a business line's Issues; who reports a defect after release
+REPORTERS = {"ec": ["Operations", "Merchandising", "Marketing"], "mob": ["UX group", "Store operations"], "crm": ["Member operations", "Customer care"],
+             "sc": ["Supply chain management", "Warehouse and logistics"], "int": ["Administration"]}
+DEFECT_FROM = ["Customer care", "Online monitoring"]
+DEFECT_RATE = {"base": 0.08, "agent": 0.05}  # share of new apps and features with a defect reported within 30 days of release
 ISSUE0, PR0 = 1001, 1201
 
 
 def trace(items: list[dict], wips: list[dict]) -> None:
-    """给交付和进行中的需求补上 Issue 与 PR，并把部分修复链接到它修的那项交付。用另一个随机种子，不改动已有的
-    任何数字（条数、类型、规模、周期、上线日）。"""
+    """Give the deliveries and the in-progress items an Issue and a PR, and link some fixes to the delivery they fix. It uses
+    another random seed, so none of the existing numbers (count, kind, size, cycle, release day) changes."""
     r = random.Random(SEED + 1)
     for it in items:
         it["created"] = (date.fromisoformat(it["ship"]) - timedelta(days=int(it["cyc"]))).isoformat()
         line = LINES[it["line"]]
-        var = it["t"].rsplit("（", 1)[-1].rstrip("）") if "（" in it["t"] else ""
-        it["reporter"] = var if line["key"] == "int" and var.endswith(("部", "组")) else r.choice(REPORTERS[line["key"]])
+        var = it["t"].rsplit(" (", 1)[-1].rstrip(")") if " (" in it["t"] else ""
+        it["reporter"] = var if line["key"] == "int" and var in line["var"] else r.choice(REPORTERS[line["key"]])
     fixes = sorted((i for i in items if i["kind"] == "fix"), key=lambda i: i["ship"])
     taken: set[int] = set()
     for it in sorted((i for i in items if i["kind"] != "fix"), key=lambda i: i["ship"]):
@@ -161,12 +171,12 @@ def trace(items: list[dict], wips: list[dict]) -> None:
         k = r.choice(cands)
         taken.add(k)
         fix = fixes[k]
-        fix["t"] = f"{it['t']}上线后缺陷修复"
+        fix["t"] = f"Post-release defect fix: {it['t']}"
         fix["reporter"] = r.choice(DEFECT_FROM)
         fix["origin"] = id(it)
         it.setdefault("defects", []).append(id(fix))
     by_created = sorted(items, key=lambda i: (i["created"], i["ship"], i["t"]))
-    num = {id(i): f"TY-{ISSUE0 + n}" for n, i in enumerate(by_created)}
+    num = {id(i): f"{ISSUE_PREFIX}-{ISSUE0 + n}" for n, i in enumerate(by_created)}
     for n, it in enumerate(sorted(items, key=lambda i: (i["ship"], i["created"], i["t"]))):
         it["issue"], it["pr"] = num[id(it)], PR0 + n
     for it in items:
@@ -176,13 +186,13 @@ def trace(items: list[dict], wips: list[dict]) -> None:
             it["defects"] = [num[d] for d in it["defects"]]
     nxt, pr = ISSUE0 + len(items), PR0 + len(items)
     for w in wips:
-        w["issue"], nxt = f"TY-{nxt}", nxt + 1
+        w["issue"], nxt = f"{ISSUE_PREFIX}-{nxt}", nxt + 1
         w["reporter"] = r.choice(REPORTERS[LINES[w["line"]]["key"]])
-        if w.get("gate") == "签字放行":
+        if w.get("gate") == "Sign-off":
             w["pr"], pr = pr, pr + 1
 
 
-def gen() -> list[dict]:
+def gen() -> tuple[list[dict], dict]:
     items, used = [], {}
     for period, start, rates in (("base", BASE_START, None), ("agent", AGENT_START, AGENT_RATE)):
         for w in range(12):
@@ -205,11 +215,15 @@ def gen() -> list[dict]:
 def main() -> None:
     items, used = gen()
     items.sort(key=lambda x: (x["ship"], x["t"]), reverse=True)
+    # The assumptions behind the page's money and effort figures (docs/cto-view-data.md lists them, the page's Assumptions
+    # panel shows them). dayRate is the loaded cost of one person-day in `currency`; the seat price is in USD and
+    # `fx` turns it into `currency` (1.0 here: the example company reports in USD).
     meta = {"today": TODAY.isoformat(), "agentStart": AGENT_START.isoformat(),
             "weeks": [(BASE_START + timedelta(days=7 * i)).isoformat() for i in range(24)],
             "lines": [ln["name"] for ln in LINES], "peoplePerLine": 12,
             "eq": {"S": 1, "M": 5, "L": 30}, "human": {"S": 0.25, "M": 1, "L": 7},
-            "dayRate": 2000, "seatUsdMonth": 40, "fx": 7.1, "months": 3}
+            "currency": "USD", "dayRate": 282, "seatUsdMonth": 40, "fx": 1.0, "months": 3,
+            "company": "Larkspur Outfitters"}
     wips = wip(used)
     trace(items, wips)
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -217,7 +231,7 @@ def main() -> None:
                    encoding="utf-8")
     base = sum(1 for i in items if i["period"] == "base")
     linked = sum(len(i.get("defects", [])) for i in items)
-    print(f"{OUT}：前 12 周 {base} 项，近 12 周 {len(items) - base} 项（不含实测）；上线后缺陷链接 {linked} 条")
+    print(f"{OUT}: {base} items in the first 12 weeks, {len(items) - base} in the last 12 (no measured runs); {linked} post-release defects linked")
 
 
 if __name__ == "__main__":

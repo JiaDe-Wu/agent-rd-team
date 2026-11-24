@@ -57,8 +57,8 @@ interface Effects {
 
 /** Fill in the preset comment: the note the team file suggests for a gate (by its label); the person can still write their own. */
 const GATE_PRESETS: Record<string, string> = {
-  // protocol token: kept in Chinese (the key is the gate label the backend sends)
-  方案: 'Approved. One more point: when stock is below 5, products in the list and on the detail page show "Only N left".',
+
+  Plan: 'Approved. One more point: when stock is below 5, products in the list and on the detail page show "Only N left".',
 }
 
 const NO_EFFECTS: Effects = { run: null, flips: {}, flashes: {}, bumps: {}, merges: new Set(), fresh: new Set(), announce: '' }

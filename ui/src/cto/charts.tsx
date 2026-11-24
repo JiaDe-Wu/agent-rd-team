@@ -252,7 +252,7 @@ export function MiniCheap({ m, meta }: { m: Metrics; meta: CtoMeta }) {
   const human = m.eq ? (m.human * meta.dayRate) / m.eq : 0, agentPart = m.eq ? m.sub / m.eq : 0
   const rows: [string, number, string][] = [['Before', meta.dayRate, 'var(--deemph)'], ['Now', m.unit, 'var(--s4)']]
   return (
-    <Mini label={`Cost per person-day of work: before ¥${fmt(meta.dayRate)}, now ¥${fmt(m.unit)}`} height={H}>
+    <Mini label={`Cost per person-day of work: before $${fmt(meta.dayRate)}, now $${fmt(m.unit)}`} height={H}>
       {(W, onTip) => {
         const pw = Math.max(10, W - L - R)
         return rows.map(([lab, v, fill], r) => {
@@ -261,8 +261,8 @@ export function MiniCheap({ m, meta }: { m: Metrics; meta: CtoMeta }) {
             <g key={lab}>
               <text x={0} y={y0 + bh / 2 + 4} className={r === 1 ? 'is-strong' : undefined}>{lab}</text>
               <BarEnd x={L} y={y0} w={Math.max(w, 1)} h={bh} fill={fill} />
-              <text x={L + w + 8} y={y0 + bh / 2 + 4} className={r === 1 ? 'is-strong' : undefined}>¥{fmt(v)}</text>
-              <Hit x={L - 4} y={y0 - 3} w={w + 8} h={bh + 6} onTip={onTip} rows={r === 0 ? [[`¥${fmt(v)}`, 'Done by people, per person-day']] : [[`¥${fmt(v)}`, 'With agent collaboration, per person-day'], [`¥${fmt(human)}`, 'Of which people\'s time'], [`¥${fmt(agentPart)}`, 'Of which agent subscription']]} />
+              <text x={L + w + 8} y={y0 + bh / 2 + 4} className={r === 1 ? 'is-strong' : undefined}>${fmt(v)}</text>
+              <Hit x={L - 4} y={y0 - 3} w={w + 8} h={bh + 6} onTip={onTip} rows={r === 0 ? [[`$${fmt(v)}`, 'Done by people, per person-day']] : [[`$${fmt(v)}`, 'With agent collaboration, per person-day'], [`$${fmt(human)}`, 'Of which people\'s time'], [`$${fmt(agentPart)}`, 'Of which agent subscription']]} />
             </g>
           )
         })

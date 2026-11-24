@@ -20,9 +20,9 @@ describe('the CTO view numbers', () => {
     // equivalent work 1 + 5 + 30 + 5 + 5 = 46 person-days; people put in 0.25 + 1 + 7 + 1 + 1 = 10.25
     expect(all.eq).toBe(46)
     expect(all.human).toBe(10.25)
-    const sub = 60 * 40 * 3 * 7.1
-    expect(all.unit).toBeCloseTo((10.25 * 2000 + sub) / 46)
-    expect(all.save).toBeCloseTo(46 * 2000 - 10.25 * 2000 - sub)
+    const sub = 60 * 40 * 3 * 1
+    expect(all.unit).toBeCloseTo((10.25 * 282 + sub) / 46)
+    expect(all.save).toBeCloseTo(46 * 282 - 10.25 * 282 - sub)
     const ec = metrics(d, 0, base)
     expect([ec.before.length, ec.agent.length, ec.seats]).toEqual([2, 3, 12])
     expect(ratioOf(d.items, 0)).toBe(1.5)
@@ -48,7 +48,7 @@ describe('the CTO view numbers', () => {
     expect(csv.charCodeAt(0)).toBe(0xfeff)
     const lines = csv.slice(1).split('\r\n')
     expect(lines[0]).toBe('Delivery,Business line,Type,Size,Issue,Raised by,Issue created,Release date,Cycle (days),Average cycle before (same size, days),Signed by,PR,Post-release defects,Fixed Issue,Source,Run id')
-    expect(lines[1]).toBe('Singles Day appliance sale campaign page,E-commerce,New feature,Medium,TY-4127,Operations dept,2026-10-19,2026-10-19,0.01,10.0,R&D lead,#5123,,,Measured,r1013f04d')
+    expect(lines[1]).toBe('Black Friday appliance sale page,E-commerce,New feature,Medium,LO-4127,Operations,2026-10-19,2026-10-19,0.01,10.0,R&D lead,#5123,,,Measured,r1013f04d')
     expect(lines[2]).toContain('"Delivery, with a comma"')
   })
 })

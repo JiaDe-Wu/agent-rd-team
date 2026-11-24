@@ -20,10 +20,12 @@ export type CtoMeta = {
   peoplePerLine: number
   eq: Record<Size, number> // person-days the same work takes people alone
   human: Record<Size, number> // person-days people still put in with the agent team
-  dayRate: number // ¥ per person-day
+  dayRate: number // the loaded cost of one person-day, in `currency`
   seatUsdMonth: number
-  fx: number
+  fx: number // `currency` per USD, for the seat price
   months: number
+  currency?: string // what dayRate and every amount are in (USD)
+  company?: string // the example company's name
   realAvgMins: number // a measured run's average time, minutes
 }
 
@@ -37,13 +39,15 @@ export type CtoItem = {
   cyc: number // days from its Issue to release
   signer: string
   real: string | null // the run id when it is a run of this app (measured)
-  issue?: string // TY-2795
-  reporter?: string // who raised it: Operations dept …
+  issue?: string // LO-2795
+  reporter?: string // who raised it: Operations …
   created?: string // the Issue's day
   pr?: number | null // the PR that took it into main
   defects?: string[] // the Issues of defects raised after it shipped (a fix links back with origin)
   origin?: string // a fix of a defect: the Issue of what it fixes
   mins?: number // measured: the run's own time
+  credits?: number | null // measured: Kiro Crew credits the run used, when known
+  agent_s?: number // measured: seconds the agents worked, outside the gates
   tests?: string // measured: the checks when it was signed, 37/37
   members?: number // measured: agent members that took part
   decisions?: [string, string][] // measured: what people decided at its gates
@@ -51,7 +55,7 @@ export type CtoItem = {
   risks?: CtoRisk[] // measured: what people who sent work back at a gate noted it kept from going live
 }
 
-/** Risk stopped: noted by the person who sent work back at a gate; the amount is in yuan (or none). ``at``: seconds from
+/** Risk stopped: noted by the person who sent work back at a gate; the amount is in USD (or none). ``at``: seconds from
  * the run's start, to open its moment. */
 export type CtoRisk = { what: string; amount: number | null; gate: string; role?: string | null; at: number }
 
@@ -60,12 +64,12 @@ export type FlowSegment = {
   from: number
   to: number
   who: 'agent' | 'person'
-  col: string // the kanban column: Ideation · Inception · Construction · Operation (protocol tokens: kept in Chinese)
+  col: string // the kanban column: Ideation · Inception · Construction · Operation
   phase: string // the AI-DLC phase of its roles (the board's phase key)
-  label: string // start · build · rework · awaiting approval · release gate · sign-off (protocol tokens: kept in Chinese)
+  label: string // start · build · rework · awaiting approval · release gate · sign-off
   roles: string[]
   gate: string | null // a person's segment: the gated role, or 'signoff'
-  decision: '批准' | '退回' | '签字' | null // protocol token: kept in Chinese
+  decision: 'Approved' | 'Sent back' | 'Signed' | null // what the person decided at that segment
 }
 export type FlowMark = { at: number; kind: 'gate' | 'approved' | 'bounce' | 'check' | 'review' | 'deployed' | 'signoff' | 'merged'; role: string | null; label: string }
 export type CtoFlow = {
@@ -99,7 +103,7 @@ export type CtoWip = {
   kind: Kind
   size: Size
   state: 'pool' | 'agent' | 'wait'
-  col: '需求池' | '构思' | '启动' | '构建' | '运维' // protocol token: kept in Chinese
+  col: 'Backlog' | 'Ideation' | 'Inception' | 'Construction' | 'Operation'
   mins?: number // pool: since it came in; agent: since the run began
   members?: number // agent: members at work
   gate?: string // wait: release gate …

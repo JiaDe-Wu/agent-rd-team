@@ -118,16 +118,34 @@ export function runMeta(status: string): { label: string; tone: Tone; active: bo
 /** Nothing more will happen to this lane in this run. */
 export const isFinal = (lane: Pick<Lane, 'status' | 'writable'>) => lane.status === 'merged' || (lane.status === 'done' && lane.writable.length === 0)
 
-/** Display names of the delivery tag values the backend stores (protocol tokens: the keys stay in Chinese). */
-const DELIVERY_LABEL: Record<string, string> = {
-  新应用: 'New app', 新功能: 'New feature', 修复: 'Fix', // protocol token: kept in Chinese
-  小: 'Small', 中: 'Medium', 大: 'Large', // protocol token: kept in Chinese
-  电商: 'E-commerce', 移动应用: 'Mobile app', 客户关系管理: 'CRM', 供应链: 'Supply chain', 内部系统: 'Internal systems', // protocol token: kept in Chinese
-  运营部: 'Operations dept', 用户体验组: 'UX group', 会员运营部: 'Membership operations', 供应链管理部: 'Supply chain management', 行政部: 'Administration', 人力资源部: 'HR dept', // reporters in the sample data
+/** The delivery tag values (kind, size, business line) and the reporters are English words and are shown as they are. Runs of earlier
+ * versions stored them in Chinese (written here as \u escapes); those are shown as the English words below. */
+const LEGACY_LABEL: Record<string, string> = {
+  '\u65b0\u5e94\u7528': 'New app',
+  '\u65b0\u529f\u80fd': 'New feature',
+  '\u4fee\u590d': 'Fix',
+  '\u5c0f': 'Small',
+  '\u4e2d': 'Medium',
+  '\u5927': 'Large',
+  '\u7535\u5546': 'E-commerce',
+  '\u79fb\u52a8\u5e94\u7528': 'Mobile app',
+  '\u5ba2\u6237\u5173\u7cfb\u7ba1\u7406': 'CRM',
+  '\u4f9b\u5e94\u94fe': 'Supply chain',
+  '\u5185\u90e8\u7cfb\u7edf': 'Internal systems',
+  '\u8fd0\u8425\u90e8': 'Operations',
+  '\u7528\u6237\u4f53\u9a8c\u7ec4': 'UX group',
+  '\u4f1a\u5458\u8fd0\u8425\u90e8': 'Membership operations',
+  '\u4f9b\u5e94\u94fe\u7ba1\u7406\u90e8': 'Supply chain management',
+  '\u884c\u653f\u90e8': 'Administration',
+  '\u4eba\u529b\u8d44\u6e90\u90e8': 'HR',
+  '\u5546\u54c1\u90e8': 'Merchandising',
+  '\u5e02\u573a\u90e8': 'Marketing',
+  '\u5ba2\u670d\u4e2d\u5fc3': 'Customer care',
+  '\u7ebf\u4e0a\u76d1\u63a7': 'Online monitoring',
 }
-/** Issue kinds the backend sends (protocol tokens: kept in Chinese), as a person reads them. */
-export const issueKind = (k: string) => (k === '需求' ? 'Requirement' : k === '缺陷' ? 'Defect' : k)
-export const deliveryLabel = (v: string) => DELIVERY_LABEL[v] ?? v
+/** Issue kinds the backend sends, as a person reads them (an earlier run's Chinese word is read as the English one). */
+export const issueKind = (k: string) => (k === 'Requirement' || k === '\u9700\u6c42' ? 'Requirement' : k === 'Defect' || k === '\u7f3a\u9677' ? 'Defect' : k)
+export const deliveryLabel = (v: string) => LEGACY_LABEL[v] ?? v
 
 /** The AI-DLC phases, in order: the team graph's column groups. */
 export const PHASES: ReadonlyArray<{ key: string; n: string; title: string; en: string }> = [
@@ -309,7 +327,7 @@ export const AIDLC_AGENTS: ReadonlyArray<{ key: string; name: string }> = [
 ]
 
 /** Experts a company adds to the official 14 (a Crew member of its own), by their member name. */
-export const CUSTOM_EXPERTS: Readonly<Record<string, string>> = { 'taoyuan-motion-agent': 'Brand motion' }
+export const CUSTOM_EXPERTS: Readonly<Record<string, string>> = { 'larkspur-motion-agent': 'Brand motion', 'taoyuan-motion-agent': 'Brand motion' }
 
 export const expertName = (key: string) => AIDLC_AGENTS.find((a) => a.key === key)?.name ?? CUSTOM_EXPERTS[key] ?? key
 

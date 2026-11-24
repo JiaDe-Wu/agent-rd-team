@@ -1337,7 +1337,7 @@ class TeamRun:
         d = self.delivery()
         return {"id": str(got.get("id") or delivery_mod.issue_id(self.rid)),
                 # protocol token: kept in Chinese (UI type of the Issue kind)
-                "kind": str(got.get("kind") or ("缺陷" if d["kind"] == "修复" else "需求")),
+                "kind": str(delivery_mod.issue_kind(got.get("kind") or delivery_mod.issue_kind_of(d))),
                 "reporter": str(got.get("reporter") or delivery_mod.REPORTERS[d["line"]]),
                 "created_at": float(got.get("created_at") or self.s.get("started_at") or 0)}
 

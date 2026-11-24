@@ -34,7 +34,7 @@ export type RunCard = {
   tests: { passed: number; failed: number; total: number }
   imported?: boolean // recorded on another Mac and imported here (POST /runs/import): look and replay only
   name: string // the delivery name (its delivery tag's name): what the run is called in the list
-  issue: string // its Issue number, TY-3456
+  issue: string // its Issue number, LO-3456
 }
 
 export type RunDetail = {
@@ -57,7 +57,7 @@ export type RunDetail = {
   events: TeamEvent[] // latest 200, oldest first
   team: { name: string; orchestrator: string } // the team file's name; what orchestrates it (the deterministic engine)
   ownership: Ownership | null // who writes where, once the ownership file is read
-  review_rounds: number // times a review that said 要改 (protocol token: kept in Chinese) sent work back
+  review_rounds: number // times a review that said changes needed sent work back
   gate_notes: Record<string, string> // what a person said when approving a gate, by role
   gate_discuss: boolean // the team offers Discuss at its gates
   standards: Standard[] // matched standards: the company standards and data the requirement touches, by keywords
@@ -69,15 +69,15 @@ export type RunDetail = {
   risks: Risk[] // risk stopped: what people who sent work back at a gate noted it kept from going live
   requirement: string // the requirement as the person wrote it
   plan_skip: Record<string, string> // the optional members the planner's work split proposal leaves out this run, with why (applied once a person approves)
-  overruled: { role: string; note: string; review: string } | null // a person approved a gate over a review that still said 要改 (protocol token: kept in Chinese), and why
+  overruled: { role: string; note: string; review: string } | null // a person approved a gate over a review that still said changes needed, and why
   sign_block: string // why this run cannot be signed off ('' when it can: it finished and what it deploys went out)
   delivery: Delivery // delivery tag: what the CTO view counts this run as, once a person signs it off
   issue: Issue // the requirement as the organisation tracks it
   pr: PullRequest | null // the run branch into main: open once the run delivered, merged when a person signs it off
 }
 
-/** The run's Issue: its number, 需求 (requirement) or 缺陷 (defect) (protocol tokens: kept in Chinese in kind), who raised it and when (the run's start, unless its record says). */
-export type Issue = { id: string; kind: '需求' | '缺陷'; reporter: string; created_at: number }
+/** The run's Issue: its number, Requirement or Defect (in kind), who raised it and when (the run's start, unless its record says). */
+export type Issue = { id: string; kind: 'Requirement' | 'Defect'; reporter: string; created_at: number }
 
 /** The run's pull request: its run branch into main, merged when a person signs it off (Signed off). */
 export type PullRequest = {
@@ -98,16 +98,16 @@ export type PullRequest = {
 
 /** Delivery tag: proposed by the run's first gated role, confirmed (or changed) by the person at that gate; the team file's defaults until then. */
 export type Delivery = {
-  name: string // e.g. Singles Day appliance sale campaign page
-  kind: '新应用' | '新功能' | '修复' // protocol token: kept in Chinese
-  size: '小' | '中' | '大' // protocol token: kept in Chinese
-  line: '电商' | '移动应用' | '客户关系管理' | '供应链' | '内部系统' // business line; protocol tokens: kept in Chinese
+  name: string // e.g. Black Friday appliance sale page
+  kind: 'New app' | 'New feature' | 'Fix'
+  size: 'Small' | 'Medium' | 'Large'
+  line: 'E-commerce' | 'Mobile app' | 'CRM' | 'Supply chain' | 'Internal systems' // business line
   why: string // the proposer's one-line reason, '' when none
   confirmed: boolean // a person confirmed them at the gate
 }
 
 /** A person's signature on a finished run: what the machine checks said when they signed. */
-/** Risk stopped: noted by the person who sent work back at a gate (amount in yuan, or none). */
+/** Risk stopped: noted by the person who sent work back at a gate (amount in USD, or none). */
 export type Risk = { what: string; amount: number | null; gate: string; role: string | null; at: number }
 
 export type SignOff = { by: string; note: string; at: number; tests: string }
@@ -117,7 +117,7 @@ export type Standard = {
   id: string // 'RULE' | 'PII' | 'DATA-EMP' ...
   title: string // e.g. annual party raffle rules
   kind: 'standard' | 'data'
-  owner: string // who sets it: HR dept
+  owner: string // who sets it: HR
   doc: string // its document in the knowledge source
   rules: string[] // RULE-1 ...
   why: string // e.g. matched "raffle"
@@ -168,7 +168,7 @@ export type Lane = {
   gate: 'pending' | 'discussing' | 'approved' | null // a person's gate after this role (null: none, or not reached; discussing: it is answering the person's discussion)
   gate_label: string // what the person approves, e.g. 'Scope'
   gate_preset: string // the team file's preset note for approving that gate (Fill in the preset comment), '' when none
-  gate_revise_preset: string // …and for sending it back (a review gate: says whom, 打回：Frontend #2; 打回 is a protocol token: kept in Chinese)
+  gate_revise_preset: string // …and for sending it back (a review gate: says whom, Send back: Frontend #2
   gate_revise_risk: { what: string; amount: number | null } | null // …and the risk that send-back keeps from going live
   kinds: string[] // every attempt's kind, oldest first: 'work' | 'fix' | 'conflict' | 'review' | 'revise' | 'discuss'
   session: string | null // the Kiro Crew chat session it works in, null before it opened
@@ -179,7 +179,7 @@ export type Lane = {
   member: string // the Kiro Crew member it is (Agents page), '' when the team does not name one
   member_kind: string | null // how its session was booted: 'member' | 'template' | 'default'; null before one opened
   optional: boolean // a post that may sit a run out: its member not on Crew's Agents page (not on Crew), or the approved plan leaves it out
-  overrule: boolean // its gate waits for a person over a review that still says 要改 (protocol token: kept in Chinese) with its rounds used up
+  overrule: boolean // its gate waits for a person over a review that still says changes needed with its rounds used up
   awaiting_member: string | null // ready to start, but its Crew member is not on the Agents page: held until a person adds it
   delivery_gate: boolean // this role proposes the delivery tag: its gate is where a person confirms them
   questions: GateQuestion[] // decisions needed: what the role asks the person to decide at its gate, answered one by one
@@ -325,7 +325,7 @@ export type OutputFile = {
 
 export type OutputAttempt = {
   n: number
-  kind: 'work' | 'fix' | 'conflict' | 'review' | 'revise' // review: a review that said 要改 (protocol token: kept in Chinese) sent it back; revise: a person or the ownership check did
+  kind: 'work' | 'fix' | 'conflict' | 'review' | 'revise' // review: a review that said changes needed sent it back; revise: a person or the ownership check did
   label: string // 'fix AC-19' …, '' for the first one
   agent: string | null
   started: number | null
