@@ -74,12 +74,12 @@ test('the start form says an optional post whose member is not on Crew sits the 
   const role = (key: string, title: string, member: string, extra: Partial<RouteRole> = {}): RouteRole =>
     ({ key, title, phase: 'construction', stage: '3.5 Code generation', aidlc_agent: member, member, icon: key, assignment: '', gate: false, on_crew: false, ...extra })
   const pick = {
-    team: { file: 'team-taoyuan-promo.json', name: 'Larkspur Outfitters R&D team · Black Friday sale', scope: 'mvp', keywords: [], priority: 35, fallback: false, official_stages: null, needs_source: false, starter: 'starters/mall', source: null,
-      roles: [role('motion', 'Motion designer', 'taoyuan-motion-agent', { optional: true }), role('tester', 'Test engineer', 'aidlc-quality-agent')], agents: [], stages: [], extra_stages: [], extra_note: '' },
+    team: { file: 'team-promo.json', name: 'Larkspur Outfitters R&D team · Black Friday sale', scope: 'mvp', keywords: [], priority: 35, fallback: false, official_stages: null, needs_source: false, starter: 'starters/mall', source: null,
+      roles: [role('motion', 'Motion designer', 'larkspur-motion-agent', { optional: true }), role('tester', 'Test engineer', 'aidlc-quality-agent')], agents: [], stages: [], extra_stages: [], extra_note: '' },
     matched: ['Black Friday'], why: '', others: [], roster: [], teams: [],
   } as RoutePick
   render(<TeamPick pick={pick} />)
-  expect(screen.getByTestId('kt-pick-unhired')).toHaveTextContent('Motion designer not on Crew, so not in this run (add taoyuan-motion-agent under Crew Agents, then hand the requirement to the team to include it)')
+  expect(screen.getByTestId('kt-pick-unhired')).toHaveTextContent('Motion designer not on Crew, so not in this run (add larkspur-motion-agent under Crew Agents, then hand the requirement to the team to include it)')
   expect(screen.getByText(/Test engineer not on the team yet/)).toHaveTextContent('if not added, the run stops and waits when its turn comes')
 })
 

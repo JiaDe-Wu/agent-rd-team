@@ -34,7 +34,7 @@ export type RunCard = {
   tests: { passed: number; failed: number; total: number }
   imported?: boolean // recorded on another Mac and imported here (POST /runs/import): look and replay only
   name: string // the delivery name (its delivery tag's name): what the run is called in the list
-  issue: string // its Issue number, LO-3456
+  issue: string // its Issue number, LK-3456
 }
 
 export type RunDetail = {

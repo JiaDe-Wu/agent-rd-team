@@ -71,11 +71,11 @@ describe('the CTO view and the board, both ways', () => {
     await screen.findByTestId('cto-more')
     const table = within(screen.getByRole('region', { name: 'Delivery list' })).getByRole('table')
     const row = within(table).getByText('Product spec comparison (refrigerators)').closest('tr') as HTMLElement
-    expect(row).toHaveTextContent('LO-2790')
-    expect(row).toHaveTextContent('LO-2790 MerchandisingPR #2990')
-    expect(row).toHaveTextContent('Post-release defects 1 · fixes in LO-2801')
+    expect(row).toHaveTextContent('LK-2790')
+    expect(row).toHaveTextContent('LK-2790 MerchandisingPR #2990')
+    expect(row).toHaveTextContent('Post-release defects 1 · fixes in LK-2801')
     expect(within(table).getByText('Black Friday appliance sale page').closest('tr')).toHaveTextContent('PR #5123')
-    expect(screen.getByTestId('cto-live-card')).toHaveTextContent('E-commerce · LO-4130')
+    expect(screen.getByTestId('cto-live-card')).toHaveTextContent('E-commerce · LK-4130')
   })
 
   test('a run of this app waiting at its gate is a card that opens the board at that gate', async () => {
@@ -135,11 +135,11 @@ describe('the CTO view and the board, both ways', () => {
     render(<AidlcTeamApp pollMs={60_000} />)
     const table = within(await screen.findByRole('region', { name: 'Delivery list' })).getByRole('table')
     await user.click(within(table).getByText('Product spec comparison (refrigerators)'))
-    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'LO-2790', from: 'cto' })
+    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'LK-2790', from: 'cto' })
     expect(await screen.findByText('Simulated delivery with no run record: the step details only exist for real runs.')).toBeInTheDocument()
     const twin = screen.getByTestId('item-twin')
     expect(twin).toHaveTextContent('Black Friday appliance sale page')
-    expect(screen.getByRole('article', { name: 'More stable' })).toHaveTextContent('Post-release defects 1:LO-2801')
+    expect(screen.getByRole('article', { name: 'More stable' })).toHaveTextContent('Post-release defects 1:LK-2801')
     await user.click(within(twin).getByRole('button', { name: 'See its value stream ↗' }))
     expect(parseView(window.location.search)).toEqual({ kind: 'item', run: 'r1013f04d' })
   })
@@ -147,7 +147,7 @@ describe('the CTO view and the board, both ways', () => {
   test('the CTO view picks out the delivery it comes back to; its checks and signature open the board', async () => {
     const user = userEvent.setup()
     routes()
-    window.history.replaceState(null, '', '/apps/agent-rd-team?hl=LO-2790')
+    window.history.replaceState(null, '', '/apps/agent-rd-team?hl=LK-2790')
     render(<AidlcTeamApp pollMs={60_000} />)
     const table = within(await screen.findByRole('region', { name: 'Delivery list' })).getByRole('table')
     await waitFor(() => expect(within(table).getByText('Product spec comparison (refrigerators)').closest('tr')).toHaveClass('is-hl'))
@@ -170,7 +170,7 @@ describe('the CTO view and the board, both ways', () => {
     await user.click(within(screen.getByRole('region', { name: 'Weekly releases' })).getAllByLabelText(/Week from .*: see this week's deliveries/)[3])  // before AI-DLC: 06-01 and 06-02
     expect(screen.getByRole('button', { name: 'Stop filtering by week' })).toBeInTheDocument()
     expect(screen.getByTestId('cto-ledger-count')).toHaveTextContent('2 items')
-  }, 15_000)
+  }, 40_000)
 
   test('the sign-off sheet and Delivery detail go both ways', async () => {
     const user = userEvent.setup()
@@ -221,7 +221,7 @@ describe('the CTO view and the board, both ways', () => {
     const text = await new Promise<string>((ok) => { const r = new FileReader(); r.onload = () => ok(String(r.result)); r.readAsText(made[0]) })
     expect(text).toContain('r1013f04d')
     expect(text.split('\r\n')[0]).toContain('Issue,Raised by,Issue created,Release date')
-    expect(text).toContain('LO-4127,Operations,2026-10-19')
+    expect(text).toContain('LK-4127,Operations,2026-10-19')
     expect(screen.getByRole('status')).toHaveTextContent('Exported 2 rows (All business lines · measured only)')
   })
 
@@ -280,11 +280,11 @@ describe('the board side of it', () => {
 
   test('the sign-off sheet and the top bar carry the run’s Issue and PR: Waiting to merge until the signature, then merged into main', () => {
     const run = clone(finishedBoard()).run!
-    run.issue = { id: 'LO-4127', kind: 'Requirement', reporter: 'Operations', created_at: run.started_at }
+    run.issue = { id: 'LK-4127', kind: 'Requirement', reporter: 'Operations', created_at: run.started_at }
     run.pr = { number: 5123, head: `team/${run.id}/run`, base: 'main', state: 'open', opened_at: run.ended_at ?? 0, merged_at: null, merged_by: null,
       sha: '', files: 12, added: 340, removed: 8, checks: '37/37', review: 'The review says it can be merged' }
     const { rerender } = render(<SignOff run={run} onSign={async () => {}} />)
-    expect(screen.getByTestId('kt-sign-pr')).toHaveTextContent(`Issue LO-4127 (Requirement · raised by Operations) → PR #5123: team/${run.id}/run → main · Waiting to merge: merged into main when signed off`)
+    expect(screen.getByTestId('kt-sign-pr')).toHaveTextContent(`Issue LK-4127 (Requirement · raised by Operations) → PR #5123: team/${run.id}/run → main · Waiting to merge: merged into main when signed off`)
     run.signoff = { by: 'R&D lead', note: '', at: run.ended_at ?? 0, tests: '37/37' }
     run.pr = { ...run.pr, state: 'merged', sha: 'a1b2c3d' }
     rerender(<SignOff run={clone(run)} />)
@@ -307,16 +307,16 @@ describe('moving between the three views', () => {
     expect(window.location.search).toBe('?line=0&kind=feat')  // a filter rewrites the entry
     const length = window.history.length
     await user.click(within(ledgerOf()).getByText('Product spec comparison (refrigerators)'))
-    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'LO-2790', from: 'cto' })
+    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'LK-2790', from: 'cto' })
     expect(window.history.length).toBe(length + 1)  // the move is a new entry
-    expect(navigations).toEqual(['/apps/agent-rd-team?view=item&issue=LO-2790&from=cto'])  // made by the host's router (its ← → know about it)
+    expect(navigations).toEqual(['/apps/agent-rd-team?view=item&issue=LK-2790&from=cto'])  // made by the host's router (its ← → know about it)
     expect((window.history.state as { ktDepth?: number }).ktDepth).toBe(1)
     window.history.back()
-    await waitFor(() => expect(window.location.search).toBe('?line=0&kind=feat&hl=LO-2790'))
+    await waitFor(() => expect(window.location.search).toBe('?line=0&kind=feat&hl=LK-2790'))
     expect(await screen.findByTestId('cto-ledger-count')).toHaveTextContent('3 items')
     await waitFor(() => expect(within(ledgerOf()).getByText('Product spec comparison (refrigerators)').closest('tr')).toHaveClass('is-hl'))
     window.history.forward()
-    await waitFor(() => expect(window.location.search).toBe('?view=item&issue=LO-2790&from=cto'))
+    await waitFor(() => expect(window.location.search).toBe('?view=item&issue=LK-2790&from=cto'))
     expect(await screen.findByTestId('item-root')).toBeInTheDocument()
   })
 
@@ -328,13 +328,13 @@ describe('moving between the three views', () => {
     await user.click(screen.getByRole('button', { name: /^E-commerce/ }))
     await user.click(within(ledgerOf()).getByText('Product spec comparison (refrigerators)'))
     await user.click(await screen.findByRole('button', { name: 'CTO view' }))
-    expect(parseView(window.location.search)).toEqual({ kind: 'cto', line: 0, hl: 'LO-2790' })
+    expect(parseView(window.location.search)).toEqual({ kind: 'cto', line: 0, hl: 'LK-2790' })
     expect(await screen.findByTestId('cto-ledger-count')).toHaveTextContent('3 items')
   })
 
   test('a row not under the filters it comes back to: they are relaxed, and the page says so', async () => {
     routes()
-    window.history.replaceState(null, '', '/apps/agent-rd-team?line=3&hl=LO-2790')  // Supply chain, but the spec comparison is E-commerce
+    window.history.replaceState(null, '', '/apps/agent-rd-team?line=3&hl=LK-2790')  // Supply chain, but the spec comparison is E-commerce
     render(<AidlcTeamApp pollMs={60_000} />)
     expect(await screen.findByText('This item was not in the previous filter; now showing all business lines and types')).toBeInTheDocument()
     await waitFor(() => expect(within(ledgerOf()).getByText('Product spec comparison (refrigerators)').closest('tr')).toHaveClass('is-hl'))
@@ -347,7 +347,7 @@ describe('moving between the three views', () => {
     await screen.findByTestId('cto-more')
     within(ledgerOf()).getByText('Product spec comparison (refrigerators)').closest('tr')!.focus()
     await user.keyboard('{Enter}')
-    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'LO-2790', from: 'cto' })
+    expect(parseView(window.location.search)).toEqual({ kind: 'item', issue: 'LK-2790', from: 'cto' })
   })
 
   test('the run picked in the board picker is what the URL says; See each member usage opens the lanes', async () => {

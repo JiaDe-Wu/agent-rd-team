@@ -39,7 +39,7 @@ Only an item with a `real` run id is measured.
 | `t`, `line`, `kind`, `size` | Name; index into `meta.lines`; `app` / `feat` / `fix`; `S` / `M` / `L` |
 | `period` | `base` (the 12 weeks before AI-DLC) or `agent` |
 | `ship`, `cyc`, `signer` | Release day; days from the Issue to release; who signed it off |
-| `issue`, `reporter`, `created`, `pr` | The Issue (`LO-1234`), who raised it, its day, the PR that took it into main |
+| `issue`, `reporter`, `created`, `pr` | The Issue (`LK-1234`), who raised it, its day, the PR that took it into main |
 | `defects`, `origin` | A delivery lists the Issues of defects raised after it shipped; a fix points back to what it fixes |
 | `real` | `null` for a simulated delivery, else the run id: **a measured delivery** |
 

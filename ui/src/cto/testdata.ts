@@ -18,10 +18,10 @@ export function ctoData(): CtoData {
     },
     items: [
       { ...agent, t: 'Black Friday appliance sale page', line: 0, kind: 'feat', size: 'M', ship: '2026-10-19', cyc: 0.012, mins: 17, credits: 34.2, agent_s: 504, signer: 'R&D lead', real: 'r1013f04d', tests: '37/37', members: 8,
-        issue: 'LO-4127', reporter: 'Operations', created: '2026-10-19', pr: 5123, defects: [],
+        issue: 'LK-4127', reporter: 'Operations', created: '2026-10-19', pr: 5123, defects: [],
         decisions: [['Approved Requirements', 'Added rule: at most 2 units per person per model'], ['Sent back Release', 'Price-adjustment refund $68,000, above $42,000 needs CFO approval'], ['Approved Release', 'Price-adjustment refund reserved at $39,000']],
         caught: { person: 1, review: 0, checks: 2 }, risks: [{ what: 'Price-adjustment refund above the $42,000 approval limit', amount: 29000, gate: 'Release', role: 'compliance', at: 731 }] },
-      { ...agent, t: 'Product spec comparison (refrigerators)', line: 0, kind: 'feat', size: 'M', ship: '2026-10-19', cyc: 2.5, issue: 'LO-2790', reporter: 'Merchandising', created: '2026-10-17', pr: 2990, defects: ['LO-2801'] },
+      { ...agent, t: 'Product spec comparison (refrigerators)', line: 0, kind: 'feat', size: 'M', ship: '2026-10-19', cyc: 2.5, issue: 'LK-2790', reporter: 'Merchandising', created: '2026-10-17', pr: 2990, defects: ['LK-2801'] },
       { ...agent, t: 'Delivery, with a comma', line: 0, kind: 'feat', size: 'M', ship: '2026-10-18', cyc: 0.02, mins: 25, credits: 21.8, agent_s: 1260, signer: 'Noah Fischer', real: 'r1020live', tests: '20/20', members: 5, decisions: [['Approved Scope', 'No further comment']] },
       { ...agent, t: 'Stock alert threshold setting (East warehouse)', line: 4, kind: 'fix', size: 'S', ship: '2026-10-18', cyc: 0.8 },
       { ...agent, t: 'Supplier reconciliation platform', line: 3, kind: 'app', size: 'L', ship: '2026-10-01', cyc: 7 },
@@ -31,7 +31,7 @@ export function ctoData(): CtoData {
       { ...base, t: 'Address book department ordering (Administration)', line: 4, kind: 'fix', size: 'S', ship: '2026-06-12', cyc: 2 },
     ],
     wip: [
-      { t: 'Black Friday store sale', line: 0, kind: 'feat', size: 'M', state: 'wait', col: 'Operation', gate: 'Release gate', role: 'compliance', who: 'Owner', hours: 0.2, focus: 'The independent review has a verdict; waiting for the owner to decide', live: true, real: 'r1020gate', issue: 'LO-4130', reporter: 'Operations' },
+      { t: 'Black Friday store sale', line: 0, kind: 'feat', size: 'M', state: 'wait', col: 'Operation', gate: 'Release gate', role: 'compliance', who: 'Owner', hours: 0.2, focus: 'The independent review has a verdict; waiting for the owner to decide', live: true, real: 'r1020gate', issue: 'LK-4130', reporter: 'Operations' },
       { t: 'Member phone number masking digits fix', line: 2, kind: 'fix', size: 'S', state: 'wait', col: 'Ideation', gate: 'Scope gate', who: 'Hannah Reed', hours: 2.1, focus: '3 questions waiting for an answer' },
       { t: 'Stock sync delay (South warehouse)', line: 3, kind: 'fix', size: 'S', state: 'agent', col: 'Construction', members: 4, mins: 12 },
       { t: 'Overtime request approval (Legal)', line: 4, kind: 'feat', size: 'M', state: 'pool', col: 'Backlog', mins: 4 },
@@ -69,7 +69,7 @@ export function ctoFlow(): CtoFlow {
     ],
     agent_s: 504, person_s: 516, gates: 3, credits: 34.2, members: 8, tests: { passed: 37, total: 37, enterprise: 28 },
     sent_back: { person: 1, review: 0, checks: 0 }, risks: [{ what: 'Price-adjustment refund above the $42,000 approval limit', amount: 29000, gate: 'Release', role: 'compliance', at: 731 }], rework: 1, review: 'Review says ready to deliver', deployed: true,
-    issue: { id: 'LO-4127', kind: 'Requirement', reporter: 'Operations', created_at: 1791840066 },
+    issue: { id: 'LK-4127', kind: 'Requirement', reporter: 'Operations', created_at: 1791840066 },
     pr: { number: 5123, head: 'team/r1013f04d/run', base: 'main', state: 'signed', opened_at: 1791841088, merged_at: 1791841088, merged_by: 'R&D lead', sha: '', files: 17, added: 1523, removed: 40, checks: '37/37', review: 'Review says ready to deliver' },
     titles: { product: 'Product manager', backend1: 'Backend development #1', tester: 'Test engineer', compliance: 'Compliance review', deploy: 'Deploy engineer' },
     team: [

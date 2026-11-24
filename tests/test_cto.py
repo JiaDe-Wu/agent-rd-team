@@ -97,7 +97,7 @@ def git(cwd, *args):
 
 def test_a_run_has_an_issue_and_once_it_delivered_a_pr_that_the_signature_merges_into_main(tmp_path):
     run = promo_run(tmp_path)
-    assert delivery.issue_id(run.rid).startswith("LO-")
+    assert delivery.issue_id(run.rid).startswith("LK-")
     assert run.issue()["reporter"] == "Operations" and run.issue()["created_at"] == NOW - 3600 and run.issue()["id"] == delivery.issue_id(run.rid)
     assert delivery.issue_kind(run.issue()["kind"]) == "Requirement"
     assert run.issue()["id"] == delivery.issue_id(run.rid) != delivery.issue_id("r1020bbbb")
@@ -290,7 +290,7 @@ def test_the_shipped_history_is_the_data_the_page_reads():
     issues = {i["issue"]: i for i in h["items"] + h["wip"]}
     assert len(issues) == len(h["items"]) + len(h["wip"]) and all(i["reporter"] for i in issues.values())
     assert all(i["created"] <= i["ship"] for i in h["items"]) and len({i["pr"] for i in h["items"]}) == len(h["items"])
-    assert all(k.startswith("LO-") and int(k[3:]) < 3000 for k in issues) and all(i["pr"] < 5000 for i in h["items"])  # apart from the runs' own
+    assert all(k.startswith("LK-") and int(k[3:]) < 3000 for k in issues) and all(i["pr"] < 5000 for i in h["items"])  # apart from the runs' own
     linked = [(i, issues[d]) for i in h["items"] for d in i.get("defects", [])]
     assert linked and all(f["origin"] == i["issue"] and f["kind"] == "fix" and f["ship"] > i["ship"] for i, f in linked)
     assert not re.search(r"[\u4e00-\u9fff]", cto.HISTORY.read_text(encoding="utf-8"))  # the example company's data is English

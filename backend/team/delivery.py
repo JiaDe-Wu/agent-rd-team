@@ -33,7 +33,7 @@ FIELDS = {"kind": KINDS, "size": SIZES, "line": LINES}
 # who raises a business line's Issues when a run does not say (an imported run brings its own)
 REPORTERS = {"E-commerce": "Operations", "Mobile app": "UX group", "CRM": "Membership operations",
              "Supply chain": "Supply chain management", "Internal systems": "Administration"}
-ISSUE_PREFIX = "LO"  # Larkspur Outfitters, the example company
+ISSUE_PREFIX = "LK"  # Larkspur, the example company
 
 
 ISSUE_KINDS = ("Requirement", "Defect")
@@ -61,7 +61,7 @@ def canonical(d: dict[str, Any]) -> dict[str, Any]:
 
 
 def issue_id(rid: str) -> str:
-    """A run's Issue number, from its id (stable, and apart from the shipped history's LO-1001…LO-2999)."""
+    """A run's Issue number, from its id (stable, and apart from the shipped history's LK-1001…LK-2999)."""
     return f"{ISSUE_PREFIX}-{3000 + zlib.crc32(rid.encode()) % 7000}"
 
 

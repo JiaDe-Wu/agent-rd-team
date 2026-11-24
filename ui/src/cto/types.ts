@@ -39,7 +39,7 @@ export type CtoItem = {
   cyc: number // days from its Issue to release
   signer: string
   real: string | null // the run id when it is a run of this app (measured)
-  issue?: string // LO-2795
+  issue?: string // LK-2795
   reporter?: string // who raised it: Operations …
   created?: string // the Issue's day
   pr?: number | null // the PR that took it into main

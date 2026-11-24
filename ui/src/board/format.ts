@@ -120,31 +120,10 @@ export const isFinal = (lane: Pick<Lane, 'status' | 'writable'>) => lane.status 
 
 /** The delivery tag values (kind, size, business line) and the reporters are English words and are shown as they are. Runs of earlier
  * versions stored them in Chinese (written here as \u escapes); those are shown as the English words below. */
-const LEGACY_LABEL: Record<string, string> = {
-  '\u65b0\u5e94\u7528': 'New app',
-  '\u65b0\u529f\u80fd': 'New feature',
-  '\u4fee\u590d': 'Fix',
-  '\u5c0f': 'Small',
-  '\u4e2d': 'Medium',
-  '\u5927': 'Large',
-  '\u7535\u5546': 'E-commerce',
-  '\u79fb\u52a8\u5e94\u7528': 'Mobile app',
-  '\u5ba2\u6237\u5173\u7cfb\u7ba1\u7406': 'CRM',
-  '\u4f9b\u5e94\u94fe': 'Supply chain',
-  '\u5185\u90e8\u7cfb\u7edf': 'Internal systems',
-  '\u8fd0\u8425\u90e8': 'Operations',
-  '\u7528\u6237\u4f53\u9a8c\u7ec4': 'UX group',
-  '\u4f1a\u5458\u8fd0\u8425\u90e8': 'Membership operations',
-  '\u4f9b\u5e94\u94fe\u7ba1\u7406\u90e8': 'Supply chain management',
-  '\u884c\u653f\u90e8': 'Administration',
-  '\u4eba\u529b\u8d44\u6e90\u90e8': 'HR',
-  '\u5546\u54c1\u90e8': 'Merchandising',
-  '\u5e02\u573a\u90e8': 'Marketing',
-  '\u5ba2\u670d\u4e2d\u5fc3': 'Customer care',
-  '\u7ebf\u4e0a\u76d1\u63a7': 'Online monitoring',
-}
+const LEGACY_LABEL: Record<string, string> = JSON.parse(String.raw`{"\u65b0\u5e94\u7528": "New app", "\u65b0\u529f\u80fd": "New feature", "\u4fee\u590d": "Fix", "\u5c0f": "Small", "\u4e2d": "Medium", "\u5927": "Large", "\u7535\u5546": "E-commerce", "\u79fb\u52a8\u5e94\u7528": "Mobile app", "\u5ba2\u6237\u5173\u7cfb\u7ba1\u7406": "CRM", "\u4f9b\u5e94\u94fe": "Supply chain", "\u5185\u90e8\u7cfb\u7edf": "Internal systems", "\u8fd0\u8425\u90e8": "Operations", "\u7528\u6237\u4f53\u9a8c\u7ec4": "UX group", "\u4f1a\u5458\u8fd0\u8425\u90e8": "Membership operations", "\u4f9b\u5e94\u94fe\u7ba1\u7406\u90e8": "Supply chain management", "\u884c\u653f\u90e8": "Administration", "\u4eba\u529b\u8d44\u6e90\u90e8": "HR", "\u5546\u54c1\u90e8": "Merchandising", "\u5e02\u573a\u90e8": "Marketing", "\u5ba2\u670d\u4e2d\u5fc3": "Customer care", "\u7ebf\u4e0a\u76d1\u63a7": "Online monitoring"}`)
 /** Issue kinds the backend sends, as a person reads them (an earlier run's Chinese word is read as the English one). */
-export const issueKind = (k: string) => (k === 'Requirement' || k === '\u9700\u6c42' ? 'Requirement' : k === 'Defect' || k === '\u7f3a\u9677' ? 'Defect' : k)
+const LEGACY_ISSUE_KIND: Record<string, string> = JSON.parse(String.raw`{"\u9700\u6c42": "Requirement", "\u7f3a\u9677": "Defect"}`)
+export const issueKind = (k: string) => LEGACY_ISSUE_KIND[k] ?? k
 export const deliveryLabel = (v: string) => LEGACY_LABEL[v] ?? v
 
 /** The AI-DLC phases, in order: the team graph's column groups. */
@@ -327,7 +306,7 @@ export const AIDLC_AGENTS: ReadonlyArray<{ key: string; name: string }> = [
 ]
 
 /** Experts a company adds to the official 14 (a Crew member of its own), by their member name. */
-export const CUSTOM_EXPERTS: Readonly<Record<string, string>> = { 'larkspur-motion-agent': 'Brand motion', 'taoyuan-motion-agent': 'Brand motion' }
+export const CUSTOM_EXPERTS: Readonly<Record<string, string>> = { 'larkspur-motion-agent': 'Brand motion' }
 
 export const expertName = (key: string) => AIDLC_AGENTS.find((a) => a.key === key)?.name ?? CUSTOM_EXPERTS[key] ?? key
 

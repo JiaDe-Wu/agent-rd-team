@@ -48,7 +48,7 @@ describe('the CTO view numbers', () => {
     expect(csv.charCodeAt(0)).toBe(0xfeff)
     const lines = csv.slice(1).split('\r\n')
     expect(lines[0]).toBe('Delivery,Business line,Type,Size,Issue,Raised by,Issue created,Release date,Cycle (days),Average cycle before (same size, days),Signed by,PR,Post-release defects,Fixed Issue,Source,Run id')
-    expect(lines[1]).toBe('Black Friday appliance sale page,E-commerce,New feature,Medium,LO-4127,Operations,2026-10-19,2026-10-19,0.01,10.0,R&D lead,#5123,,,Measured,r1013f04d')
+    expect(lines[1]).toBe('Black Friday appliance sale page,E-commerce,New feature,Medium,LK-4127,Operations,2026-10-19,2026-10-19,0.01,10.0,R&D lead,#5123,,,Measured,r1013f04d')
     expect(lines[2]).toContain('"Delivery, with a comma"')
   })
 })

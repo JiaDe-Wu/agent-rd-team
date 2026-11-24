@@ -23,6 +23,9 @@ export function prState(run: RunDetail): string {
   return run.imported ? 'Signed off; the run was imported from another computer and the code repository is not here, so nothing was merged here' : 'Signed off; main got new commits during the run, so it could not be merged directly'
 }
 
+/** Older runs' event texts began with the Chinese word for "a person" (decoded at run time): it is dropped. */
+const OLD_PERSON = new RegExp(String.raw`^\u4eba`)
+
 export function SignOff({ run, onSign, onCto, onItem }: { run: RunDetail; onSign?: (by: string, note: string) => Promise<void>; onCto?: () => void; onItem?: () => void }) {
   const [by, setBy] = useState(() => (typeof localStorage !== 'undefined' && localStorage.getItem(SIGNER_KEY)) || '')
   const [note, setNote] = useState('')
@@ -40,7 +43,7 @@ export function SignOff({ run, onSign, onCto, onItem }: { run: RunDetail; onSign
   const approvedAt = (key: string) => Math.max(-1, ...run.events.filter((e) => e.kind === 'approved' && e.role === key).map((e) => e.seq))
 
   const decisions = [
-    ...sentBack.map((e) => ({ seq: e.seq, key: `b${e.seq}`, back: true, text: e.text.replace(/^\u4eba/, '') })),
+    ...sentBack.map((e) => ({ seq: e.seq, key: `b${e.seq}`, back: true, text: e.text.replace(OLD_PERSON, '') })),
     ...gates.map((l) => ({ seq: approvedAt(l.key), key: l.key, back: false, text: `Approved ${l.gate_label}: ${run.gate_notes[l.key]}` })),
   ].sort((a, b) => (a.seq < 0 ? Infinity : a.seq) - (b.seq < 0 ? Infinity : b.seq))
   const review = run.roles.find((l) => l.writable.length === 0)

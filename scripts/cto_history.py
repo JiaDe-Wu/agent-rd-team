@@ -26,7 +26,7 @@ SEED = 20261016
 TODAY = date(2026, 10, 16)
 AGENT_START = TODAY - timedelta(days=83)       # the first day of the last 12 weeks
 BASE_START = AGENT_START - timedelta(days=84)  # the first day of the 12 weeks before
-ISSUE_PREFIX = "LO"                            # Larkspur Outfitters
+ISSUE_PREFIX = "LK"                            # Larkspur
 rng = random.Random(SEED)
 
 # Deliveries per business line per week (Poisson mean). The baseline is calibrated to a 12-person group; the last 12 weeks

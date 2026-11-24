@@ -16,7 +16,7 @@
       },
       "imported": false,
       "name": "Event signup site",
-      "issue": "LO-4127"
+      "issue": "LK-4127"
     }
   ],
   "run": {
@@ -1500,7 +1500,7 @@
       "confirmed": false
     },
     "issue": {
-      "id": "LO-4127",
+      "id": "LK-4127",
       "kind": "Requirement",
       "reporter": "Operations",
       "created_at": 1791230000.0
