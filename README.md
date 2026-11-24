@@ -78,27 +78,32 @@ kirocrew app install https://github.com/JiaDe-Wu/agent-rd-team    # or a clone: 
 ```
 
 The app stays off after install. `kirocrew app enable agent-rd-team` does not turn it on: the gateway refuses until two things are answered in the
-dashboard (open the app's page at `/apps/detail/agent-rd-team` and enable it there):
+dashboard. Open the app's page (`/apps/detail/agent-rd-team`) and enable it there:
 
-1. **Trust.** The app has executable parts (a Python backend, and its tasks run shell commands in git worktrees), so a Kiro Crew with
-   `agent.apps_allow_third_party` off refuses it with `app_execution_denied`. The first refusal names the setting `agent.apps_trusted`, which trusts this
-   one app only: `agent.apps_trusted: ["agent-rd-team"]`. Setting `agent.apps_allow_third_party` to `true` trusts every third-party app.
+1. **Trust.** The app has executable parts (a Python backend, and its tasks run shell commands in git worktrees), so Kiro Crew asks before it runs.
+   Kiro Crew 0.14 and later show a dialog that names the repository and ties your answer to it: you trust this repository, not the name. (A Kiro Crew
+   with `agent.apps_allow_third_party` off refuses an untrusted app with `app_execution_denied`.)
 2. **Chat control.** The sessions the app opens run file edits and shell commands without asking each time, so the owner has to allow it
    (`sessionApproval`, see below).
 
-<!-- P4-CONFIRM: the one-click setup below is written for the setup wizard P4 delivers; check each sentence against it -->
-Open the app from the sidebar. The first time, the page offers **Set up the example team**: it creates the `larkspur` workspace, adds the 14 members,
-attaches the knowledge base from `knowledge/larkspur` and fills in a first requirement. Press **Start** and the team starts working. Where that button is
-missing (an older build), run `python3 scripts/install_members.py`, attach `knowledge/larkspur` under Knowledge base > Sources in the Crew sidebar,
-and write a one-sentence requirement yourself.
+Then open the app from the sidebar. The first time, the page shows **Set up the example team**. One press does what Kiro Crew only lets its owner do:
+
+- creates the `larkspur` workspace and the 14 team members (the page runs this as you, the owner; the app's own backend is not allowed to);
+- writes the member templates, copies `knowledge/larkspur` to `~/workplace/knowledge/larkspur/` and attaches it as the knowledge source
+  **Larkspur Outfitters**, so the roles can look up the company rules and data;
+- fills in a first requirement. Press **Start**.
+
+Anything already there is kept, and the panel lists each step as done or missing. **Load a sample delivery** puts a finished run into the app, so
+Replay and the CTO view have something to show before you spend any model credits. If you would rather do the setup in a terminal,
+`python3 scripts/setup_plan.py` prints the steps and the commands.
 
 ### Requirements
 
 - Kiro Crew 0.13.0 or newer (the first release with the sandboxed spawn for app backends), on macOS or Linux. Windows is not supported.
 - `git`, and Node 22 or newer: the company checks run with `node --test`.
 - The Kiro Crew members the team files name (for example `aidlc-product-agent`) on the Agents page. A role whose
-  member is missing waits, unless the team file marks it `optional`. The setup (below) adds the 14 members; run by hand,
-  `python3 scripts/install_members.py` writes the member templates from `agents/` (as `<member>-template`) into
+  member is missing waits, unless the team file marks it `optional`. The setup (above) adds the 14 members; run by hand,
+  `python3 scripts/install_members.py` (older) or `python3 scripts/setup_plan.py` writes the member templates from `agents/` (as `<member>-template`) into
   `~/.kiro/agents` and adds them to a running Kiro Crew, using its `kirocrew` command. It never overwrites a template or
   member that already exists, and `--dry-run` shows what it would do.
 
