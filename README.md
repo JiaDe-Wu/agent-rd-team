@@ -50,6 +50,25 @@ project is a small Node project with a planted bug: `orderTotal` gave no discoun
 
 This is one run on a small fix, not an average and not evidence for a large requirement. The numbers on the left come from the run's record; the ones on the right are the CTO view's assumptions.
 
+### A run against company rules
+
+A second real run, on 2026-11-24 (run `r1124e063`, team `team-promo`, the example the page offers, model `auto` = the gateway's default). It is the
+Black Friday example for Larkspur Outfitters: *pick 20 items and discount them with spend-and-save, a campaign page with a countdown, reference prices
+and final prices, and Operations configures it in the back office and launches it in one click.*
+
+| | Measured: this run |
+| --- | --- |
+| Time | 333 s (5.5 minutes) wall time, from start to deployed |
+| Cost | 9.73 Kiro Crew credits for 7 role sessions (product 1.04, backend 3.05, two frontends 1.37 and 1.27, tester 1.26, compliance 1.33, deploy 0.41) |
+| Rules the roles were told to look up | Frontend Engineering, Brand, Pricing and Promotion Compliance, Margin and Pricing Rules, Price-Adjustment Guarantee Rules, plus the official store's products and orders and the campaign plan |
+| Company checks | 38 of 38 pass, run by the app itself. Each names the rule it comes from, for example **PRC-1** the reference price is the lowest price paid in the 7 days before the sale, not what Operations typed; **MGN-2** a plan with an item below the margin floor cannot launch; **PP-2** payouts over $20,000 need CFO approval and the sale cannot launch without it; **FE-1** no inline scripts |
+| People | Two gates, *Requirements* and *Release*. Here this script approved both (the run came from `scripts/e2e_install.sh --promo` on a gateway made for the test); a real run waits for a person |
+| Result | Deployed on 127.0.0.1, signed off, merged into the run repository's `main` |
+
+What this run does not show: no check failed the first time, so nothing was sent back to a role in this run (the send-back path is covered by the tests, not by this
+run). The motion designer sat it out because the example team has no such member. It is one run of one example, on one model, and it is not an average.
+You can open this run without spending anything: **Load a sample delivery** in the app's setup panel imports it, and its Replay plays it back.
+
 ## Enterprise rules, in English
 
 The example company is **Larkspur Outfitters**, a fictitious online outdoor-gear retailer. Its rules and data are plain files, and the agents look the

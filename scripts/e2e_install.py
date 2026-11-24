@@ -72,6 +72,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--keep", action="store_true", help="keep the fresh HOME afterwards")
     ap.add_argument("--with-model", action="store_true", help="also run a delivery on a real model (spends credits)")
     ap.add_argument("--copy-kiro-login", action="store_true", help="copy ~/.local/share/kiro-cli into the fresh HOME (for --with-model)")
+    ap.add_argument("--promo", action="store_true", help="also run the example Black Friday delivery on a real model, approving its gates as the owner (spends many credits; implies --with-model's setup)")
     ap.add_argument("--model", default="", help="the model for --with-model (default: the first the gateway offers)")
     a = ap.parse_args(argv)
 
@@ -242,6 +243,8 @@ def run(a: argparse.Namespace, env: dict, kirocrew: list[str], home: Path, crew:
 
     if a.with_model:
         with_model(a, owner, base)
+    if a.promo:
+        with_promo(a, owner)
 
 
 BUGGY_PROJECT = {
@@ -287,6 +290,61 @@ def with_model(a: argparse.Namespace, owner, base: str) -> None:
         check(run.get("status") == "done", "it is delivered", f"status {run.get('status')}")
         tests = run.get("tests") or {}
         check((tests.get("failed") or 0) == 0 and (tests.get("total") or 0) > 0, "the company checks pass", json.dumps(tests)[:160])
+
+
+def with_promo(a: argparse.Namespace, owner) -> None:
+    """The example the page offers: the Black Friday sale for Larkspur Outfitters, a person at the gates. Here the owner's
+    approvals are given by this script, on a gateway made for the test, with a note that says so."""
+    print("9  the example delivery (Black Friday sale), on a real model, with its gates approved by this script")
+    code, setup = owner.call("GET", f"/api/apps/{APP}/setup")
+    example = (setup or {}).get("example") or {}
+    check(bool(example.get("requirement")) and bool(example.get("team")), "the page offers an example requirement and team", str(setup)[:160])
+    code, body = owner.call("GET", f"/api/apps/{APP}/models")
+    models = [m["id"] for m in body.get("models", [])]
+    model = a.model or (models[0] if models else "")
+    code, body = owner.call("POST", f"/api/apps/{APP}/runs", {"requirement": example.get("requirement", ""), "team": example.get("team", ""),
+                                                           **({"model": model} if model else {})})
+    rid = body.get("run", "")
+    if not check(code == 200 and bool(rid), "the example delivery starts", f"HTTP {code} {body}"):
+        return
+    print(f"     run {rid}, model {model or 'default'}", flush=True)
+    seen: dict[str, str] = {}
+    approved: set[str] = set()
+    deadline = time.time() + 55 * 60
+
+    def board() -> dict:
+        return owner.call("GET", f"/api/apps/{APP}/board?run={rid}")[1].get("run", {})
+    run: dict = {}
+    while time.time() < deadline:
+        run = board()
+        line = ", ".join(f"{r.get('key')}:{r.get('status')}{'/' + str(r.get('gate')) if r.get('gate') else ''}" for r in run.get("roles", []))
+        if line != seen.get("line"):
+            seen["line"] = line
+            print("     " + line, flush=True)
+        if run.get("status") in ("done", "failed", "stopped"):
+            break
+        for r in run.get("roles", []):
+            if r.get("gate") == "pending" and r.get("key") not in approved:
+                q = r.get("questions") or []
+                answers = {x.get("id"): {"choice": (x.get("options") or [{}])[0].get("id", "A") if isinstance((x.get("options") or [{}])[0], dict) else "A", "text": ""}
+                           for x in q if isinstance(x, dict) and x.get("id")}
+                code, body = owner.call("POST", f"/api/apps/{APP}/runs/{rid}/gate", {
+                    "role": r["key"], "decision": "approve", "note": "Approved by the end-to-end test script (a test gateway, not a person).",
+                    **({"answers": answers} if answers else {})})
+                print(f"     gate {r['key']}: approve -> HTTP {code} {str(body)[:140] if code != 200 else ''}", flush=True)
+                if code == 200:
+                    approved.add(r["key"])
+        time.sleep(10)
+    check(run.get("status") == "done", "the example delivery ends delivered", f"status {run.get('status')}")
+    tests = run.get("tests") or {}
+    check((tests.get("failed") or 0) == 0 and (tests.get("total") or 0) > 0, "the company checks pass", json.dumps(tests)[:200])
+    check(len(approved) >= 1, "a person (here: the script) decided at the gates", f"approved {sorted(approved)}")
+    print(f"     credits {run.get('credits')}, tests {tests.get('passed')}/{tests.get('total')}, bounces {run.get('bounces')}, risks {run.get('risks')}", flush=True)
+    if run.get("status") == "done":
+        code, body = owner.call("POST", f"/api/apps/{APP}/runs/{rid}/signoff", {"by": "E2E test", "note": "Signed off by the end-to-end test script."})
+        check(code == 200, "the delivery is signed off", f"HTTP {code} {str(body)[:140]}")
+    data = Path(os.environ.get("KIROCREW_HOME", "")) / "apps" / APP / "data" / "runs" / rid
+    print(f"     run folder: {data}", flush=True)
 
 
 if __name__ == "__main__":
