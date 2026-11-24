@@ -59,7 +59,7 @@ export function TopBar({ board, run, projection, follow, startOpen, onSelect, on
   return (
     <header className="kt-top">
       <div className="kt-title">
-        {!inApp && <h1>AI-DLC multi-agent team</h1>}
+        {!inApp && <h1>Agent R&amp;D Team</h1>}
         {run && meta && (
           <>
             {onItem ? (

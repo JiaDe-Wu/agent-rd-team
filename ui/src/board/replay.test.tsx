@@ -50,12 +50,12 @@ describe('Replay: a finished run played again from its record', () => {
     expect(lane(r, 'frontend2').status).toBe('running')
   })
 
-  test('the person sends it back at the security gate: 前端开发 #1 does a second round, the reviewer waits', () => {
+  test('the person sends it back at the security gate: Frontend development #1 does a second round, the reviewer waits', () => {
     const before = at(260)
     expect(before.status).toBe('gating')
     expect(lane(before, 'security')).toMatchObject({ status: 'done', gate: 'pending' })
     const r = at(280)
-    expect(lane(r, 'frontend1')).toMatchObject({ status: 'fixing', attempt: 2, doing: '按评审意见改' })
+    expect(lane(r, 'frontend1')).toMatchObject({ status: 'fixing', attempt: 2, doing: 'Changing as the review says' })
     expect(lane(r, 'frontend1').agent?.elapsed_s).toBeGreaterThan(0)
     expect(lane(r, 'security')).toMatchObject({ status: 'waiting', gate: null })
     const again = at(320)
@@ -110,7 +110,7 @@ describe('Replay: a finished run played again from its record', () => {
       [`GET ${API}/runs/${run.id}/events`]: () => ({ run: run.id, events }),
     })
     render(<TeamPage pollMs={60_000} entry={{ run: run.id, replay: 30 }} onCto={() => {}} />)
-    const bar = await screen.findByRole('group', { name: 'Replay' })
+    const bar = await screen.findByRole('group', { name: 'Replay' }, { timeout: 5000 })  // the first render of a file is slow on a small machine
     expect(apiCalls.some((c) => c.path === `${API}/board?run=${run.id}`)).toBe(true)
     await waitFor(() => expect(within(bar).getByRole('radio', { name: '30×' }).getAttribute('aria-checked')).toBe('true'))
   })
@@ -129,7 +129,7 @@ describe('Replay: a finished run played again from its record', () => {
     const bar = await screen.findByRole('group', { name: 'Replay' })
     await waitFor(() => expect(within(bar).getByRole('button', { name: 'Play' })).toBeInTheDocument())  // paused
     expect(bar).toHaveTextContent('2:00 /')
-    expect(screen.getByText('安全审查', { selector: '.kt-focuschip, .kt-focuschip *' })).toBeInTheDocument()
+    expect(screen.getByText('Security review', { selector: '.kt-focuschip, .kt-focuschip *' })).toBeInTheDocument()
     unmount()
     render(<TeamPage pollMs={60_000} entry={{ run: run.id, phase: 'construction' }} onItem={onItem} />)
     const bar2 = await screen.findByRole('group', { name: 'Replay' })
@@ -158,7 +158,7 @@ describe('Replay: a finished run played again from its record', () => {
     unmount()
     render(<TeamPage pollMs={60_000} entry={{ run: run.id, role: 'security', at: 120, from: 'item' }} onItem={onItem} />)
     const bar = await screen.findByTestId('kt-focusbar')
-    await waitFor(() => expect(screen.getByTestId('kt-where')).toHaveTextContent('安全 gate'))
+    await waitFor(() => expect(screen.getByTestId('kt-where')).toHaveTextContent('Security gate'))
     fireEvent.click(within(bar).getByRole('button', { name: 'Value stream of this delivery ↗' }))
     expect(onItem).toHaveBeenCalledWith({ run: run.id, at: 120 })
   })
@@ -197,7 +197,7 @@ describe('Replay: a finished run played again from its record', () => {
     fireEvent.change(within(bar).getByRole('slider', { name: 'Replay progress' }), { target: { value: String(Math.round(sp.start + 262)) } })
     expect(await within(bar).findByText(/^4:22 \/ 7:38$/)).toBeTruthy()
     const gate = await screen.findByTestId('kt-gate')
-    expect(within(gate).getByText('✓ Approve 安全')).toBeTruthy()
+    expect(within(gate).getByText('✓ Approve Security')).toBeTruthy()
     expect(within(gate).queryByRole('button')).toBeNull() // a replay's gate is a picture, not a decision
     expect(screen.queryByTestId('kt-sign')).toBeNull()
 

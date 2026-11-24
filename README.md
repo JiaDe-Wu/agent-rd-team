@@ -1,49 +1,106 @@
-# Agent R&D Team: the Kiro Crew app
+# Agent R&D Team: an agent R&D team for Kiro Crew
 
-An agent R&D team built on [AI-DLC](https://github.com/awslabs/aidlc-workflows) that works from your own
-standards and keeps what its people decide. It turns a one-sentence requirement into a run of an agent team
-defined by a team file. Every role is a Kiro Crew chat session running as a Kiro Crew member, working in its own
-git worktree and branch. The app dispatches the roles by their dependencies, merges their work, runs your
-company checks itself, sends failures back to the role that owns them, stops at human gates, deploys on the
-local machine, and draws all of it on a live board. A finished run can be replayed and signed off.
+Agent R&D Team is a Kiro Crew app that takes a one-sentence requirement through a team of AI members the way a software
+team works: roles working in parallel, your company's checks run by the app itself, people approving at the gates, and a
+deployment on your own machine. It is for engineering leads who want to see how much of a delivery can run without a person,
+and where a person still has to decide. You get the finished delivery in a git repository, a record of who decided what, and a
+page that shows the team working.
 
-**What it uses from you.** Company standards (`standards.json` and the checks under `tests/enterprise/`),
-business rules in the team's knowledge source, and the team file itself. All are plain files you replace.
+It is built on [AI-DLC](https://github.com/awslabs/aidlc-workflows) and works from your own standards: company rules,
+company checks and the team itself are plain files you replace. Every role is a Kiro Crew chat session running as a Kiro Crew
+member, in its own git worktree and branch. The app dispatches the roles by their dependencies, merges their work, runs
+the company checks itself, sends failures back to the role that owns them, stops at human gates, deploys locally, and draws all
+of it on a live board. A finished run can be replayed and signed off.
 
-**What it keeps.** Decisions made at a gate are written to `docs/aidlc/decisions.md` on the run branch. At the
-last gate you tick which lessons to keep; later runs read them. See [Roadmap](#roadmap) for what is not done yet.
+The page has three views that share one app bar: the **CTO view** (all deliveries), **Delivery detail** (one delivery) and the
+**Team board** (how the team delivered it).
 
-The page has three views that share one app bar: the **CTO view** (CTO 视图, all deliveries), **delivery
-detail** (交付详情, one delivery) and the **team board** (团队看板, how the team delivered it).
+## See it in 30 seconds
+
+You do not need Kiro Crew or any model credits to look at the app. The page is built into one HTML file with sample data:
+
+```bash
+git clone https://github.com/JiaDe-Wu/agent-rd-team && cd agent-rd-team
+open docs/preview.html            # macOS; on Linux: xdg-open docs/preview.html
+```
+
+(Or save [docs/preview.html](docs/preview.html) from GitHub and open it.) It opens on the **CTO view** of a simulated company.
+Two more addresses show the rest, add them after the file name:
+
+| Address | What it shows |
+| --- | --- |
+| `docs/preview.html?view=board&fixture=gate` | The team board of a recorded run, stopped at a human gate; the **Replay** bar plays it |
+| `docs/preview.html?view=board&fixture=finished` | The board of a finished run, with the test wall and the sign-off sheet |
+
+Everything in the preview is sample data, so the CTO view's numbers are simulated: read [Is the CTO view real?](#is-the-cto-view-real)
+before you quote one. To rebuild the file after changing the page: `cd ui && npm ci && npm run preview:build && cp preview-dist/index.html ../docs/preview.html`.
+
+## What a delivery looks like
+
+One real run, measured on 2026-11-23 (run `r1123cad1`, team `team-bugfix`, model `claude-haiku-5.5`, picked from the app's own model list). The
+project is a small Node project with a planted bug: `orderTotal` gave no discount at exactly 10 items, and the test `tests/price.test.js` AC-2 failed.
+
+| | Measured: this run | Estimate: not measured |
+| --- | --- | --- |
+| Time | 85.7 s wall time | A person alone: about 1 person-day for a small delivery; with the agent team about 0.25 person-day of their time (assumptions, [below](#is-the-cto-view-real)) |
+| Cost | 0.226 Kiro Crew credits | $282 per person-day (assumption), so about $282 alone against about $71 of people's time |
+| What happened | The test engineer wrote a failing regression test; the fixer changed `quantity > 10` to `quantity >= 10`; both branches merged into the run branch | |
+| Checks | The app's own test step: 3 of 3 pass. Checked by hand with `node --test`: the unfixed project fails 1 of 2, the fixed one passes 3 of 3 | |
+| People | No gate in this team; no write-scope violation | |
+
+This is one run on a small fix, not an average and not evidence for a large requirement. The numbers on the left come from the run's record; the ones on the right are the CTO view's assumptions.
+
+## Enterprise rules, in English
+
+The example company is **Larkspur Outfitters**, a fictitious online outdoor-gear retailer. Its rules and data are plain files, and the agents look the
+originals up in a Kiro Crew knowledge source instead of writing from memory.
+
+| What | Where |
+| --- | --- |
+| Rule documents, as a person at the company would write them | `knowledge/larkspur/*.md` |
+| The data the rules refer to (products, orders, campaign, staff, prizes, weak passwords) | `knowledge/larkspur/data/` |
+| Which rule applies to which requirement (by keyword), and who owns it | `packs/larkspur/standards.json` |
+| The company checks the app runs itself on every run | `packs/larkspur-promo/tests/enterprise/` |
+| The team that uses them | `team/team-promo.json` (`standards`, `standards_always`, `knowledge`, `spec_pack`, `test_command`) |
+| The project the team changes | `starters/mall/` |
+
+`knowledge/README.md` lists the documents and what each one is for. To use your own company: write your rule documents, list them in a `standards.json`
+with their keywords, write the checks as `node:test` files under a pack's `tests/enterprise/`, and point a team file at them with the keys above.
+A requirement that mentions a keyword gets the matching rules named in every role's task, and a failed check goes back to the role that owns the file.
 
 ## Install
 
-Kiro Crew installs it straight from this repository (it is not in the App Store catalog yet):
+From the App Store: open **Discover**, pick **Agent R&D Team** and press **Install**. (It is not in the catalog yet: the listing request is
+[kirodotdev/KiroCrew#41059](https://github.com/kirodotdev/KiroCrew/issues/41059).) Until then, Kiro Crew installs it straight from this repository:
 
 ```bash
 kirocrew app install https://github.com/JiaDe-Wu/agent-rd-team    # or a clone: kirocrew app install ./agent-rd-team
 ```
 
-The app stays off after install. `kirocrew app enable agent-rd-team` does not turn it on: the gateway refuses
-until the app is trusted, and it also asks you to allow the app to control your chats (see below). Both are
-answered in the dashboard: open the app's page at `/apps/detail/agent-rd-team` and enable it there. The first
-refusal names the setting `agent.apps_trusted`, which trusts this one app only.
+The app stays off after install. `kirocrew app enable agent-rd-team` does not turn it on: the gateway refuses until two things are answered in the
+dashboard (open the app's page at `/apps/detail/agent-rd-team` and enable it there):
 
-The app has executable parts (a Python backend, and its tasks run shell commands in git worktrees), so a Kiro Crew
-with `agent.apps_allow_third_party` off refuses it with `app_execution_denied`. Trust this app alone with
-`agent.apps_trusted: ["agent-rd-team"]`, or set `agent.apps_allow_third_party` to `true` to allow every third-party app.
+1. **Trust.** The app has executable parts (a Python backend, and its tasks run shell commands in git worktrees), so a Kiro Crew with
+   `agent.apps_allow_third_party` off refuses it with `app_execution_denied`. The first refusal names the setting `agent.apps_trusted`, which trusts this
+   one app only: `agent.apps_trusted: ["agent-rd-team"]`. Setting `agent.apps_allow_third_party` to `true` trusts every third-party app.
+2. **Chat control.** The sessions the app opens run file edits and shell commands without asking each time, so the owner has to allow it
+   (`sessionApproval`, see below).
 
-Open the app from the sidebar, write a one-sentence requirement and hand it to the team.
+<!-- P4-CONFIRM: the one-click setup below is written for the setup wizard P4 delivers; check each sentence against it -->
+Open the app from the sidebar. The first time, the page offers **Set up the example team**: it creates the `larkspur` workspace, adds the 14 members,
+attaches the knowledge base from `knowledge/larkspur` and fills in a first requirement. Press **Start** and the team starts working. Where that button is
+missing (an older build), run `python3 scripts/install_members.py`, attach `knowledge/larkspur` under Knowledge base > Sources in the Crew sidebar,
+and write a one-sentence requirement yourself.
 
 ### Requirements
 
 - Kiro Crew 0.13.0 or newer (the first release with the sandboxed spawn for app backends), on macOS or Linux. Windows is not supported.
 - `git`, and Node 22 or newer: the company checks run with `node --test`.
 - The Kiro Crew members the team files name (for example `aidlc-product-agent`) on the Agents page. A role whose
-  member is missing waits, unless the team file marks it `optional`. `python3 scripts/install_members.py` writes the
-  member templates from `agents/` (as `<member>-template`) into `~/.kiro/agents` and adds the 14 members to a running
-  Kiro Crew, using its `kirocrew` command; it never overwrites a template or member that already exists, and
-  `--dry-run` shows what it would do.
+  member is missing waits, unless the team file marks it `optional`. The setup (below) adds the 14 members; run by hand,
+  `python3 scripts/install_members.py` writes the member templates from `agents/` (as `<member>-template`) into
+  `~/.kiro/agents` and adds them to a running Kiro Crew, using its `kirocrew` command. It never overwrites a template or
+  member that already exists, and `--dry-run` shows what it would do.
 
 ### What the app is allowed to do, and why
 
@@ -80,9 +137,8 @@ that start later read that file once and name its cards in every role's task. De
 
 ### Language
 
-The app's screens, messages and team labels are in English. The agents' prompts (the `brief` fields and the task
-templates) and the example company data (`packs/`, `demo/`) are still in Chinese, so the documents a run produces
-are in Chinese unless you write your own team file. The store listing also carries a Chinese name and description.
+The app's screens, messages, the agents' prompts, and the example company's rules and data are English. A team file can ask for another language in its
+`brief` texts. Older runs that stored their delivery tag in Chinese are still read: the words are turned into the English ones.
 
 ### Where it comes from
 
@@ -90,6 +146,22 @@ This app began as the agent-team sample in
 [aws-samples/sample-ai-for-software-engineering-on-aws](https://github.com/aws-samples/sample-ai-for-software-engineering-on-aws)
 and is maintained here. It follows [AI-DLC Workflows](https://github.com/awslabs/aidlc-workflows). Licensed under
 Apache-2.0.
+
+## Is the CTO view real?
+
+Not as shipped. The company is fictitious and its history is generated, so the CTO view has something to show the first time it opens. Read it as
+a mock-up of what the page would say about your team, not as a result.
+
+- **Simulated:** the 445 deliveries before AI-DLC and the 1,359 after it, their cycle times, their post-release defects and the weekly chart. They are generated
+  by `scripts/cto_history.py` with a fixed random seed. Every run of the script writes the same file.
+- **Measured:** a delivery marked **Measured** is a real run of this app that a person signed off. Its run time, credits, checks and decisions are real.
+  The page puts it next to an estimate of the same work done by people alone, and says which is which.
+- **Assumptions behind the money and effort figures** (also on the page, under *Assumptions*): 60 people (5 business lines × 12); the work of a
+  small / medium / large delivery is 1 / 5 / 30 person-days for people alone and 0.25 / 1 / 7 person-days of their time with the agent team;
+  one person-day costs $282; the agent seat costs $40 per person per month for 3 months. Change them in `cto/history.json`.
+- **The number you can quote** is one that is marked Measured, with its basis. The page's headline gives no conclusion for that reason.
+
+The data format, what each field means and how to replace the simulated history with yours is in [docs/cto-view-data.md](docs/cto-view-data.md).
 
 ## How a run goes
 
@@ -103,7 +175,7 @@ Apache-2.0.
 | 6 Task | The task template filled in with the role, its branch, the paths it may write, upstream outputs, matching standards, the role's `brief`, the approved work split, and the person's notes and decisions at the gates. A fix round continues the role's own session | `team._work_task`, `team._launch` |
 | 7 Merge | Uncommitted changes inside the write scope are committed for the role; changes outside it are recorded as violations; the branch is merged into the run branch, and a conflict goes back to the role. A human gate then stops the run | `team._integrate`, `gitwork.merge` |
 | 8 Checks | The app runs `node --test` file by file on the run branch and assigns failures to roles by `test_owners` | `checks.run_tests`, `team._test_and_bounce` |
-| 9 Review | The read-only reviewer answers `DONE: 可以交付` (deliverable) or `DONE: 要改：…` (changes needed) with the roles to send back to | `team._review_done` |
+| 9 Review | The read-only reviewer answers `DONE: ready to deliver` or `DONE: changes needed: …` with the roles to send back to | `team._review_done` |
 | 10 Gates | Approve: later roles start with the note and the per-question decisions, which are also written to `docs/aidlc/decisions.md` on the run branch. Discuss: the role answers in its own session and may revise its documents while the gate stays open. Send back: the role reworks with the note; the person may note the risk the send-back keeps from going live (`{what, amount}` in yuan, on the run's `risks`) | `team.TeamRun.gate` |
 | 11 Deploy | The deploy role writes `deploy/local.json` (port, health path); the app starts the site with `HOST=127.0.0.1`, waits for the health check, and stops a site that listens beyond loopback (checked with `lsof`) | `service._deploy`, `site.Site` |
 | 12 End | `done` when every role merged, `failed` when a role failed. Only a delivered run can be signed off; signing merges the run branch into the run repository's `main` | `team._settle`, `service.signoff` |
@@ -113,15 +185,17 @@ Apache-2.0.
 | Path | What it is |
 | --- | --- |
 | `app.json` | Kiro Crew app manifest |
-| `backend/` | The orchestrator: `team/team.py` (one run's state machine and the tasks), `team/service.py` (all runs, the tick, gates, sign-off, deploy), `team/routing.py`, `team/standards.py`, `team/checks.py`, `team/gitwork.py`, `team/sessions.py`, `team/board.py`, `team/cto.py` |
+| `backend/` | The orchestrator: `team/team.py` (one run's state machine and the tasks), `team/service.py` (all runs, the tick, gates, sign-off, deploy), `team/routing.py`, `team/standards.py`, `team/checks.py`, `team/gitwork.py`, `team/sandbox.py` (the one place that starts a command), `team/sessions.py`, `team/board.py`, `team/cto.py`, `team/delivery.py` |
 | `ui/src/` | The page: `main.tsx`, `AppBar.tsx`, `board/` (team board), `cto/` (CTO view and delivery detail) |
-| `ui/preview/` | A preview page on test data, without Kiro Crew |
+| `ui/preview/` | The preview page on sample data, without Kiro Crew; built into `docs/preview.html` |
 | `team/` | Team files `team*.json`, the roster, task templates |
 | `starters/` | Project templates of the example: `mall` (store promotion), `web` (internal web pages) |
-| `packs/` | Company checks in `tests/enterprise/`, reference implementations in `_reference/` for the checks' own tests, and the standards index `taoyuan/standards.json` |
-| `cto/history.json` | Synthetic history for the CTO view, made by `scripts/cto_history.py` |
+| `knowledge/larkspur/` | The example company's rule documents and data, in English |
+| `packs/` | Company checks in `tests/enterprise/`, reference implementations in `_reference/` for the checks' own tests, and the standards index `larkspur/standards.json` |
+| `cto/history.json` | Simulated history for the CTO view, made by `scripts/cto_history.py`; `cto/offline.html` is the offline page |
+| `docs/` | `cto-view-data.md` (the CTO view's data), `preview.html` (the preview) |
 | `demo/target-template/` | The project the built-in team (`team/team.json`) starts from |
-| `scripts/dev-install.sh` | Installs or updates the app in the local Kiro Crew |
+| `scripts/` | `install_members.py`, `dev-install.sh` (installs or updates the app in the local Kiro Crew), `cto_history.py` |
 | `tests/` | Backend tests with a fake session manager and real git and node |
 
 ## Team file keys
@@ -154,7 +228,7 @@ Role level:
 | `gate_preset`, `gate_revise_preset`, `gate_revise_risk` | Notes the gate dialog can fill in for approving and for sending back, and the risk filled in with the send-back |
 | `questions` | File on the run branch with the questions the person decides at the gate: `{"questions": [{id, q, options: [{key, text}], recommend, why}]}`; `"multi": true` makes it a tick-any question (up to 10 options, no recommendation) |
 | `remember` | `true` on the last gated role: what the person ticked is written to the lessons file when its gate is approved |
-| `name_zh` | The role's Chinese title, so a reviewer's Chinese send-back lines still name it |
+| `name_zh` | An alternative title for the role, so a send-back line in a reviewer's report can still name it (older teams wrote a Chinese title here) |
 | `delivery` | File on the run branch with the proposed delivery labels |
 | `optional` | Sits the run out when its member does not exist or the approved work split leaves it out |
 | `deploy` `{mode: local, port, health}` | Deploy on this machine |

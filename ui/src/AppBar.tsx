@@ -27,13 +27,13 @@ export const APP_CSS = `
 const TABS: [ViewKind, string, string][] = [
   ['cto', 'CTO view', 'All deliveries: results and requirement flow'],
   ['item', 'Delivery detail', 'One delivery: cycle time, where the time went, cost, quality, value stream, human decisions'],
-  ['board', 'Team board', 'How the multi-agent team delivers: roles, gates, checks, sign-off'],
+  ['board', 'Team board', 'How the agent team delivers: roles, gates, checks, sign-off'],
 ]
 
 export function AppBar({ view, projection, onView, onProjection, item }: { view: ViewKind; projection: boolean; onView: (v: ViewKind) => void; onProjection: () => void; item?: string }) {
   return (
     <header className="kt-appbar" data-testid="kt-appbar">
-      <h1>AI-DLC multi-agent team</h1>
+      <h1>Agent R&amp;D Team</h1>
       <div className="kt-tabs" role="tablist" aria-label="Views">
         {TABS.map(([k, name, hint]) => (
           <button type="button" role="tab" key={k} aria-selected={view === k} title={k === 'item' && item ? `${hint} (${item})` : hint} onClick={() => view !== k && onView(k)}>
