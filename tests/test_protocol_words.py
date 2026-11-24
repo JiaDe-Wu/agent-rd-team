@@ -27,14 +27,14 @@ def test_the_marker_of_a_persons_send_back_is_read_in_both_languages():
     assert team_mod.human_mark_of("The reviewer's own words") == "" and team_mod.human_mark_of("") == ""
 
 
-def test_the_delivery_tag_is_written_in_english_and_stored_as_the_enum_the_ui_knows():
+def test_the_delivery_tag_is_written_and_stored_in_english_and_the_older_chinese_words_are_still_read():
     base = delivery.defaults({}, "Add a thing")
     assert (base["kind"], base["size"], base["line"]) == ("New app", "Medium", "Internal systems")
     got = delivery.clean({"name": "Promo page", "kind": "New Feature", "size": "LARGE", "line": "e-commerce", "why": "a reason"}, base)
-    assert (got["kind"], got["size"], got["line"]) == ("新功能", "大", "电商")  # the stored enum is unchanged (the UI and the CTO data match it)
-    assert delivery.label(got) == "new feature · large · e-commerce (Promo page)"
-    assert delivery.clean({"kind": "fix", "line": "CRM", "size": "small"}, base)["kind"] == "修复"
-    assert delivery.clean({"kind": "新功能", "line": "供应链"}, base)["line"] == "供应链"  # the older files' own words still count
+    assert (got["kind"], got["size"], got["line"]) == ("New feature", "Large", "E-commerce")  # stored as the English words the UI and the CTO data use
+    assert delivery.label(got) == "New feature · Large · E-commerce (Promo page)"
+    assert delivery.clean({"kind": "fix", "line": "CRM", "size": "small"}, base)["kind"] == "Fix"
+    assert delivery.clean({"kind": "新功能", "line": "供应链"}, base)["line"] == "Supply chain"  # the older files' own words still count (stored in English)
     assert delivery.clean({"kind": "bug", "size": "huge", "line": "x"}, base) == base  # nothing it does not know
     delivery.check({"delivery_defaults": {"kind": "fix", "size": "small", "line": "internal systems"}})
     with pytest.raises(ValueError, match="one of new app, new feature, fix"):
