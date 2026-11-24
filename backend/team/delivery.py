@@ -29,7 +29,6 @@ LEGACY = {
 }
 NAME_MAX = 20
 WHY_MAX = 60
-FIELDS = {"kind": KINDS, "size": SIZES, "line": LINES}
 # who raises a business line's Issues when a run does not say (an imported run brings its own)
 REPORTERS = {"E-commerce": "Operations", "Mobile app": "UX group", "CRM": "Membership operations",
              "Supply chain": "Supply chain management", "Internal systems": "Administration"}
@@ -50,9 +49,20 @@ def issue_kind_of(d: dict[str, Any]) -> str:
     return ISSUE_KINDS[1] if canon("kind", d.get("kind")) == FIX else ISSUE_KINDS[0]
 
 
+FIELDS = {"kind": KINDS, "size": SIZES, "line": LINES}
+_WORDS = {f: {w.lower(): w for w in FIELDS[f]} for f in FIELDS}
+_WORDS["line"]["mobile apps"] = LINES[1]
+_WORDS["line"]["e-commerce"] = LINES[0]
+
+
 def canon(field: str, value: Any) -> Any:
-    """*value* as the English word of *field* (kind, size, line): an older run's Chinese word is turned into it; anything else is returned as it is."""
-    return LEGACY[field].get(value, value)
+    """*value* as the English word of *field* (kind, size, line): the word in any case, or an older run's Chinese word, is turned
+    into it; anything else is returned as it is."""
+    if value in LEGACY[field]:
+        return LEGACY[field][value]
+    if isinstance(value, str):
+        return _WORDS[field].get(" ".join(value.split()).lower(), value)
+    return value
 
 
 def canonical(d: dict[str, Any]) -> dict[str, Any]:
