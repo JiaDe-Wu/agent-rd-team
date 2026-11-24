@@ -27,7 +27,7 @@ def test_a_risk_is_clean_or_nothing():
     assert clean({"what": "", "amount": None}) is None and clean("206000") is None and clean(None) is None
     assert clean({"amount": 8000}) == {"what": "Not stated", "amount": 8000.0}
     assert clean({"what": "Reading customer phone numbers without permission", "amount": -5}) == {"what": "Reading customer phone numbers without permission", "amount": None}
-    assert (team_mod.money(206000), team_mod.money(8000), team_mod.money(None)) == ("¥206.0k", "¥8,000", "")
+    assert (team_mod.money(206000), team_mod.money(8000), team_mod.money(None)) == ("$206.0k", "$8,000", "")
 
 
 def test_a_send_back_keeps_its_risk_and_an_approval_does_not(tmp_path):

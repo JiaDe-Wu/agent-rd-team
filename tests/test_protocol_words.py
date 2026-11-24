@@ -29,7 +29,7 @@ def test_the_marker_of_a_persons_send_back_is_read_in_both_languages():
 
 def test_the_delivery_tag_is_written_in_english_and_stored_as_the_enum_the_ui_knows():
     base = delivery.defaults({}, "Add a thing")
-    assert (base["kind"], base["size"], base["line"]) == ("新应用", "中", "内部系统")
+    assert (base["kind"], base["size"], base["line"]) == ("New app", "Medium", "Internal systems")
     got = delivery.clean({"name": "Promo page", "kind": "New Feature", "size": "LARGE", "line": "e-commerce", "why": "a reason"}, base)
     assert (got["kind"], got["size"], got["line"]) == ("新功能", "大", "电商")  # the stored enum is unchanged (the UI and the CTO data match it)
     assert delivery.label(got) == "new feature · large · e-commerce (Promo page)"
