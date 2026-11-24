@@ -1,6 +1,6 @@
-/* 品牌规范（设计部）BR-1～BR-3 的变量。别的样式文件只用这里的变量，不写新颜色（前端工程规范 UX-4）。 */
+/* The variables of the Brand Standard (Design) BR-1 to BR-3. Other style files use only these variables and write no new colours (Frontend Engineering Standard UX-4). */
 :root {
-  /* BR-1 颜色 */
+  /* BR-1 colour */
   --brand-600: #7c3aed;
   --brand-500: #8b5cf6;
   --brand-400: #a78bfa;
@@ -22,22 +22,22 @@
   --brand-glow-peach: rgba(255, 154, 128, 0.5);
   --brand-danger: #ff8a8a;
 
-  /* BR-2 字体 */
-  --font-brand: "Space Grotesk", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  /* BR-2 type */
+  --font-brand: "Space Grotesk", -apple-system, "Segoe UI", Roboto, sans-serif;
   --fs-hero: clamp(44px, 7vw, 104px);
   --fs-title: clamp(26px, 3vw, 40px);
   --fs-big: clamp(34px, 4.6vw, 64px);
   --fs-body: 16px;
   --fs-small: 13px;
 
-  /* BR-3 动效 */
+  /* BR-3 motion */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-smooth: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-fast: 180ms;
   --dur: 420ms;
   --dur-slow: 900ms;
 
-  /* 间距、圆角、阴影 */
+  /* Spacing, radius, shadow */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;

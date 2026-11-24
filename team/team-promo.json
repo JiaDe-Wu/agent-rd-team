@@ -1,0 +1,306 @@
+{
+  "version": 1,
+  "name": "Larkspur Outfitters R&D team · Black Friday sale",
+  "orchestrator": "kirocrew-team",
+  "scope": "mvp",
+  "delivery_defaults": {
+    "kind": "new feature",
+    "size": "medium",
+    "line": "E-commerce"
+  },
+  "official_stages": 23,
+  "extra_stages": [
+    "4.1 Deploy pipeline",
+    "4.3 Deploy execution"
+  ],
+  "extra_note": "The official mvp has no operations phase; this team adds deployment",
+  "priority": 35,
+  "keywords": [
+    "black friday",
+    "cyber monday",
+    "cyber week",
+    "promotion",
+    "sale",
+    "spend and save",
+    "reference price",
+    "strikethrough price",
+    "price adjustment",
+    "campaign plan",
+    "official store"
+  ],
+  "roster": "roster-larkspur.json",
+  "starter": "starters/mall",
+  "spec_pack": "packs/larkspur-promo",
+  "standards": "packs/larkspur/standards.json",
+  "standards_always": [
+    "PRC",
+    "MGN",
+    "PP",
+    "BR"
+  ],
+  "knowledge": {
+    "source": "Larkspur Outfitters",
+    "data_dir": "knowledge/larkspur"
+  },
+  "task_template": "task_template-promo.md",
+  "test_command": [
+    "node",
+    "tests/enterprise/_run.cjs"
+  ],
+  "test_timeout_s": 30,
+  "test_owners": [
+    {
+      "glob": "tests/enterprise/data-copy*",
+      "role": "product"
+    },
+    {
+      "glob": "tests/enterprise/prc-*",
+      "role": "backend1"
+    },
+    {
+      "glob": "tests/enterprise/mgn-*",
+      "role": "backend1"
+    },
+    {
+      "glob": "tests/enterprise/pp-*",
+      "role": "backend1"
+    },
+    {
+      "glob": "tests/enterprise/api-*",
+      "role": "backend1"
+    },
+    {
+      "glob": "tests/enterprise/fe-campaign*",
+      "role": "frontend1"
+    },
+    {
+      "glob": "tests/enterprise/fe-site*",
+      "role": "frontend1"
+    },
+    {
+      "glob": "tests/enterprise/fe-admin*",
+      "role": "frontend2"
+    },
+    {
+      "glob": "tests/enterprise/ux-motion*",
+      "role": "motion"
+    },
+    {
+      "glob": "tests/api-*",
+      "role": "backend1"
+    },
+    {
+      "glob": "tests/web-campaign*",
+      "role": "frontend1"
+    },
+    {
+      "glob": "tests/web-admin*",
+      "role": "frontend2"
+    }
+  ],
+  "defaults": {
+    "model": "claude-sonnet-5.5",
+    "max_fix_rounds": 2,
+    "max_review_rounds": 1
+  },
+  "workspace": "larkspur",
+  "roles": [
+    {
+      "key": "product",
+      "title": "Product manager",
+      "icon": "product",
+      "member": "aidlc-product-agent",
+      "aidlc_agent": "aidlc-product-agent",
+      "phase": "inception",
+      "stage": "1.1 Intent capture · 2.3 Requirements analysis",
+      "mission": "Write the requirement as acceptance criteria, pull data from the knowledge base, and hand it to a person to approve",
+      "assignment": "Look up standards, fetch data, write acceptance criteria",
+      "depends_on": [],
+      "writable": [
+        "docs/aidlc/2-inception/requirements.md",
+        "server/data/**",
+        "docs/aidlc/2-inception/plan.json",
+        "docs/aidlc/2-inception/delivery.json"
+      ],
+      "outputs": [
+        "docs/aidlc/2-inception/requirements.md",
+        "docs/aidlc/2-inception/plan.json"
+      ],
+      "plan": "docs/aidlc/2-inception/plan.json",
+      "delivery": "docs/aidlc/2-inception/delivery.json",
+      "gate": "human",
+      "gate_label": "Requirements",
+      "gate_preset": "Approved. One more rule: limit 2 units per person per item; over the limit the cart shows \"Limit 2 per item\".",
+      "brief": "First look up, in the knowledge base, the standards and data listed above: the Pricing and Promotion Compliance Standard, the Margin and Pricing Rules, the Price-Adjustment Guarantee Rules, \"Official store products and orders\" and \"Black Friday to Cyber Monday campaign plan\". The products and orders document gives the paths of the JSON data files: copy `mall-products.json` and `mall-orders.json` as they are into `server/data/products.json` and `server/data/orders.json` (use `cp`; do not change the contents; backend developer #1 copies the campaign plan, you do not). Then write `docs/aidlc/2-inception/requirements.md`: for whom and why (Operations configures the Black Friday sale in a back office, reads the pre-launch check and launches it in one click; shoppers see the prices on the campaign page and order); what to build and what not to build; 8 to 10 acceptance criteria AC-n in three groups, \"Campaign page\", \"Operations back office\" and \"Price engine\", each saying which rule it comes from (PRC-n, MGN-n, PP-n). The shape of the API and the pages is already set in the README, \"Company template conventions\"; do not repeat it. One page at most, no code. Last write the work-split proposal `docs/aidlc/2-inception/plan.json`: the task for each member in this run, one sentence each, at most 40 characters, specific, written once (for example \"Price engine: reference price, margin\"), keyed by the member's code: `backend1` backend developer #1, `frontend1` frontend developer #1, `frontend2` frontend developer #2, `motion` motion designer, `tester` test engineer, `compliance` compliance review, `deploy` deploy engineer; split by the folders in the README and add no new member. The motion designer (`motion`) is optional: if the requirement has something that has to move (the countdown, product cards appearing, add to cart, the launch celebration), give it a task; if it is not needed, leave its line out and add `\"skip\": {\"motion\": \"one-sentence reason\"}` to the same file. Every other member takes part and cannot go into skip. When the task says a member does not take part this time (not on Crew), give it no task and write no skip for it. Finally write the delivery tag `docs/aidlc/2-inception/delivery.json`: one JSON object with the keys name (the delivery's name, at most 16 characters), kind (new app, new feature or fix), size (small, medium or large), line (E-commerce, Mobile apps, CRM, Supply chain or Internal systems) and why (one sentence), which counts into the company's delivery statistics. When you are done the run stops for a person to approve (the person looks at the requirements, the split and the delivery tag), and the person may add rules: the person's words win."
+    },
+    {
+      "key": "backend1",
+      "title": "Backend developer #1",
+      "icon": "backend",
+      "member": "aidlc-developer-agent",
+      "aidlc_agent": "aidlc-developer-agent",
+      "phase": "construction",
+      "stage": "3.5 Code generation",
+      "mission": "Price engine and all APIs",
+      "assignment": "Price engine: strikethrough price, margin floor, price protection, go-live",
+      "depends_on": [
+        "product"
+      ],
+      "writable": [
+        "server/lib/pricing.js",
+        "server/routes/**",
+        "server/config/campaign.json"
+      ],
+      "outputs": [
+        "server/lib/pricing.js",
+        "server/routes/index.js"
+      ],
+      "brief": "First copy `mall-campaign.json`, which the knowledge base document \"Black Friday to Cyber Monday campaign plan\" names, as it is into `server/config/campaign.json` (use `cp`). Then implement `finalPrice`, `linePrice`, `check` and `quote` in `server/lib/pricing.js` as the README, \"Price engine\", says, and all the endpoints in `server/routes/` as \"API conventions\" says. The rules are in the knowledge base: Pricing and Promotion Compliance Standard PRC-1, PRC-4, PRC-5; Margin and Pricing Rules MGN-1 to MGN-3; Price-Adjustment Guarantee Rules PP-1, PP-2. The reference price is the lowest price paid in the 7 days before the sale (not the one Operations typed); the final price is rounded to the dollar; the lowest price of an item in spend and save is 90% of the final price; payouts count only completed orders with the guarantee in the 14 days before the sale; payouts over $20,000 need CFO approval; a sale that fails the check cannot launch; nothing can be ordered at the sale price before the sale is live. A rule the person adds at a gate (the task will say it, for example a purchase limit) goes into `quote` and the cart endpoint. Always take the time from `ctx.now()`. When you are done run `npm run check-campaign` to see the check: for Operations' plan as it stands it will say the sale cannot launch, and that is right. The plan (the discounts) is Operations' decision: do not change `campaign.json` to make it launchable; whether to change it is for the person at the launch gate. Then run `node tests/enterprise/_run.cjs prc- mgn- pp- api- data-`: everything must be green except data-copy (that one is the product manager's)."
+    },
+    {
+      "key": "frontend1",
+      "title": "Frontend developer #1",
+      "icon": "frontend",
+      "member": "aidlc-developer-agent",
+      "aidlc_agent": "aidlc-developer-agent",
+      "phase": "construction",
+      "stage": "3.5 Code generation",
+      "mission": "Double 11 campaign page",
+      "assignment": "Campaign page: final price, strikethrough price note, spend-and-save discounts, countdown",
+      "depends_on": [
+        "product"
+      ],
+      "writable": [
+        "web/pages/campaign.js",
+        "web/styles/campaign.css"
+      ],
+      "outputs": [
+        "web/pages/campaign.js"
+      ],
+      "brief": "Implement `web/pages/campaign.js` (`render` and `mount`) and `web/styles/campaign.css` as the README, \"Page conventions\", says. This is the Black Friday page shoppers see, and it should look like a big sale: the sale name at the top, the spend-and-save rule (PRC-3: say in full how much is taken off for each how many dollars, whether it stacks with discounts and whether it stacks with coupons; no \"lowest prices anywhere\" claims) and a countdown (`data-countdown`, `data-end`, ticking every second from the server time of `/api/time`, digits changed with `ctx.motion.flip`); items grouped by category (Tents, Sleeping Bags, Packs, Footwear, Camp Kitchen, Apparel, Electronics); each card has the name, the final price in large type (`data-final`), a discount badge, the struck-through reference price (`data-line`) with the small note \"Lowest price in the 7 days before the sale\" next to it (PRC-2), and an add-to-cart button (`data-action=\"add\"`); when the sale is not live yet show no add button and say it is not live yet (PRC-4); a cart (`data-cart`) at the side or the bottom with subtotal, spend and save, and total, and when the API returns an error (a purchase limit, say) show its message. Cards appearing call `ctx.motion.reveal`; adding to the cart calls `ctx.motion.bump`. The large final price must fit its card: use `clamp()` for the size, and the digits must not wrap or overflow. Use the site-wide components of base.css, start your own class names with `campaign-`, and use only the tokens variables for colour (no #fff, no rgba(…)). The motion designer is writing `web/motion/` at the same time; you only call its interface. When you are done run `node tests/enterprise/_run.cjs fe-campaign fe-site`: both must be green."
+    },
+    {
+      "key": "frontend2",
+      "title": "Frontend developer #2",
+      "icon": "frontend",
+      "member": "aidlc-developer-agent",
+      "aidlc_agent": "aidlc-developer-agent",
+      "phase": "construction",
+      "stage": "3.5 Code generation",
+      "mission": "Operations back office",
+      "assignment": "Back office: change discounts, pre-release check, one-click release",
+      "depends_on": [
+        "product"
+      ],
+      "writable": [
+        "web/pages/admin.js",
+        "web/styles/admin.css"
+      ],
+      "outputs": [
+        "web/pages/admin.js"
+      ],
+      "brief": "Implement `web/pages/admin.js` (`render` and `mount`) and `web/styles/admin.css` as the README, \"Page conventions\", says: the back office where Operations configures the Black Friday sale, which must show at a glance whether the sale can launch and why. On the left a table with one row per item (`data-sku`, `data-ok`): name, regular price, the discount input (`data-pct`), the spend-and-save switch (`data-fr`), final price, reference price (marked when it differs from what Operations typed), lowest price, margin floor, and whether it meets the floor; a change calls `PUT /api/campaign/items/:sku` and the page is redrawn with the check that comes back. On the right the \"Pre-launch check\" panel, fixed in the viewport with `position: sticky` (always visible as the table scrolls), from top to bottom: the verdict (can launch / cannot launch), the reasons it cannot launch (`data-blockers`), the launch button (`data-action=\"launch\"`, `disabled` when it cannot launch), then the price-adjustment payouts (orders and amount, `data-pp`, with the items that pay out the most) and the expected margin rate (regular → sale). When Operations changes a number they must see at a glance what changed: `mount` remembers the check from before the change and passes it to `render` as the optional `state.prev` (without `prev` it renders as usual); next to the payouts and the margin rate write the change from just now (for example \"+$1,620 since just now\"; more in the warning colour, less in the pass colour), highlight the changed row and the changed numbers for a few seconds, and change the digits with `ctx.motion.flip`; a successful launch calls `ctx.motion.celebrate(ctx.fx)` and shows that the sale is live. Three states: loading, saving, error. On a 1440-wide screen the table must show every column without scrolling sideways: put explanations such as \"Lowest price in the 7 days before the sale (calculated by the system)\" in the table header and not in every row; item names may wrap; only on narrower screens scroll sideways inside the panel, and do not cut off columns. Show the sale times in Eastern Time as \"2026-11-27 00:00\" and not as ISO text. Use `.glass`, `.panel`, `.table`, `.btn--primary`, `.chip` and `.state` from base.css, start your own class names with `admin-`, and use only the tokens variables for colour. When you are done run `node tests/enterprise/_run.cjs fe-admin`: it must be green."
+    },
+    {
+      "key": "motion",
+      "title": "Motion designer",
+      "icon": "motion",
+      "member": "larkspur-motion-agent",
+      "aidlc_agent": "larkspur-motion-agent",
+      "optional": true,
+      "phase": "construction",
+      "stage": "3.5 Code generation · Brand motion",
+      "mission": "Motion for the countdown, card entrance, add-to-cart and the release celebration",
+      "assignment": "Countdown, card entrance, add-to-cart and release celebration",
+      "depends_on": [
+        "product"
+      ],
+      "writable": [
+        "web/motion/**"
+      ],
+      "outputs": [
+        "web/motion/motion.js"
+      ],
+      "brief": "Implement `prefersReduced`, `flip`, `reveal`, `bump` and `celebrate` in `web/motion/motion.js` as the README, \"Motion interface\", says, with the styles in `web/motion/motion.css`. First look up the Brand Standard BR-3 and the Frontend Engineering Standard UX-1 in the knowledge base. `flip`: when a countdown digit changes it flips up and down; `reveal`: item cards float in one after another (add `is-in`; define in CSS how they look before and after); `bump`: the cart badge pops; `celebrate`: when the sale goes live, a burst of light points and confetti on the full-screen canvas for about 3 seconds, with colours read from the brand variables such as `getComputedStyle(document.documentElement).getPropertyValue('--brand-peach')` and never hard-coded, clearing the canvas at the end. Keyframes animate only `transform` and `opacity`; with `prefers-reduced-motion: reduce` nothing flips and no confetti is thrown, the result just shows. Use no animation library. When you are done run `node tests/enterprise/_run.cjs ux-motion`: it must be green."
+    },
+    {
+      "key": "tester",
+      "title": "Test engineer",
+      "icon": "tester",
+      "member": "aidlc-quality-agent",
+      "aidlc_agent": "aidlc-quality-agent",
+      "phase": "construction",
+      "stage": "3.6 Build & test",
+      "mission": "Write tests from the acceptance criteria",
+      "assignment": "Write tests for pricing and the campaign page from the acceptance criteria",
+      "depends_on": [
+        "product"
+      ],
+      "writable": [
+        "tests/api-*",
+        "tests/web-*"
+      ],
+      "outputs": [
+        "tests/"
+      ],
+      "brief": "Write tests from the acceptance criteria in `docs/aidlc/2-inception/requirements.md` and the conventions in the README: for the API and the price engine write `tests/api-promo.test.js`, for the campaign page `tests/web-campaign.test.js` (ES modules, `node:test`; the page is imported directly from `web/pages/campaign.js` and `render(state)` is called; for the API use `startServer` from `tests/enterprise/_lib.js`). The back office is already covered by the company checks: do not write for it. Pick the most important ACs, one test for each, with the test name starting with the AC number, at most 14 across the two files, and a rule the person added at a gate must have a test. Launching and changing a discount change state, so every API case starts its own `startServer()` instance, puts it into a `try` straight away and calls `close()` in `finally` (in helper functions too: close it when an assertion fails); do not repeat what the company checks already cover (PRC, MGN, PP, FE, BR). The implementation is not written yet, so the tests are red now, and that is right: do not write an implementation, create temporary files or restore other folders (something like `git checkout -- web`) to try your tests out; on your branch the implementation is empty and red is correct; touch only the files you may change. When you are done run `node tests/enterprise/_run.cjs api- web-` to make sure your files run (red is fine, not running is not), then commit."
+    },
+    {
+      "key": "compliance",
+      "title": "Compliance review",
+      "icon": "compliance",
+      "member": "aidlc-compliance-agent",
+      "aidlc_agent": "aidlc-compliance-agent",
+      "phase": "construction",
+      "stage": "3.6 Build & test · Independent review",
+      "mission": "Read-only: independently review all changes and give the pre-release check verdict",
+      "assignment": "Read the git diff and the pre-release check against price compliance, margin and price protection",
+      "depends_on": [
+        "backend1",
+        "frontend1",
+        "frontend2",
+        "motion",
+        "tester"
+      ],
+      "writable": [],
+      "outputs": [],
+      "gate": "human",
+      "gate_label": "Release",
+      "gate_preset": "Approve release. Reserve $15,000 for price-adjustment payouts; Finance reviews after the sale ends.",
+      "gate_revise_risk": {
+        "what": "Price-adjustment payouts exceed the $20,000 approval line",
+        "amount": 9100
+      },
+      "gate_revise_preset": "Sent back per the pre-release check.\nSend back: Backend developer #1. Price-adjustment payouts above $20,000 need CFO approval, which this campaign will not request: change the Ridgeline 4-Person Tent from 20% off to 10% off and the Glacier Down Jacket from 30% off to 20% off (in server/config/campaign.json set pct to 90 and 80 for these two).",
+      "brief": "You are not the session of the members who write code and have not seen their conversations; you see only the actual changes. First look up, in the knowledge base, the Pricing and Promotion Compliance Standard, the Margin and Pricing Rules and the Price-Adjustment Guarantee Rules, then read the `git diff` (the command is below) and check it against PRC-1 to PRC-5, MGN-1 to MGN-3 and PP-1 to PP-3 one by one. Then run `npm run check-campaign` and put its verdict in the first paragraph of your report, \"Pre-launch check\": can it launch, how many price-adjustment payout orders and how much, the expected margin rate, and the reasons it cannot launch. Note that a check that says the sale cannot launch is not a code problem: the discount plan is Operations' decision, and whether and how to change it is for the owner at the launch gate; you just make that clear. Ask for changes only for real code problems: a reference price that is not the lowest price in the 7 days, a final price, spend-and-save or payout that is worked out wrong, a page that does not say what the reference price and the spend-and-save rule are, a sale that can be ordered at the sale price before it is live, a claim such as \"lowest prices anywhere\". Style is not a problem. The first line of your reply is `DONE: ready to deliver` or `DONE: changes needed: <one sentence>`. Below it list the verdict for each rule (one line for those that are fine); give each problem that needs changing its own number F-1, F-2 and so on, each with: which rule is broken, the file and line, the evidence (the code as written), how to change it. When you let it through also list 2 or 3 \"risks that do not block\", each with the risk, what you suggest, and its owner (a member's name, for example \"Owner: Backend developer #1\"). Pricing compliance and Finance will read your report at the gate and decide to approve the release or send it back."
+    },
+    {
+      "key": "deploy",
+      "title": "Deploy engineer",
+      "icon": "deploy",
+      "member": "aidlc-pipeline-deploy-agent",
+      "aidlc_agent": "aidlc-pipeline-deploy-agent",
+      "phase": "operation",
+      "stage": "4.1 Deploy pipeline · 4.3 Deploy execution",
+      "mission": "Deploy to this machine",
+      "assignment": "Deploy to 127.0.0.1:8090",
+      "depends_on": [
+        "compliance"
+      ],
+      "writable": [
+        "deploy/**",
+        "docs/aidlc/4-operation/**"
+      ],
+      "outputs": [
+        "deploy/local.json"
+      ],
+      "deploy": {
+        "mode": "local",
+        "port": 8090,
+        "health": "/api/campaign",
+        "ttl_min": 240
+      },
+      "brief": "Write the deployment configuration `deploy/local.json`: `{ \"port\": 8090, \"health\": \"/api/campaign\" }` (the port and the health-check path), then a one-page deployment record `docs/aidlc/4-operation/deploy.md`: how to start it, the health check, the verdict of the pre-launch check (run `npm run check-campaign` and paste it in as it is), and the rollback (stop the process, go back to the previous commit). Do one smoke test on a free port: `PORT=18090 node server/server.js &`, `curl -s 127.0.0.1:18090/api/campaign` returns 200, then stop it. Do not take port 8090: after you commit, the pipeline (the orchestrator) deploys to 127.0.0.1:8090 with your configuration, and the deployment counts as successful only when the health check returns 200; if it does not, the reason is sent back to you. Whether the sale goes live is not yours to decide: the head of Operations clicks \"Launch\" in the back office."
+    }
+  ]
+}

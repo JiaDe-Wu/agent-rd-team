@@ -1,4 +1,4 @@
-# 活动配置
+# Campaign configuration
 
-- `campaign.json`：这次活动的配置，从知识库《双十一活动方案》写的路径（`mall-campaign.json`）原样复制来。之后方案要改（比如关卡上人定的折扣），改这个文件。
-- `clock.json`：演示环境的服务器时间（见 `../lib/clock.js`）。
+- `campaign.json`: this sale's configuration, copied as it is from the path the knowledge base document "Black Friday to Cyber Monday campaign plan" gives (`mall-campaign.json`). When the plan has to change (for example a discount a person decided at a gate), change this file.
+- `clock.json`: the server time of the demo environment (see `../lib/clock.js`).

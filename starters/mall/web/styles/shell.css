@@ -1,2 +1,2 @@
-/* 模板自带：hidden 属性一定隐藏（别的样式的 display 不能盖过它） */
+/* Comes with the template: the hidden attribute always hides (another style's display must not override it) */
 [hidden] { display: none !important; }

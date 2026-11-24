@@ -1,11 +1,11 @@
-// 模板自带的占位首页：开发加了自己的页面以后，可以改掉或者从 pages/index.js 里拿掉。
+// The placeholder home page that comes with the template: once developers add their own pages, change it or take it out of pages/index.js.
 import { html } from '../lib/format.js'
 
 export function render(state = {}) {
   return String(html`<section class="hero glass panel">
-    <p class="eyebrow">桃源科技</p>
-    <h1 class="display">${state.title || '新页面'}</h1>
-    <p class="muted">这个项目从公司网页模板开工，页面还没写。</p>
+    <p class="eyebrow">Larkspur Outfitters</p>
+    <h1 class="display">${state.title || 'New page'}</h1>
+    <p class="muted">This project started from the company web template; the page has not been written yet.</p>
   </section>`)
 }
 

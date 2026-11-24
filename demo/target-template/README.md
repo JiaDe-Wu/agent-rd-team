@@ -1,19 +1,19 @@
-# 活动报名小站
+# Event Sign-up Site
 
-## 需求
+## Requirement
 
-做一个小网站，让主办方发布活动、让参加的人报名。
+Build a small website where organisers publish events and attendees sign up.
 
-1. 首页列出所有活动：名称、时间、地点、剩余名额。
-2. 点进活动看详情，填姓名和邮箱报名。
-3. 报名要校验：姓名不能为空；邮箱格式要对；名额满了不能报；同一个邮箱不能重复报同一个活动。报名失败要告诉用户为什么。
-4. 主办方能看到某个活动的报名名单。
-5. 页面在手机上也能用。
+1. The home page lists all events: name, time, place and the places left.
+2. Open an event to see its details, and sign up with a name and an email address.
+3. Sign-up is validated: the name cannot be empty; the email address must be well formed; a full event cannot be signed up for; the same email address cannot sign up for the same event twice. When a sign-up fails, tell the person why.
+4. An organiser can see the list of people who signed up for an event.
+5. The pages also work on a phone.
 
-## 约束
+## Constraints
 
-- 后端和前端分开：后端在 `backend/`，前端在 `frontend/`，前端只通过 HTTP 接口拿数据。
-- 零依赖：只用 Node 22 自带的模块，不装任何 npm 包。
-- 数据先存在内存里，服务重启可以丢。
-- `npm start` 起服务，同时提供接口和前端页面：端口读环境变量 `PORT`（默认 3000），只监听环境变量 `HOST` 给的地址（默认 `127.0.0.1`）。
-- `npm test` 用 `node --test` 跑 `tests/` 下的全部 `*.test.js`；每个测试名以验收标准的编号开头，比如 `AC-3: 名额满了不能报名`。
+- The backend and the frontend are separate: the backend is in `backend/`, the frontend is in `frontend/`, and the frontend gets its data only over the HTTP API.
+- No dependencies: use only the modules that come with Node 22 and install no npm packages.
+- Data is kept in memory first; it may be lost when the server restarts.
+- `npm start` starts the server, which serves both the API and the frontend pages: the port is the environment variable `PORT` (default 3000), and it listens only on the address in the environment variable `HOST` (default `127.0.0.1`).
+- `npm test` runs every `*.test.js` under `tests/` with `node --test`; each test name starts with the number of an acceptance criterion, for example `AC-3: a full event cannot be signed up for`.

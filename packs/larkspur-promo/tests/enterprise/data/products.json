@@ -1,0 +1,182 @@
+[
+ {
+  "sku": "TENT4",
+  "name": "Ridgeline 4-Person Tent",
+  "category": "Tents",
+  "price": 599,
+  "cost": 410,
+  "stock": 800,
+  "priceProtect": true
+ },
+ {
+  "sku": "TENT2",
+  "name": "Ridgeline 2-Person Tent",
+  "category": "Tents",
+  "price": 379,
+  "cost": 265,
+  "stock": 1200,
+  "priceProtect": false
+ },
+ {
+  "sku": "TENT6",
+  "name": "Summit 6-Person Basecamp Tent",
+  "category": "Tents",
+  "price": 999,
+  "cost": 690,
+  "stock": 300,
+  "priceProtect": false
+ },
+ {
+  "sku": "BAG20",
+  "name": "Alpine 20F Down Sleeping Bag",
+  "category": "Sleeping Bags",
+  "price": 349,
+  "cost": 240,
+  "stock": 1500,
+  "priceProtect": true
+ },
+ {
+  "sku": "BAG0",
+  "name": "Alpine 0F Down Sleeping Bag",
+  "category": "Sleeping Bags",
+  "price": 529,
+  "cost": 365,
+  "stock": 600,
+  "priceProtect": false
+ },
+ {
+  "sku": "PACK65",
+  "name": "Trailhead 65L Backpack",
+  "category": "Packs",
+  "price": 289,
+  "cost": 200,
+  "stock": 500,
+  "priceProtect": false
+ },
+ {
+  "sku": "PACK40",
+  "name": "Trailhead 40L Backpack",
+  "category": "Packs",
+  "price": 159,
+  "cost": 110,
+  "stock": 900,
+  "priceProtect": false
+ },
+ {
+  "sku": "BOOT",
+  "name": "Granite Waterproof Hiking Boots",
+  "category": "Footwear",
+  "price": 169,
+  "cost": 115,
+  "stock": 900,
+  "priceProtect": false
+ },
+ {
+  "sku": "MBOOT",
+  "name": "Granite Mountaineering Boots",
+  "category": "Footwear",
+  "price": 429,
+  "cost": 295,
+  "stock": 300,
+  "priceProtect": false
+ },
+ {
+  "sku": "STOVE",
+  "name": "Basecamp Two-Burner Stove",
+  "category": "Camp Kitchen",
+  "price": 189,
+  "cost": 128,
+  "stock": 400,
+  "priceProtect": false
+ },
+ {
+  "sku": "COOK",
+  "name": "Basecamp Nesting Cook Set",
+  "category": "Camp Kitchen",
+  "price": 179,
+  "cost": 121,
+  "stock": 500,
+  "priceProtect": false
+ },
+ {
+  "sku": "JACKET",
+  "name": "Glacier Down Jacket",
+  "category": "Apparel",
+  "price": 399,
+  "cost": 260,
+  "stock": 1000,
+  "priceProtect": true
+ },
+ {
+  "sku": "RAIN",
+  "name": "Trail Rain Shell",
+  "category": "Apparel",
+  "price": 199,
+  "cost": 131,
+  "stock": 1200,
+  "priceProtect": true
+ },
+ {
+  "sku": "BASE",
+  "name": "Merino Base Layer",
+  "category": "Apparel",
+  "price": 119,
+  "cost": 78,
+  "stock": 800,
+  "priceProtect": false
+ },
+ {
+  "sku": "GPS",
+  "name": "Orbit GPS Watch",
+  "category": "Electronics",
+  "price": 449,
+  "cost": 348,
+  "stock": 2000,
+  "priceProtect": false
+ },
+ {
+  "sku": "MSG",
+  "name": "Orbit Satellite Messenger",
+  "category": "Electronics",
+  "price": 299,
+  "cost": 222,
+  "stock": 1500,
+  "priceProtect": false
+ },
+ {
+  "sku": "LAMP",
+  "name": "Beacon Rechargeable Headlamp",
+  "category": "Electronics",
+  "price": 79,
+  "cost": 47,
+  "stock": 3000,
+  "priceProtect": true
+ },
+ {
+  "sku": "SOLAR",
+  "name": "Orbit Solar Charger",
+  "category": "Electronics",
+  "price": 149,
+  "cost": 97,
+  "stock": 2000,
+  "priceProtect": true
+ },
+ {
+  "sku": "BTL",
+  "name": "Trailside Insulated Bottle Set",
+  "category": "Camp Kitchen",
+  "price": 59,
+  "cost": 35,
+  "stock": 2500,
+  "priceProtect": true
+ },
+ {
+  "sku": "FILT",
+  "name": "Camp Water Filter",
+  "category": "Camp Kitchen",
+  "price": 129,
+  "cost": 84,
+  "stock": 700,
+  "priceProtect": false
+ }
+]
