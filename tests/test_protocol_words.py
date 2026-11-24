@@ -37,7 +37,7 @@ def test_the_delivery_tag_is_written_and_stored_in_english_and_the_older_chinese
     assert delivery.clean({"kind": "新功能", "line": "供应链"}, base)["line"] == "Supply chain"  # the older files' own words still count (stored in English)
     assert delivery.clean({"kind": "bug", "size": "huge", "line": "x"}, base) == base  # nothing it does not know
     delivery.check({"delivery_defaults": {"kind": "fix", "size": "small", "line": "internal systems"}})
-    with pytest.raises(ValueError, match="one of new app, new feature, fix"):
+    with pytest.raises(ValueError, match="one of New app, New feature, Fix"):
         delivery.check({"delivery_defaults": {"kind": "bug"}})
     assert set(delivery.REPORTERS) == set(delivery.LINES) and not any("部" in v or "组" in v for v in delivery.REPORTERS.values())
 
