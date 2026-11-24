@@ -12,7 +12,7 @@ function sourceText(run: RunDetail): string {
   const s = run.knowledge.source
   if (!s) return ''
   if (s.present === null) return 'Reading…'
-  if (!s.present) return `Not attached yet: add ${s.path || '~/workplace/taoyuan/knowledge'} in the Crew sidebar under Knowledge base > Sources`
+  if (!s.present) return `Not attached yet: add ${s.path || 'knowledge/larkspur'} in the Crew sidebar under Knowledge base > Sources`
   const sync = s.status === 'synced' ? 'Synced' : s.files_total ? `Indexing ${s.files_done ?? 0}/${s.files_total}` : s.status || 'Indexing'
   return `${s.items ?? 0} document${s.items === 1 ? '' : 's'} · ${sync}`
 }

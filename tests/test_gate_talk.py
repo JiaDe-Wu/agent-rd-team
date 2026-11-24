@@ -214,6 +214,6 @@ def test_a_discussion_is_part_of_the_wait_at_its_gate_in_the_value_stream(tmp_pa
         assert await run.gate("scope", "approve")
         flow = mod("cto").flow(run, run.events, now=run.d.now())
         waits = [x for x in flow["segments"] if x["gate"] == "scope"]
-        assert len(waits) == 1 and waits[0]["decision"] == "批准"  # (the CTO data's own word, from cto.py) one wait, from the gate to the decision
+        assert len(waits) == 1 and waits[0]["decision"] == "Approved"  # one wait, from the gate to the decision
 
     asyncio.run(go())

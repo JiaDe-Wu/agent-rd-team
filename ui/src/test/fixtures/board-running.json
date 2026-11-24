@@ -16,7 +16,7 @@
       },
       "imported": false,
       "name": "Event signup site",
-      "issue": "TY-4127"
+      "issue": "LK-4127"
     }
   ],
   "run": {
@@ -1431,7 +1431,7 @@
         "id": "RULE",
         "title": "Annual party raffle rules",
         "kind": "standard",
-        "owner": "HR dept",
+        "owner": "HR",
         "doc": "21-annual-party-raffle-rules.md",
         "rules": [
           "RULE-1",
@@ -1443,7 +1443,7 @@
         "id": "DATA-EMP",
         "title": "Employee roster",
         "kind": "data",
-        "owner": "HR dept",
+        "owner": "HR",
         "doc": "data/employee-roster.md",
         "rules": [],
         "why": "Matched \"employee\""
@@ -1453,13 +1453,13 @@
     "imported": null,
     "knowledge": {
       "source": {
-        "name": "Taoyuan Technology",
+        "name": "Larkspur Outfitters",
         "present": true,
         "items": 9,
         "status": "synced",
         "files_total": 9,
         "files_done": 9,
-        "path": "~/workplace/taoyuan/knowledge"
+        "path": "~/workplace/larkspur/knowledge"
       },
       "hits": [
         {
@@ -1493,16 +1493,16 @@
     "sign_block": "Signing is only possible after the run has ended",
     "delivery": {
       "name": "Event signup site",
-      "kind": "新应用",
-      "size": "中",
-      "line": "电商",
+      "kind": "New app",
+      "size": "Medium",
+      "line": "E-commerce",
       "why": "",
       "confirmed": false
     },
     "issue": {
-      "id": "TY-4127",
-      "kind": "需求",
-      "reporter": "Operations dept",
+      "id": "LK-4127",
+      "kind": "Requirement",
+      "reporter": "Operations",
       "created_at": 1791230000.0
     },
     "pr": null,

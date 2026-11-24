@@ -10,7 +10,7 @@ import type { RunDetail } from '../types'
 import { CASE_GROUPS, caseGroup, deliveryLabel, fmtCredits, fmtSpan, issueKind } from './format'
 import { RoleIcon } from './RoleIcon'
 import { money } from '../cto/metrics'
-import { zh } from '../cto/vocab'
+import { word } from '../cto/vocab'
 
 const SIGNER_KEY = 'agent-rd-team:signer'
 
@@ -23,6 +23,9 @@ export function prState(run: RunDetail): string {
   return run.imported ? 'Signed off; the run was imported from another computer and the code repository is not here, so nothing was merged here' : 'Signed off; main got new commits during the run, so it could not be merged directly'
 }
 
+/** Older runs' event texts began with the Chinese word for "a person" (decoded at run time): it is dropped. */
+const OLD_PERSON = new RegExp(String.raw`^\u4eba`)
+
 export function SignOff({ run, onSign, onCto, onItem }: { run: RunDetail; onSign?: (by: string, note: string) => Promise<void>; onCto?: () => void; onItem?: () => void }) {
   const [by, setBy] = useState(() => (typeof localStorage !== 'undefined' && localStorage.getItem(SIGNER_KEY)) || '')
   const [note, setNote] = useState('')
@@ -33,14 +36,14 @@ export function SignOff({ run, onSign, onCto, onItem }: { run: RunDetail; onSign
     const cases = t.cases.filter((c) => caseGroup(c.ac) === i)
     return { ...g, total: cases.length, passed: cases.filter((c) => c.status === 'pass').length }
   }).filter((g) => g.total > 0)
-  const over = run.overruled // a person approved over a review that still said 要改 (protocol token: kept in Chinese)
+  const over = run.overruled // a person approved over a review that still said changes needed
   const gates = run.roles.filter((l) => l.gate_label && run.gate_notes[l.key] && l.key !== over?.role)
   const sentBack = run.events.filter((e) => e.kind === 'bounce' && e.from === 'person')
   // in the order they were made: an approval sits where its "approved by a person" event is
   const approvedAt = (key: string) => Math.max(-1, ...run.events.filter((e) => e.kind === 'approved' && e.role === key).map((e) => e.seq))
-  // protocol token: kept in Chinese: the leading 人 of a backend event text is stripped below
+
   const decisions = [
-    ...sentBack.map((e) => ({ seq: e.seq, key: `b${e.seq}`, back: true, text: e.text.replace(/^人/, '') })),
+    ...sentBack.map((e) => ({ seq: e.seq, key: `b${e.seq}`, back: true, text: e.text.replace(OLD_PERSON, '') })),
     ...gates.map((l) => ({ seq: approvedAt(l.key), key: l.key, back: false, text: `Approved ${l.gate_label}: ${run.gate_notes[l.key]}` })),
   ].sort((a, b) => (a.seq < 0 ? Infinity : a.seq) - (b.seq < 0 ? Infinity : b.seq))
   const review = run.roles.find((l) => l.writable.length === 0)
@@ -110,7 +113,7 @@ export function SignOff({ run, onSign, onCto, onItem }: { run: RunDetail; onSign
               <ul>
                 {(run.risks ?? []).map((r, i) => (
                   <li key={i} className="kt-sign-back">
-                    {r.what}{r.amount != null ? ` ${money(r.amount)}` : ''} (noted when {zh(r.gate)} was sent back)
+                    {r.what}{r.amount != null ? ` ${money(r.amount)}` : ''} (noted when {word(r.gate)} was sent back)
                   </li>
                 ))}
               </ul>

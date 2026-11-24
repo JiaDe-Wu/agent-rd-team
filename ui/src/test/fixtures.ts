@@ -346,10 +346,10 @@ export function scenario(): Board[] {
   out.push(s.snap())
   // 8: done
   s.tick(25)
-    .say('reviewer', 'DONE: 可以交付。') // protocol token: kept in Chinese
-    .done('reviewer', 'DONE: 可以交付 · all 12 acceptance criteria have an implementation and tests', 7.6, 14) // protocol token: kept in Chinese
-    .event('review', 'reviewer', 'Review: 可以交付', 12) // protocol token: kept in Chinese
-    .event('run', null, 'Run finished: 12/12 all green, review says 可以交付', 6) // protocol token: kept in Chinese
+    .say('reviewer', 'DONE: ready to deliver。')
+    .done('reviewer', 'DONE: ready to deliver · all 12 acceptance criteria have an implementation and tests', 7.6, 14)
+    .event('review', 'reviewer', 'Review: ready to deliver', 12)
+    .event('run', null, 'Run finished: 12/12 all green, review says ready to deliver', 6)
     .status('done', 6)
   out.push(s.snap())
   return out

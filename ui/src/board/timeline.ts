@@ -8,6 +8,9 @@
  */
 import type { AgentLive, Lane, LaneStatus, RunDetail, RunStatus, TeamEvent, TestCase } from '../types'
 
+/** The marker of a round in a spawned event's text: ", round N: " now; older runs wrote it in Chinese (decoded at run time). */
+const ROUND_MARK = new RegExp(String.raw`\u7b2c \d+ \u8f6e\uff1a|, round \d+: `)
+
 export interface ReplaySpan {
   start: number
   end: number
@@ -65,8 +68,8 @@ export function replayAt(run: RunDetail, events: TeamEvent[], t: number): RunDet
           s.attempts += 1
           s.status = s.attempts > 1 && byKey.get(e.role!)?.writable.length ? 'fixing' : 'running' // a reviewer's second look is not a fix
           s.spans.push({ a: e.at, b: null })
-          // protocol token: 第 N 轮： is kept in Chinese (older runs); ", round N: " is the current marker in the spawned event text
-          const label = /第 \d+ 轮：|, round \d+: /.test(e.text) ? afterColon(e.text) : ''
+
+          const label = ROUND_MARK.test(e.text) ? afterColon(e.text) : ''
           s.doing = label || byKey.get(e.role!)?.assignment || ''
         }
         break

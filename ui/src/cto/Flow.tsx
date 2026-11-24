@@ -6,23 +6,22 @@
  */
 import { deliveryLabel } from '../board/format'
 import { RoleIcon } from '../board/RoleIcon'
-import { zh } from './vocab'
+import { word } from './vocab'
 import type { BoardEntry, ItemEntry } from '../nav'
 import { itemOf } from '../nav'
 import { daysBefore, fmt, inLine, md, mean, waited } from './metrics'
 import type { CtoData, CtoItem, CtoWip } from './types'
 
-// protocol token: kept in Chinese (column names the backend sends; shown through zh())
-const COLS: [string, string][] = [['需求池', 'Submitted, waiting for a team'], ['构思', 'Intent · Constraints · Scope'], ['启动', 'Requirements · Design · Work split'], ['构建', 'Code · Tests · Independent review'], ['运维', 'Deploy · Release · Sign-off'], ['已交付', 'Last 7 days · click for the delivery detail']]
-// protocol token: kept in Chinese (the column names the backend sends; shown through zh())
-const STAGES = ['构思', '启动', '构建', '运维'] as const
+const COLS: [string, string][] = [['Backlog', 'Submitted, waiting for a team'], ['Ideation', 'Intent · Constraints · Scope'], ['Inception', 'Requirements · Design · Work split'], ['Construction', 'Code · Tests · Independent review'], ['Operation', 'Deploy · Release · Sign-off'], ['Delivered', 'Last 7 days · click for the delivery detail']]
+
+const STAGES = ['Ideation', 'Inception', 'Construction', 'Operation'] as const
 /** a kanban column's AI-DLC phase on the board */
-// protocol token: kept in Chinese
-export const COL_PHASE: Record<string, string> = { 构思: 'ideation', 启动: 'inception', 构建: 'construction', 运维: 'operation' }
+
+export const COL_PHASE: Record<string, string> = { Ideation: 'ideation', Inception: 'inception', Construction: 'construction', Operation: 'operation' }
 
 /** a gate's icon on its card: the board's icon of the role that stops there */
-// protocol token: kept in Chinese (gate names the backend sends)
-const GATE_ICON: Record<string, string> = { 范围关卡: 'scope', 需求关卡: 'pm', 方案关卡: 'architect', 上线关卡: 'compliance', 安全关卡: 'security', 签字放行: 'sign' }
+
+const GATE_ICON: Record<string, string> = { 'Scope gate': 'scope', 'Requirements gate': 'pm', 'Plan gate': 'architect', 'Release gate': 'compliance', 'Security gate': 'security', 'Sign-off': 'sign' }
 
 export type FlowHandlers = {
   onOpen: (e: BoardEntry) => void
@@ -42,7 +41,7 @@ function Card({ w, lines, hl, h }: { w: CtoWip; lines: string[]; hl: string | nu
       <div className="cto-ktop">
         {w.state === 'wait' ? (
           <>
-            <span className="cto-gate"><RoleIcon role={w.role || GATE_ICON[w.gate ?? ''] || 'wait'} size={13} />{zh(w.gate)}</span>
+            <span className="cto-gate"><RoleIcon role={w.role || GATE_ICON[w.gate ?? ''] || 'wait'} size={13} />{word(w.gate)}</span>
             <span>Waited {waited(w.hours ?? 0)}</span>
           </>
         ) : w.state === 'agent' ? (
@@ -87,13 +86,13 @@ export function Flow({ data, line, fresh, hl = null, ...h }: { data: CtoData; li
   const done = data.items.filter((i) => i.period === 'agent' && i.ship >= d7 && inLine(line)(i))
   const pin = (i: CtoItem) => (i.real && fresh.has(i.real) ? 0 : i.real ? 1 : 2)
   const shown = [...done].sort((a, b) => pin(a) - pin(b) || (a.ship < b.ship ? 1 : -1)).slice(0, 4)
-  // protocol token: kept in Chinese: the column names are compared with the backend's
-  const count = (col: string) => (col === '需求池' ? pool.length : col === '已交付' ? done.length : W.filter((w) => w.col === col && w.state !== 'pool').length)
+
+  const count = (col: string) => (col === 'Backlog' ? pool.length : col === 'Delivered' ? done.length : W.filter((w) => w.col === col && w.state !== 'pool').length)
   const latest = data.items.find((i) => i.real && inLine(line)(i)) ?? data.items.find((i) => i.real)
   // a column's heading: that phase on the board, in the run of this app that is there now, else the newest measured delivery
   const openCol = (col: string) => {
-    if (col === '需求池') return h.onOpen({ new: 'promo' })
-    if (col === '已交付') return h.onLedger()
+    if (col === 'Backlog') return h.onOpen({ new: 'promo' })
+    if (col === 'Delivered') return h.onLedger()
     const here = W.find((w) => w.live && w.real && w.col === col)
     const run = here?.real ?? latest?.real
     if (run) h.onOpen({ run, phase: COL_PHASE[col], ...(here ? {} : { pick: 'latest' as const }) })
@@ -109,7 +108,7 @@ export function Flow({ data, line, fresh, hl = null, ...h }: { data: CtoData; li
     else if (latest?.real) h.onOpen({ run: latest.real, replay: 30, pick: 'latest' })
   }
   const colTitle = (col: string) =>
-    col === '需求池' ? 'Raise a new requirement on the team board' : col === '已交付' ? 'See the delivery list below' : `See the "${zh(col)}" step on the team board (${W.some((w) => w.live && w.col === col) ? 'the run that is here now' : 'the latest measured delivery'})`
+    col === 'Backlog' ? 'Raise a new requirement on the team board' : col === 'Delivered' ? 'See the delivery list below' : `See the "${word(col)}" step on the team board (${W.some((w) => w.live && w.col === col) ? 'the run that is here now' : 'the latest measured delivery'})`
   return (
     <section className="cto-card cto-flow" aria-label="Requirement flow" data-anchor="flow">
       <div className="cto-flow-head">
@@ -117,7 +116,7 @@ export function Flow({ data, line, fresh, hl = null, ...h }: { data: CtoData; li
         <h3>Requirement flow</h3>
         <span className="cto-dim">Now · from Kiro Crew · refreshes every 5 s · click a card for the delivery detail, click a column name for that step on the team board</span>
         <span className="cto-grow" />
-        <button type="button" className="kt-btn is-small cto-noprint cto-noproj" onClick={() => h.onOpen({ new: 'promo' })} title="Submit a new requirement on the team board (Singles Day · appliance sale is filled in)">New requirement ↗</button>
+        <button type="button" className="kt-btn is-small cto-noprint cto-noproj" onClick={() => h.onOpen({ new: 'promo' })} title="Submit a new requirement on the team board (the Black Friday sale is filled in)">New requirement ↗</button>
       </div>
       <div className="cto-stats" data-testid="cto-flow-stats">
         In progress {fmt(waits.length + agents.length)}<span>·</span>Agent working {fmt(agents.length)}<span>·</span>Awaiting approval {fmt(waits.length)}<span>·</span>Backlog {fmt(pool.length)}
@@ -130,7 +129,7 @@ export function Flow({ data, line, fresh, hl = null, ...h }: { data: CtoData; li
         {COLS.map(([name, sub]) => (
           <div className="cto-kb-h" key={name}>
             <button type="button" onClick={() => openCol(name)} title={colTitle(name)}>
-              <div><b>{zh(name)}{name !== '已交付' ? ' ↗' : ''}</b><span className="cto-n">{fmt(count(name))}</span></div>
+              <div><b>{word(name)}{name !== 'Delivered' ? ' ↗' : ''}</b><span className="cto-n">{fmt(count(name))}</span></div>
               <div className="cto-st">{sub}</div>
             </button>
           </div>
@@ -142,7 +141,7 @@ export function Flow({ data, line, fresh, hl = null, ...h }: { data: CtoData; li
         </div>
         {STAGES.map((col) => (
           <Cell key={`w-${col}`} wait lines={M.lines} hl={hl} h={h} list={waits.filter((w) => w.col === col).sort((a, b) => live(a, b) || (b.hours ?? 0) - (a.hours ?? 0))}
-            empty={col === '构建' ? 'No human gate in this phase: failed checks are sent back to the agent automatically' : 'None right now'} />
+            empty={col === 'Construction' ? 'No human gate in this phase: failed checks are sent back to the agent automatically' : 'None right now'} />
         ))}
         <div className="cto-cell is-span">
           {shown.map((i) => {

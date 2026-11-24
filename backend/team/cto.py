@@ -2,12 +2,12 @@
 
 - ``items``: deliveries. The company's history is simulated and ships with the app (cto/history.json, made by
   scripts/cto_history.py); its dates are moved so that its last day is today. Every run of this app a person signed off
-  joins it as measured (实测), labelled with its delivery tag (delivery.py), with the decisions people made at its gates. Each one has
+  joins it as measured, labelled with its delivery tag (delivery.py), with the decisions people made at its gates. Each one has
   its Issue (``issue``, ``reporter``, ``created``) and the PR that took it into main (``pr``); a fix raised after
   something shipped links back to it (``origin``) and that one lists it (``defects``).
 - ``wip``: what is in progress now: simulated cards, plus every run of this app that is going, waits at a gate, or is
   delivered and waits for its signature. Their cards move as the run does, and open the run on the board.
-- ``meta``: the period, the business lines, and the figures the page's basis notes (口径) use.
+- ``meta``: the period, the business lines, and the assumptions the page's Method notes and Assumptions list use (docs/cto-view-data.md).
 """
 
 from __future__ import annotations
@@ -19,23 +19,31 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .constants import APP_ROOT
-from .delivery import LINES
+from .delivery import LINES, canonical
 from .team import ACTIVE, TeamRun
 
 HISTORY = APP_ROOT / "cto" / "history.json"
 OFFLINE = APP_ROOT / "cto" / "offline.html"
-# protocol token: kept in Chinese. The kinds, columns, decisions and labels below are the CTO page's own vocabulary: the UI
-# (ui/src/cto), cto/history.json and cto/offline.html match them, so they stay as they are until that page is translated.
-KIND_KEY = {"新应用": "app", "新功能": "feat", "修复": "fix"}
-SIZE_KEY = {"小": "S", "中": "M", "大": "L"}
+# The CTO page's own vocabulary is English words, shown as they are: the UI (ui/src/cto), cto/history.json and
+# cto/offline.html match them. Older runs wrote the delivery's kind, size and line in Chinese: delivery.canonical turns those
+# into these words before they are counted.
+KIND_KEY = {"New app": "app", "New feature": "feat", "Fix": "fix"}
+SIZE_KEY = {"Small": "S", "Medium": "M", "Large": "L"}
 # the kanban's columns: a run waiting at a gate sits where that gate is; one at work sits in its role's AI-DLC phase
-GATE_COL = {"范围": "构思", "需求": "启动", "方案": "启动", "上线": "运维", "安全": "运维"}
-# the team files' gate labels are English now; the CTO page still speaks Chinese, so its data maps them back
-GATE_ZH = {"Scope": "范围", "Build start": "启动", "Requirements": "需求", "Release": "上线", "Lessons": "沉淀"}
-PHASE_COL = {"ideation": "构思", "inception": "启动", "construction": "构建", "review": "构建", "operation": "运维"}
+COL_IDEATION, COL_INCEPTION, COL_CONSTRUCTION, COL_OPERATION = "Ideation", "Inception", "Construction", "Operation"
+GATE_COL = {"Scope": COL_IDEATION, "Requirements": COL_INCEPTION, "Build start": COL_INCEPTION, "Plan": COL_INCEPTION,
+            "Release": COL_OPERATION, "Security": COL_OPERATION}
+PHASE_COL = {"ideation": COL_IDEATION, "inception": COL_INCEPTION, "construction": COL_CONSTRUCTION,
+             "review": COL_CONSTRUCTION, "operation": COL_OPERATION}
+DECISIONS = {"approved": "Approved", "bounce": "Sent back"}
+OWNER = "Owner"  # who a card or a segment waits for: the person who owns the gate
 NOTE_MAX = 60
-_LEAD = re.compile(r"^(?:批准上线|批准发布到预发|批准|按上线前体检退回|按风险提示退回|按审查意见再改一轮)[。：:，,]?\s*")
-_BOUNCE_TO = re.compile(r"打回\s*[:：][^。；;\n]*[。；;]?\s*")
+NO_COMMENT, ONE_MORE_ROUND, REWORK = "No further comment", "One more round as the review said", "Rework"
+# The note a person leaves is read after the first colon of the event's text. What the page's own presets put at its front
+# is dropped, and so is the "send back to" line the backend reads (the older runs' one is written as \u escapes).
+_LEAD = re.compile(r"^(?:Approved for release|Approved|Approve release|Sent back on the (?:pre-release check|risk notes)|"
+                   r"Sent back on the review|Change once more as the review says)[.:,;]?\s*", re.I)
+_BOUNCE_TO = re.compile(r"(?:Send back|\u6253\u56de)\s*[:\uff1a][^.;\n\u3002\uff1b]*[.;\u3002\uff1b]?\s*", re.I)
 
 _cache: dict[str, Any] = {"mtime": None, "data": None}
 
@@ -75,12 +83,13 @@ def build(runs: dict[str, TeamRun], now: float, *, events_of: Callable[[TeamRun]
 
 def _labels(run: TeamRun) -> dict[str, Any]:
     d, iss = run.delivery(), run.issue()
+    d = canonical(d)
     return {"t": d["name"], "line": LINES.index(d["line"]), "kind": KIND_KEY[d["kind"]], "size": SIZE_KEY[d["size"]],
             "issue": iss["id"], "reporter": iss["reporter"], "created": date.fromtimestamp(iss["created_at"] or 0).isoformat()}
 
 
 def real_item(run: TeamRun, events: list[dict[str, Any]]) -> dict[str, Any]:
-    """A run a person signed off: one delivery, measured (实测). Its cycle runs until the signature; its duration (用时) is the run's own time."""
+    """A run a person signed off: one delivery, measured. Its cycle runs until the signature; its duration (``mins``) is the run's own time."""
     s, sig = run.s, run.s["signoff"]
     started = float(s.get("started_at") or sig["at"])
     ended = float(s.get("ended_at") or sig["at"])
@@ -94,27 +103,24 @@ def real_item(run: TeamRun, events: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def caught_of(run: TeamRun, events: list[dict[str, Any]], now: float) -> dict[str, Any]:
-    """The "safer" figures (更稳) for one run: what was sent back before release (by the checks, the independent review and people at the
-    gates, as its value stream counts them) and the risks people noted when they sent something back."""
+    """The "safer" figures for one run: what was sent back before release (by the checks, the independent review and people at the
+    gates, as its value stream counts them) and the risks people noted when they sent something back; and what the run cost
+    in credits, for the page's measured-against-estimate panel."""
     f = flow(run, events, now)
-    return {"caught": f["sent_back"], "risks": f["risks"]}
-
-
-def _gate_zh(label: str) -> str:
-    return GATE_ZH.get(label, label)
+    return {"caught": f["sent_back"], "risks": f["risks"], "credits": f["credits"], "agent_s": f["agent_s"]}
 
 
 def _after_colon(text: str) -> str:
     """What follows the first colon of an event text (full-width, or ASCII followed by a space), else ""."""
-    hits = [i for i in (text.find("："), text.find(": ")) if i >= 0]
+    hits = [i for i in (text.find("\uff1a"), text.find(": ")) if i >= 0]
     if not hits:
         return ""
     i = min(hits)
-    return text[i + (1 if text[i] == "：" else 2):]
+    return text[i + (1 if text[i] == "\uff1a" else 2):]
 
 
 def decisions(run: TeamRun, events: list[dict[str, Any]]) -> list[list[str]]:
-    """What people decided at the run's gates, in order: ["批准需求", "补充规则：…"] (approve Requirements, added rule: …). A run imported with its own
+    """What people decided at the run's gates, in order: ["Approved Requirements", "One more rule: …"]. A run imported with its own
     list (``decisions`` in its record) keeps that one."""
     kept = run.s.get("decisions")
     if isinstance(kept, list) and all(isinstance(x, list) and len(x) == 2 for x in kept):
@@ -124,14 +130,14 @@ def decisions(run: TeamRun, events: list[dict[str, Any]]) -> list[list[str]]:
         if e.get("from") != "person" or e.get("kind") not in ("approved", "bounce"):
             continue
         role = run.roles.get(str(e.get("role") or "")) or {}
-        gate = _gate_zh(str(role.get("gate_label") or role.get("title") or ""))
-        verb = "批准" if e["kind"] == "approved" else "退回"
+        gate = str(role.get("gate_label") or role.get("title") or "")
+        verb = DECISIONS[e["kind"]]
         text = str(e.get("text") or "")
         note = _after_colon(text)
         note = _BOUNCE_TO.sub("", _LEAD.sub("", note.strip())).strip()
         if len(note) > NOTE_MAX:
             note = note[:NOTE_MAX - 1] + "…"
-        out.append([verb + gate, note or ("无补充意见" if verb == "批准" else "按审查意见再改一轮")])
+        out.append([f"{verb} {gate}", note or (NO_COMMENT if e["kind"] == "approved" else ONE_MORE_ROUND)])
     return out
 
 
@@ -143,26 +149,26 @@ def live_card(run: TeamRun, now: float) -> dict[str, Any] | None:
         if run.s["status"] != "done" or run.sign_block():
             return None
         waited = (now - float(run.s.get("ended_at") or now)) / 3600
-        return {**base, "state": "wait", "col": "运维", "gate": "签字放行", "role": "", "who": "负责人",
-                "hours": round(max(0.0, waited), 2), "focus": "已交付并通过检查，待签字放行", "pr": (run.pr() or {}).get("number")}
+        return {**base, "state": "wait", "col": COL_OPERATION, "gate": "Sign-off", "role": "", "who": OWNER,
+                "hours": round(max(0.0, waited), 2), "focus": "Delivered and checks passed; waiting for the sign-off", "pr": (run.pr() or {}).get("number")}
     pending = [k for k in run.order if run.lane(k).get("gate") == "pending"]
     if pending:
         key = pending[0]
         role = run.roles[key]
-        label = _gate_zh(str(role.get("gate_label") or run.title(key)))
+        label = str(role.get("gate_label") or run.title(key))
         since = max([float(e.get("at") or 0) for e in run.events if e.get("kind") == "gate" and e.get("role") == key] or [now])
         if role.get("plan") or role.get("delivery"):
-            focus = "确认分工、验收标准与交付标签"
+            focus = "Confirm the work split, the acceptance criteria and the delivery tag"
         elif not role.get("writable"):
-            focus = "独立审查已出结论，待负责人决定"
+            focus = "The independent review has its verdict; the owner decides"
         else:
-            focus = f"{label}待负责人确认"
-        return {**base, "state": "wait", "col": GATE_COL.get(label, PHASE_COL.get(str(role.get("phase") or ""), "运维")),
-                "gate": f"{label}关卡", "role": key, "who": "负责人", "hours": round(max(0.0, now - since) / 3600, 2),
+            focus = f"{label} waits for the owner to confirm"
+        return {**base, "state": "wait", "col": GATE_COL.get(label, PHASE_COL.get(str(role.get("phase") or ""), COL_OPERATION)),
+                "gate": f"{label} gate", "role": key, "who": OWNER, "hours": round(max(0.0, now - since) / 3600, 2),
                 "focus": focus}
     working = [k for k in run.order if run.lane(k)["status"] in ACTIVE]
     latest = max(working, key=lambda k: float(run.lane(k).get("started_at") or 0)) if working else None
-    col = PHASE_COL.get(str(run.roles[latest].get("phase") or ""), "构建") if latest else "构思"
+    col = PHASE_COL.get(str(run.roles[latest].get("phase") or ""), COL_CONSTRUCTION) if latest else COL_IDEATION
     return {**base, "state": "agent", "col": col, "members": max(1, len(working)),
             "mins": max(0, round((now - float(run.s.get("started_at") or now)) / 60))}
 
@@ -178,7 +184,7 @@ def flow(run: TeamRun, events: list[dict[str, Any]], now: float) -> dict[str, An
 
     ``segments`` cut the run in time: ``person`` while a gate waits for a person (from the gate to their decision) and
     while a delivered run waits for its signature; ``agent`` the rest, by the kanban column of the role that was set to
-    work last (构思/启动/构建/运维: ideation / start / build / operate), and rework (返工) from a role's second round until a role works for the first time or a gate
+    work last (Ideation / Inception / Construction / Operation), and Rework from a role's second round until a role works for the first time or a gate
     stops the run. ``marks`` are the moments: gates, decisions, the checks or a review sending work back, the
     deployment, the signature, the PR going into main. Seconds count from the run's start (``at`` in the board's
     links). The rest is the numbers the delivery details show: agent and person time, credits, checks, send-backs, review."""
@@ -190,7 +196,7 @@ def flow(run: TeamRun, events: list[dict[str, Any]], now: float) -> dict[str, An
     evs = sorted((e for e in events if e.get("at") is not None), key=lambda e: (float(e["at"]), int(e.get("seq") or 0)))
     rel = lambda t: round(max(0.0, float(t) - t0), 1)  # noqa: E731
     title = lambda k: run.title(k) if k in run.roles else str(k or "")  # noqa: E731
-    col_of = lambda k: PHASE_COL.get(str((run.roles.get(k) or {}).get("phase") or ""), "构建")  # noqa: E731
+    col_of = lambda k: PHASE_COL.get(str((run.roles.get(k) or {}).get("phase") or ""), COL_CONSTRUCTION)  # noqa: E731
 
     person, marks, decided = [], [], []
     curated = s.get("decisions") if isinstance(s.get("decisions"), list) else None
@@ -203,32 +209,32 @@ def flow(run: TeamRun, events: list[dict[str, Any]], now: float) -> dict[str, An
         if kind == "gate" and key in run.roles:
             open_at.add(key)
             role = run.roles[key]
-            label = _gate_zh(str(role.get("gate_label") or title(key)))
+            label = str(role.get("gate_label") or title(key))
             dec = next((x for x in evs[i + 1:] if x.get("role") == key and x.get("from") == "person"
                         and x.get("kind") in ("approved", "bounce")), None)
             to = float(dec["at"]) if dec else stop
             person.append({"from": rel(e["at"]), "to": rel(to), "who": "person", "col": GATE_COL.get(label, col_of(key)),
-                           "phase": str(role.get("phase") or ""), "label": f"等人批准 · {label}关卡", "roles": [key], "gate": key,
-                           "decision": ("批准" if dec["kind"] == "approved" else "退回") if dec else None})
-            marks.append({"at": rel(e["at"]), "kind": "gate", "role": key, "label": f"{label}关卡：等人批准"})
+                           "phase": str(role.get("phase") or ""), "label": f"Awaiting approval · {label} gate", "roles": [key], "gate": key,
+                           "decision": DECISIONS[dec["kind"]] if dec else None})
+            marks.append({"at": rel(e["at"]), "kind": "gate", "role": key, "label": f"{label} gate: awaiting approval"})
         elif kind in ("approved", "bounce") and src == "person" and key in run.roles:
             open_at.discard(key)
-            label = _gate_zh(str(run.roles[key].get("gate_label") or title(key)))
-            verb = "批准" if kind == "approved" else "退回"
+            label = str(run.roles[key].get("gate_label") or title(key))
+            verb = DECISIONS[kind]
             told = float(e["at"]) if kind == "bounce" else told
-            decided.append({"at": rel(e["at"]), "role": key, "gate": verb + label, "note": _short(str(e.get("text") or ""))})
-            marks.append({"at": rel(e["at"]), "kind": kind, "role": key, "label": verb + label})
+            decided.append({"at": rel(e["at"]), "role": key, "gate": f"{verb} {label}", "note": _short(str(e.get("text") or ""))})
+            marks.append({"at": rel(e["at"]), "kind": kind, "role": key, "label": f"{verb} {label}"})
         elif kind == "bounce" and src == "tests":
-            marks.append({"at": rel(e["at"]), "kind": "check", "role": key, "label": f"检查不过，退回{title(key)}"})
-        elif kind == "bounce" and src in run.roles and not str(e.get("text") or "").startswith(("按人的意见", "As the person said")) and float(e["at"]) - told > 2:
-            marks.append({"at": rel(e["at"]), "kind": "review", "role": key, "label": f"{title(src)}要改，退回{title(key)}"})
+            marks.append({"at": rel(e["at"]), "kind": "check", "role": key, "label": f"Checks failed, sent back {title(key)}"})
+        elif kind == "bounce" and src in run.roles and not str(e.get("text") or "").startswith(("As the person said", "\u6309\u4eba\u7684\u610f\u89c1")) and float(e["at"]) - told > 2:
+            marks.append({"at": rel(e["at"]), "kind": "review", "role": key, "label": f"{title(src)} asked for changes, sent back {title(key)}"})
         elif kind == "deployed":
-            marks.append({"at": rel(e["at"]), "kind": "deployed", "role": key, "label": "部署到本机"})
+            marks.append({"at": rel(e["at"]), "kind": "deployed", "role": key, "label": "Deployed locally"})
     if curated and len(curated) == len(decided):  # an imported run's own wording, at its decisions' moments
         for d, (gate, note) in zip(decided, curated):
             d.update(gate=str(gate), note=str(note))
     for d in decided:
-        d["note"] = d["note"] or ("无补充意见" if d["gate"].startswith("批准") else "按审查意见再改一轮")
+        d["note"] = d["note"] or (NO_COMMENT if d["gate"].startswith("Approved") else ONE_MORE_ROUND)
 
     # agent time: the run's span outside the gates, cut where the work moves to another column or into a second round
     states, seen = [], set()
@@ -238,7 +244,7 @@ def flow(run: TeamRun, events: list[dict[str, Any]], now: float) -> dict[str, An
             continue
         again = key in seen
         seen.add(key)
-        label = "返工" if again else col_of(key)
+        label = REWORK if again else col_of(key)
         if states and states[-1]["label"] == label and (again or states[-1]["col"] == col_of(key)):
             if key not in states[-1]["roles"]:
                 states[-1]["roles"].append(key)  # set to work together: one segment
@@ -254,7 +260,7 @@ def flow(run: TeamRun, events: list[dict[str, Any]], now: float) -> dict[str, An
             continue
         st = next((x for x in reversed(states) if x["t"] <= a + 0.5), states[0] if states else None)
         if st is None:
-            st = {"col": "构思", "phase": "", "label": "建仓库", "roles": []}
+            st = {"col": COL_IDEATION, "phase": "", "label": "Set up repository", "roles": []}
         if agent and agent[-1]["label"] == st["label"] and abs(agent[-1]["to"] - rel(a)) < 1:
             agent[-1]["to"] = rel(b)
             continue
@@ -265,14 +271,14 @@ def flow(run: TeamRun, events: list[dict[str, Any]], now: float) -> dict[str, An
     # Sign-off: from the delivery to the signature (still waiting when there is none yet)
     sign = None
     if ended is not None and s["status"] == "done" and not run.sign_block():
-        sign = {"from": rel(ended), "to": rel(float(sig["at"]) if sig else now), "who": "person", "col": "运维", "phase": "operation",
-                "label": "签字放行", "roles": [], "gate": "signoff", "decision": "签字" if sig else None}
+        sign = {"from": rel(ended), "to": rel(float(sig["at"]) if sig else now), "who": "person", "col": COL_OPERATION, "phase": "operation",
+                "label": "Sign-off", "roles": [], "gate": "signoff", "decision": "Signed" if sig else None}
     segments = sorted(agent + person + ([sign] if sign and sign["to"] - sign["from"] >= 1 else []), key=lambda x: x["from"])
     if sig:
-        marks.append({"at": rel(sig["at"]), "kind": "signoff", "role": None, "label": f"{sig.get('by') or ''} 签字放行"})
+        marks.append({"at": rel(sig["at"]), "kind": "signoff", "role": None, "label": f"{sig.get('by') or ''} signed off".strip()})
         pr = run.pr() or {}
         if pr.get("state") == "merged":
-            marks.append({"at": rel(sig["at"]), "kind": "merged", "role": None, "label": f"PR #{pr.get('number')} 合入 main"})
+            marks.append({"at": rel(sig["at"]), "kind": "merged", "role": None, "label": f"PR #{pr.get('number')} merged into main"})
     marks.sort(key=lambda m: m["at"])
 
     t = s["tests"]
@@ -292,7 +298,7 @@ def flow(run: TeamRun, events: list[dict[str, Any]], now: float) -> dict[str, An
             "risks": [{"what": str(r.get("what") or ""), "amount": r.get("amount"), "gate": str(r.get("gate") or ""),
                        "role": r.get("role"), "at": rel(r["at"]) if r.get("at") is not None else 0.0}
                       for r in s.get("risks") or [] if isinstance(r, dict)],
-            "rework": sum(x["label"].startswith("返工") for x in segments if x["who"] == "agent"),
+            "rework": sum(x["label"] == REWORK for x in segments if x["who"] == "agent"),
             "review": str(s.get("verdict") or ""), "deployed": any(m["kind"] == "deployed" for m in marks),
             "issue": run.issue(), "pr": run.pr(), "labels": _labels(run), "titles": {k: run.title(k) for k in run.order},
             "team": [{"key": k, "title": run.title(k), "icon": str(run.roles[k].get("icon") or k),

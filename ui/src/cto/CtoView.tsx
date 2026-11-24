@@ -13,10 +13,10 @@ import { deliveryLabel, paths } from '../board/format'
 import { errorText } from '../board/useBoard'
 import { itemOf, type BoardEntry, type CtoEntry, type CtoFilters, type ItemEntry } from '../nav'
 import { boardAt } from './stream'
-import { zh } from './vocab'
+import { word } from './vocab'
 import { MiniCheap, MiniFast, MiniMore, WeeklyChart, MiniSteady } from './charts'
 import { Flow } from './Flow'
-import { KIND, KINDS, KIND_VAR, SIZE, baseCycles, day1, fmt, ledger, ledgerCsv, md, metrics, ratioOf, wan, weekly, money } from './metrics'
+import { KIND, KINDS, KIND_VAR, SIZE, baseCycles, day1, fmt, kilo, ledger, ledgerCsv, md, metrics, ratioOf, weekly, money } from './metrics'
 import { CTO_CSS } from './styles'
 import { KIT_CSS } from '../kit'
 import type { CtoData, CtoFlow, CtoItem, Kind, Size } from './types'
@@ -66,6 +66,7 @@ export function CtoView({ onOpen, onItem = () => {}, onState, returning = false,
   const [limit, setLimit] = useState(12)
   const [perDay, setPerDay] = useState('')
   const [calcOpen, setCalcOpen] = useState(false)
+  const [assumeOpen, setAssumeOpen] = useState(false)
   const [printing, setPrinting] = useState(false)
   const [toast, setToast] = useState('')
   const [fresh, setFresh] = useState<ReadonlySet<string>>(new Set())
@@ -196,12 +197,13 @@ export function CtoView({ onOpen, onItem = () => {}, onState, returning = false,
   const scopeName = line < 0 ? 'All business lines' : deliveryLabel(M.lines[line])
   const scope = line < 0 ? `R&D centre ${m.seats} people · ${M.lines.length} business lines` : `${deliveryLabel(M.lines[line])} · ${m.seats} people`
   const st = m.steady
-  const value = Number(perDay) > 0 ? `¥${wan(m.built.length * m.adv * Number(perDay))}` : '—'
+  const value = Number(perDay) > 0 ? `$${kilo(m.built.length * m.adv * Number(perDay))}` : '—'
   const pickKind = (k: Kind | 'all') => {
     setKind(k)
     setLimit(12)
   }
   const toLedger = () => ledgerRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
+  const reals = data.items.filter((i) => i.real).sort((a, b) => (a.ship < b.ship ? 1 : a.ship > b.ship ? -1 : 0))
   const latest = data.items.find((i) => i.real && (line < 0 || i.line === line)) ?? data.items.find((i) => i.real)
   // Awaiting approval, with no run of this app at a gate: the newest measured delivery's first gate, at its moment
   const gateOf = async (run: string) => {
@@ -242,8 +244,8 @@ export function CtoView({ onOpen, onItem = () => {}, onState, returning = false,
       <style>{CTO_CSS}</style>
       <style>{KIT_CSS}</style>
       <header className="cto-top">
-        <span className="cto-tag" title="Taoyuan Technology is a fictitious company and the past deliveries are sample data; those marked Measured are deliveries of real runs that were signed off (including runs imported from other computers)">Simulated company · includes measured</span>
-        <span className="cto-org">Taoyuan Technology · {scope} · week 12 since AI-DLC was introduced</span>
+        <span className="cto-tag" title="Larkspur Outfitters is a fictitious company. Its past deliveries are generated from the assumptions listed under Assumptions, not measured. The deliveries marked Measured are real runs that were signed off (including runs imported from other computers)">Simulated company · {m.real} measured</span>
+        <span className="cto-org">{M.company ?? 'Larkspur Outfitters'} · {scope} · week 12 since AI-DLC was introduced</span>
         <span className="cto-grow" />
         <details className="cto-dl cto-noprint cto-noproj" ref={dlRef}>
           <summary className="kt-btn">Download ▾</summary>
@@ -257,9 +259,10 @@ export function CtoView({ onOpen, onItem = () => {}, onState, returning = false,
       {error && <div className="kt-banner" role="status">The CTO view failed to refresh: {error}. Showing the last data received</div>}
 
       <section className="cto-hero">
-        <h2>The same R&D team delivers more, ships faster, costs less and is more stable.</h2>
-        <p>The last 12 weeks against the 12 weeks before AI-DLC · only signed-off deliveries count{m.real ? <> · <button type="button" className="cto-link" onClick={() => { setRealOnly(true); setLimit(12); toLedger() }} title="Show only measured deliveries in the delivery list">{m.real} of them {m.real === 1 ? 'is a real run' : 'are real runs'} (measured)</button></> : ''}</p>
-        <div className="cto-print-only">Taoyuan Technology · {scopeName} · exported {new Date().toLocaleString('en-US', { hour12: false })} · see Method at the end</div>
+        <h2>Same {m.seats} people: the last 12 weeks against the 12 weeks before AI-DLC</h2>
+        <p>Simulated company: its history is generated from the assumptions below, not measured · only signed-off deliveries count{m.real ? <> · <button type="button" className="cto-link" onClick={() => { setRealOnly(true); setLimit(12); toLedger() }} title="Show only measured deliveries in the delivery list">{m.real} of them {m.real === 1 ? 'is a real run' : 'are real runs'} (measured)</button></> : ' · no measured run yet'}</p>
+        <p className="cto-honest">Only what is marked Measured comes from a real run. <button type="button" className="cto-link" onClick={() => { setAssumeOpen(true); setTimeout(() => document.querySelector('[data-anchor="assumptions"]')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }), 60) }}>See the assumptions ▾</button></p>
+        <div className="cto-print-only">Larkspur Outfitters · {scopeName} · exported {new Date().toLocaleString('en-US', { hour12: false })} · see Method at the end</div>
       </section>
 
       <nav className="cto-lines" aria-label="Business lines">
@@ -301,17 +304,17 @@ export function CtoView({ onOpen, onItem = () => {}, onState, returning = false,
           </div>
           {calcOpen && (
             <label className="cto-calc">
-              Gross margin per item per day ¥<input type="number" min={0} step={100} value={perDay} onChange={(e) => setPerDay(e.target.value)} placeholder="Enter an amount" autoFocus />, which brings in about <b data-testid="cto-value">{value}</b>
+              Gross margin per item per day $<input type="number" min={0} step={100} value={perDay} onChange={(e) => setPerDay(e.target.value)} placeholder="Enter an amount" autoFocus />, which brings in about <b data-testid="cto-value">{value}</b>
             </label>
           )}
         </article>
         <article className="cto-card" aria-label="Cheaper" data-anchor="cheap">
           <div className="cto-eyebrow">Cheaper</div>
           <div className="cto-value" data-testid="cto-cheap">−{Math.round((1 - m.unit / M.dayRate) * 100)}%</div>
-          <div className="cto-desc">Cost per person-day of work</div>
+          <div className="cto-desc">Cost per person-day of work (modelled: see Assumptions)</div>
           <MiniCheap m={m} meta={M} />
           <div className="cto-foot">
-            <span>The last 12 weeks are equivalent to saving ¥{wan(m.save)} of R&D spend</span>
+            <span>The last 12 weeks are equivalent to saving ${kilo(m.save)} of R&D spend</span>
             {latest?.real && <button type="button" className="cto-link" onClick={() => item(latest)} title={`${latest.t}: agent usage, people's time and decisions`}>See the consumption of one measured delivery ↗</button>}
           </div>
         </article>
@@ -323,12 +326,55 @@ export function CtoView({ onOpen, onItem = () => {}, onState, returning = false,
           <div className="cto-foot cto-foot-steady">
             <span data-testid="cto-caught">{st.reals ? `${st.reals} measured deliver${st.reals === 1 ? 'y' : 'ies'} caught ${fmt(st.caughtAll)} problem${st.caughtAll === 1 ? '' : 's'} before release: checks ${st.caught.checks} · review ${st.caught.review} · people ${st.caught.person}` : 'Problems caught before release: measured deliveries only'}</span>
             {st.risks[0] && (
-              <button type="button" className="cto-link" data-testid="cto-risk" onClick={() => onItem({ ...itemOf(st.risks[0].item), at: Math.round(st.risks[0].at) })} title={`${st.risks[0].item.t}: noted by the owner when sending back at the ${zh(st.risks[0].gate)} gate`}>
+              <button type="button" className="cto-link" data-testid="cto-risk" onClick={() => onItem({ ...itemOf(st.risks[0].item), at: Math.round(st.risks[0].at) })} title={`${st.risks[0].item.t}: noted by the owner when sending back at the ${word(st.risks[0].gate)} gate`}>
                 Risk stopped: {st.risks[0].what}{st.risks[0].amount != null ? ` ${money(st.risks[0].amount)}` : ''} ↗
               </button>
             )}
           </div>
         </article>
+      </section>
+
+      <details className="cto-notes cto-assume" data-anchor="assumptions" data-testid="cto-assumptions" open={assumeOpen || printing || undefined} onToggle={(e) => setAssumeOpen((e.currentTarget as HTMLDetailsElement).open)}>
+        <summary>Assumptions behind these numbers (simulated company)</summary>
+        <table>
+          <thead><tr><th>Assumption</th><th>Value</th><th>Used for</th></tr></thead>
+          <tbody>
+            <tr><td>The company</td><td>{M.company ?? 'Larkspur Outfitters'} (fictitious) · {M.lines.length} business lines × {M.peoplePerLine} people = {M.lines.length * M.peoplePerLine}</td><td>Headcount in More and Cheaper</td></tr>
+            <tr><td>Work, people alone</td><td>Small {M.eq.S} · Medium {M.eq.M} · Large {M.eq.L} person-days per delivery</td><td>The equivalent work behind Cheaper, and the estimate for a measured run</td></tr>
+            <tr><td>Work, with the agent team</td><td>Small {M.human.S} · Medium {M.human.M} · Large {M.human.L} person-days of people's time per delivery</td><td>The people's cost behind Cheaper, and the estimate for a measured run</td></tr>
+            <tr><td>One person-day costs</td><td>${fmt(M.dayRate)} ({M.currency ?? 'USD'}, fully loaded)</td><td>Cheaper: before, and people's share now</td></tr>
+            <tr><td>Agent seat</td><td>${M.seatUsdMonth} per person per month × {M.months} months (rate {M.fx})</td><td>Cheaper: the agent subscription</td></tr>
+            <tr><td>Volume, cycle times, defects</td><td>Generated with a fixed random seed (scripts/cto_history.py)</td><td>More, Faster, More stable, the weekly chart and the Simulated rows: they show how the page reads, they do not measure a gain</td></tr>
+            <tr><td>Measured runs</td><td>{m.real} so far</td><td>Their time, credits, checks and decisions are real; the work estimate beside them is the assumption above</td></tr>
+          </tbody>
+        </table>
+      </details>
+
+      <section className="cto-card cto-measured" aria-label="Measured runs against the estimate" data-anchor="measured" data-testid="cto-measured">
+        <h3>Measured runs against the estimate</h3>
+        {reals.length === 0 ? (
+          <p className="cto-dim">
+            No measured run yet. Raise a requirement on the team board and sign the delivery off: its real time, credits and checks appear here, next to what the same work would take people alone (an assumption).{' '}
+            <button type="button" className="cto-link cto-noprint" onClick={() => onOpen({ new: 'promo' })}>New requirement ↗</button>
+          </p>
+        ) : (
+          <>
+            <table>
+              <thead><tr><th>Delivery</th><th>Measured: this run</th><th>Estimate: people alone</th><th>Estimate: with the agent team</th></tr></thead>
+              <tbody>
+                {reals.map((i) => (
+                  <tr key={i.real}>
+                    <td><button type="button" className="cto-link" onClick={() => item(i)}>{i.t}</button><div className="cto-was">{SIZE[i.size]} · {KIND[i.kind]}</div></td>
+                    <td>{i.mins != null ? `${i.mins} min` : '—'} run time · {i.credits != null ? `${fmt(i.credits)} credits` : 'credits not recorded'}{i.tests ? ` · checks ${i.tests}` : ''}{i.members ? ` · ${i.members} members` : ''}</td>
+                    <td className="cto-est">{M.eq[i.size]} person-day{M.eq[i.size] === 1 ? '' : 's'} ≈ ${fmt(M.eq[i.size] * M.dayRate)}</td>
+                    <td className="cto-est">{M.human[i.size]} person-day{M.human[i.size] === 1 ? '' : 's'} of people's time ≈ ${fmt(M.human[i.size] * M.dayRate)}, plus the run</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="cto-dim">The left column is measured from the run. The two estimates use the size you confirmed at the gate and the assumptions above; they are not measured.</p>
+          </>
+        )}
       </section>
 
       <WeeklyChart weeks={weeks} today={M.today} onWeek={(w) => { setWeek(w); setLimit(12); toLedger() }} />
@@ -402,10 +448,11 @@ export function CtoView({ onOpen, onItem = () => {}, onState, returning = false,
       <details className="cto-notes" open={printing || undefined}>
         <summary>Method</summary>
         <ul>
-          <li>Data: delivery records of the last 12 weeks and the 12 weeks before AI-DLC for the simulated Taoyuan Technology R&D centre ({M.lines.length} business lines, {M.peoplePerLine} people each){m.real ? `; plus ${m.real} deliver${m.real === 1 ? 'y' : 'ies'} from real runs that were signed off (including runs imported from other computers), marked Measured` : ''}. Only signed-off deliveries count.</li>
+          <li>Simulated, not measured: the deliveries before AI-DLC and the simulated ones after it are generated from the assumptions at the top of the page (fixed random seed). They show how the page reads and prove nothing about a team's efficiency. A delivery is measured only when it is marked Measured: a real run that a person signed off. The estimate beside a measured run uses the assumptions too.</li>
+          <li>Data: delivery records of the last 12 weeks and the 12 weeks before AI-DLC for the simulated Larkspur Outfitters R&D centre ({M.lines.length} business lines, {M.peoplePerLine} people each){m.real ? `; plus ${m.real} deliver${m.real === 1 ? 'y' : 'ies'} from real runs that were signed off (including runs imported from other computers), marked Measured` : ''}. Only signed-off deliveries count.</li>
           <li>More: items released in the last 12 weeks ÷ items released in the first 12 weeks, same organisation and headcount.</li>
           <li>Faster: delivery cycle = release date − Issue creation date; "Before" is the average cycle of deliveries of the same size in the 12 weeks before AI-DLC. Cycles in the simulated history are sample values and do not stand for measured efficiency gains.</li>
-          <li>Cheaper: cost per person-day of work = (actual person-days × ¥{fmt(M.dayRate)} + agent subscription) ÷ equivalent work completed. Equivalent work by size: small {M.eq.S}, medium {M.eq.M}, large {M.eq.L} person-days; human effort with agent collaboration: small {M.human.S}, medium {M.human.M}, large {M.human.L} person-days; the subscription is Kiro Pro+ at USD {M.seatUsdMonth} per person per month, exchange rate {M.fx} (sample values, see meta in cto/history.json).</li>
+          <li>Cheaper: cost per person-day of work = (actual person-days × ${fmt(M.dayRate)} + agent subscription) ÷ equivalent work completed. Equivalent work by size: small {M.eq.S}, medium {M.eq.M}, large {M.eq.L} person-days; human effort with agent collaboration: small {M.human.S}, medium {M.human.M}, large {M.human.L} person-days; the subscription is the agent seat at USD {M.seatUsdMonth} per person per month, converted at {M.fx}. All of these are assumptions, listed under Assumptions at the top and in docs/cto-view-data.md.</li>
           <li>More stable: defects reported after release per 100 new apps and new features (a defect reported after release is recorded as a fix delivery and linked back to the original delivery); measured deliveries have no post-release observation period yet and are not counted in this ratio. Problems caught before release = send-backs by checks, independent review and people at the gates in measured deliveries; for a risk stopped, the owner fills in the content and the amount when sending back at a gate.</li>
           <li>Value: this page does not estimate revenue. After you enter the gross margin per item per day, it is estimated as "number of new apps and new features × average days earlier × daily gross margin".</li>
           <li>Delivery tags (type, size, business line) are proposed by the role at the first gate and confirmed by the owner at the gate.</li>

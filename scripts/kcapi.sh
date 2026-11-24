@@ -2,7 +2,7 @@
 # Call the LOCAL KiroCrew gateway API as the dashboard owner.
 #
 #   scripts/kcapi.sh GET  /api/apps
-#   scripts/kcapi.sh POST /api/apps/agent-rd-team/route '{"requirement":"双十一大促"}'
+#   scripts/kcapi.sh POST /api/apps/agent-rd-team/route '{"requirement":"Black Friday sale"}'
 #   scripts/kcapi.sh GET  /api/apps/agent-rd-team/health
 #
 # Auth: `kirocrew token`, run with the gateway's OWN interpreter, mints a 5-minute link token signed with

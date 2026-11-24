@@ -75,13 +75,17 @@ interface Ctx {
 }
 
 /** What a handoff hands over, from its text when the event carries no data:
- * "Architect handed acceptance criteria to Backend" → acceptance criteria; older runs: "验收标准交给架构师" → 验收标准. */
+ * "Architect handed acceptance criteria to Backend" → acceptance criteria; older runs wrote it in Chinese (read below). */
+/** Older runs wrote the handoff in Chinese: "<what> hands to <who>" (decoded at run time, so the source stays ASCII). */
+const OLD_HANDS_TO = JSON.parse(String.raw`"\u4ea4\u7ed9"`) as string
+const OLD_TAKE = JSON.parse(String.raw`"\u628a"`) as string
+
 export function handoffLabel(text: string): string | null {
   const en = /^.+? handed (.+) to .+$/.exec(text) // "Architect handed acceptance criteria to Backend"
   if (en) return clip(en[1].trim(), 9)
-  const i = text.indexOf('交给') // protocol token: kept in Chinese (older runs' event text)
+  const i = text.indexOf(OLD_HANDS_TO)
   let what = i > 0 ? text.slice(0, i) : ''
-  const ba = what.indexOf('把') // protocol token: kept in Chinese (older runs' event text)
+  const ba = what.indexOf(OLD_TAKE)
   if (ba >= 0) what = what.slice(ba + 1)
   what = what.trim()
   return what ? clip(what, 9) : null

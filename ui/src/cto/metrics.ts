@@ -11,9 +11,10 @@ export const SIZE: Record<Size, string> = { S: 'Small', M: 'Medium', L: 'Large' 
 export const KIND_VAR: Record<Kind, string> = { app: 'var(--s1)', feat: 'var(--s2)', fix: 'var(--s3)' }
 
 export const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
-/** An amount in yuan: ¥206.0k · ¥8,000 · '' (none). */
-export const money = (n: number | null | undefined) => (n == null ? '' : n >= 1e4 ? `¥${(n / 1e3).toFixed(1)}k` : `¥${fmt(n)}`)
-export const wan = (n: number) => (n >= 1e11 ? `${(n / 1e6).toFixed(2)}M` : `${fmt(n / 1e3)}k`)
+/** An amount in USD: $29.0k · $8,000 · '' (none). */
+export const money = (n: number | null | undefined) => (n == null ? '' : n >= 1e4 ? `$${(n / 1e3).toFixed(1)}k` : `$${fmt(n)}`)
+/** An amount without its symbol, in thousands (k) or millions (M). */
+export const kilo = (n: number) => (n >= 1e7 ? `${(n / 1e6).toFixed(2)}M` : `${fmt(n / 1e3)}k`)
 export const day1 = (d: number) => (d >= 10 ? Math.round(d) : Math.round(d * 10) / 10)
 export const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0)
 export const md = (iso: string) => iso.slice(5)

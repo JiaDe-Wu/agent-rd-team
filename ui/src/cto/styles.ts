@@ -138,6 +138,13 @@ export const CTO_CSS = `
 .cto-notes { color: var(--muted); font-size: 13px; }
 .cto-notes summary { cursor: pointer; color: var(--text); }
 .cto-notes ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.cto-assume table, .cto-measured table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+.cto-assume th, .cto-assume td, .cto-measured th, .cto-measured td { text-align: left; padding: 6px 12px 6px 0; border-top: 1px solid var(--border); vertical-align: top; }
+.cto-assume th, .cto-measured th { font-weight: 600; color: var(--text-strong); }
+.cto-assume td:first-child { color: var(--text-strong); white-space: nowrap; }
+.cto-measured h3 { margin: 0 0 4px; }
+.cto-measured .cto-est { color: var(--muted); }
+.cto-honest { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
 .cto-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 30; padding: 10px 16px; border-radius: 12px; background: var(--bg-hover); border: 1px solid var(--border); font-size: 14px; color: var(--text-strong); max-width: 640px; }
 
 /* Delivery detail: built from the CTO view's cards and charts and the board's pills, chips and icons */

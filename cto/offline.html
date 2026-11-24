@@ -1,20 +1,17 @@
 <!doctype html>
-<html lang="zh-CN" data-mode="dark" data-snapshot="">
+<html lang="en" data-mode="dark" data-snapshot="">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CTO 视图 · 离线版</title>
+<title>CTO view · offline</title>
 <link rel="icon" href="data:,">
 <style>
-/* 离线版不连 Kiro Crew：主题变量按宿主 kiro-dark / kiro-light 的默认值写死（取自 ui/preview/index.html） */
 :root {
   color-scheme: dark;
   --bg: #19161d; --bg-hover: #28242e; --card: #211d25; --text: #dcdadf; --text-strong: #f2f1f4; --muted: #938f9b;
   --border: #352f3d; --border-strong: #4a464f; --accent: #8e48ff; --accent-fg: #fff; --cell: #19161d;
   --font-body: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
-  /* 看板的状态色（ui/src/board/styles.ts）：洋红 = 等人批准，蓝 = 运行中，绿 = 通过 */
   --kt-run: #3cc4ff; --kt-ok: #3ee08f; --kt-approve: #ff6ec7; --kt-warn: #ffc53d; --kt-glass: color-mix(in srgb, #dcdadf 4%, transparent);
-  /* 图表：新应用、新功能用两种色相（dataviz 校验在宿主卡片底色上通过），修复弱化为灰 */
   --s1: #3987e5; --s2: #d95926; --s3: #6b6673; --s4: #9085e9; --deemph: #6b6673;
 }
 :root[data-mode="light"] {
@@ -44,7 +41,6 @@ select { padding: 7px 10px; border-radius: 10px; border: 1px solid var(--border)
 .tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); color: var(--text-secondary); }
 .tag.real { border-color: var(--accent); color: var(--text-primary); background: var(--fresh); }
 
-/* app 栏（与 Crew 里的 app 同一条：名称、两个视图的选项卡、投影）和本视图的顶栏 */
 .appbar { display: flex; align-items: center; gap: 6px 18px; flex-wrap: wrap; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
 .appbar .grow { flex: 1; }
 .appbar .btn { padding: 5px 12px; margin: 4px 0 6px; }
@@ -56,12 +52,10 @@ select { padding: 7px 10px; border-radius: 10px; border: 1px solid var(--border)
 .org { color: var(--text-secondary); font-size: 14px; }
 .top .grow { flex: 1; }
 
-/* 结论 */
 .hero { margin: 26px 0 18px; }
 .hero h1 { margin: 0; font-size: 34px; line-height: 1.3; font-weight: 700; letter-spacing: .01em; }
 .hero p { margin: 6px 0 0; color: var(--text-secondary); }
 
-/* 三张卡片 */
 .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 @media (max-width: 1180px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; }
@@ -82,7 +76,6 @@ select { padding: 7px 10px; border-radius: 10px; border: 1px solid var(--border)
 .flash { animation: flash 1.6s ease-out; }
 @keyframes flash { 0% { background: var(--fresh); } 100% { background: transparent; } }
 
-/* 卡片里的小图表 */
 .mini { position: relative; margin-top: 14px; }
 .mini svg { display: block; width: 100%; overflow: visible; }
 .mini text { font-size: 12px; fill: var(--muted); font-variant-numeric: tabular-nums; }
@@ -101,7 +94,6 @@ select { padding: 7px 10px; border-radius: 10px; border: 1px solid var(--border)
 body.is-projecting .mini text { font-size: 15px; } body.is-projecting .mini text.strong { font-size: 16px; }
 @media print { .link { display: none; } }
 
-/* 图表 */
 .chart-card { margin-top: 16px; }
 .chart-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .chart-head h2 { margin: 0; font-size: 16px; }
@@ -127,14 +119,12 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: 
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .wk-table { max-height: 270px; overflow: auto; }
 
-/* 业务线 */
 .lines { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
 .lines button { display: inline-flex; align-items: baseline; gap: 8px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); cursor: pointer; }
 .lines button b { font-variant-numeric: tabular-nums; }
 .lines button span { color: var(--muted); font-size: 13px; }
 .lines button[aria-pressed="true"] { border-color: var(--accent); background: var(--fresh); }
 
-/* 需求流动 */
 .flow { margin-top: 16px; }
 .now-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .now-head h2 { margin: 0; font-size: 16px; }
@@ -180,7 +170,6 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .decisions li b { font-weight: 600; white-space: nowrap; }
 .pop-act { display: flex; gap: 8px; margin-top: 2px; }
 
-/* 清单 */
 .ledger { margin-top: 16px; }
 .ledger-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
 .ledger-head h2 { margin: 0 8px 0 0; font-size: 16px; }
@@ -197,14 +186,12 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .ledger .src { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
 .more { margin-top: 10px; }
 
-/* 口径 */
 .sample-note { margin-top: 22px; color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 8px; }
 @media print { .sample-note { display: none; } }
 .notes { margin-top: 10px; color: var(--muted); font-size: 13px; }
 .notes summary { cursor: pointer; color: var(--text-secondary); }
 .notes ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
 
-/* 下载菜单 */
 .dl { position: relative; }
 .dl summary { list-style: none; }
 .dl summary::-webkit-details-marker { display: none; }
@@ -212,14 +199,12 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .dl .menu button { text-align: left; border: 0; background: transparent; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
 .dl .menu button:hover { background: var(--raise); }
 
-/* 投影：全屏、大字，藏起下载 */
 body.is-projecting .wrap { max-width: none; padding: 28px 56px 80px; }
 body.is-projecting { font-size: 18px; }
 body.is-projecting .hero h1 { font-size: 46px; }
 body.is-projecting .value { font-size: 56px; }
 body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head .tag, body.is-projecting #realOnly, body.is-projecting #more { display: none; }
 
-/* 打印（PDF） */
 .print-only { display: none; }
 @media print {
   @page { size: A4 landscape; margin: 10mm; }
@@ -235,81 +220,97 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
   .plot { height: 220px; }
 }
 
-/* 提示 */
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); padding: 10px 16px; border-radius: 12px; background: var(--raise); border: 1px solid var(--border); font-size: 14px; display: none; max-width: 640px; }
 @media (max-width: 960px) { .cards { grid-template-columns: 1fr; } .kanban { grid-template-columns: 1fr; } .kb-cell.span { grid-row: auto; } .pop { width: auto; left: 12px !important; right: 12px !important; } }
+.assume { margin-top: 10px; color: var(--muted); font-size: 13px; }
+.assume summary { cursor: pointer; color: var(--text-secondary); }
+.assume ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.honest { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+#measuredBox { margin-top: 14px; }
+#measuredBox table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+#measuredBox th, #measuredBox td { text-align: left; padding: 6px 12px 6px 0; border-top: 1px solid var(--border); vertical-align: top; }
+#measuredBox th { font-weight: 600; color: var(--text-strong); }
+#measuredBox .est { color: var(--muted); }
 </style>
 </head>
 <body class="viz-root">
 <div class="wrap">
   <header class="appbar">
-    <span class="brand">Agent 研发团队</span>
-    <div class="tabs" role="tablist" aria-label="视图">
-      <button role="tab" aria-selected="true" title="交付结果与需求流动">CTO 视图</button>
-      <button role="tab" aria-selected="false" id="toBoard" title="多 agent 团队怎么交付：角色、关卡、检查、签字">团队看板</button>
+    <span class="brand">Agent R&amp;D Team</span>
+    <div class="tabs" role="tablist" aria-label="Views">
+      <button role="tab" aria-selected="true" title="What was delivered, and what is in progress">CTO view</button>
+      <button role="tab" aria-selected="false" id="toBoard" title="How the agent team delivers: roles, gates, checks, sign-off">Team board</button>
     </div>
     <span class="grow"></span>
-    <button class="btn" id="project">投影</button>
+    <button class="btn" id="project">Projection</button>
   </header>
   <header class="top">
-    <span class="tag" title="桃源科技是参照真实零售企业构建的模拟公司；标「实测」的是真实运行并签字的交付（含从其他电脑导入的运行）">模拟企业 · 含实测</span>
+    <span class="tag" id="simTag" title="Larkspur Outfitters is a fictitious company. Its past deliveries are generated from the assumptions listed under Assumptions, not measured. The deliveries marked Measured are real runs that were signed off.">Simulated company</span>
     <span class="org" id="org"></span>
     <span class="grow"></span>
     <span class="tag" id="snapTag" hidden></span>
-    <details class="dl" id="dl"><summary class="btn">下载 ▾</summary>
+    <details class="dl" id="dl"><summary class="btn">Download ▾</summary>
       <div class="menu">
-        <button id="dlPdf">PDF（打印版，A4 横向）</button>
-        <button id="dlCsv">交付清单（CSV，按当前筛选）</button>
+        <button id="dlPdf">PDF (print version, A4 landscape)</button>
+        <button id="dlCsv">Delivery list (CSV, with the current filter)</button>
       </div>
     </details>
   </header>
 
   <section class="hero">
-    <h1>同样的研发团队，交付更多、上线更快、成本更低、质量更稳。</h1>
+    <h1 id="heroTitle">Same people: the last 12 weeks against the 12 weeks before AI-DLC</h1>
     <p id="heroSub"></p>
+    <p class="honest" id="heroHonest"></p>
     <div class="print-only" id="printMeta"></div>
   </section>
 
-  <nav class="lines" id="lines" aria-label="业务线"></nav>
+  <nav class="lines" id="lines" aria-label="Business lines"></nav>
 
   <section class="cards" id="cards">
     <article class="card" id="cMore">
-      <div class="eyebrow">更多</div>
+      <div class="eyebrow">More</div>
       <div class="value" id="vMore"></div>
       <div class="desc" id="dMore"></div>
       <div class="mini" id="mMore"></div>
       <div class="mini-legend" id="lMore"></div>
     </article>
     <article class="card" id="cFast">
-      <div class="eyebrow">更快</div>
+      <div class="eyebrow">Faster</div>
       <div class="value" id="vFast"></div>
-      <div class="desc">大型需求的交付周期</div>
+      <div class="desc">Delivery cycle of large requirements</div>
       <div class="mini" id="mFast"></div>
-      <div class="mini-legend"><span><i class="dotk" style="background:var(--deemph)"></i>以前</span><span><i class="dotk" style="background:var(--s4)"></i>现在</span></div>
-      <div class="mini-foot"><span id="xAdv"></span><button class="link" id="calcToggle">估算价值 ▸</button></div>
-      <label class="calc" id="calcRow" hidden>每项每天带来毛利 ¥<input id="perDay" type="number" min="0" step="100" placeholder="填入金额">，约多带来 <b id="vValue">—</b></label>
+      <div class="mini-legend"><span><i class="dotk" style="background:var(--deemph)"></i>Before</span><span><i class="dotk" style="background:var(--s4)"></i>Now</span></div>
+      <div class="mini-foot"><span id="xAdv"></span><button class="link" id="calcToggle">Estimate value ▸</button></div>
+      <label class="calc" id="calcRow" hidden>Gross margin per item per day $<input id="perDay" type="number" min="0" step="100" placeholder="Enter an amount">, which brings in about <b id="vValue">—</b></label>
     </article>
     <article class="card" id="cCheap">
-      <div class="eyebrow">更省</div>
+      <div class="eyebrow">Cheaper</div>
       <div class="value" id="vCheap"></div>
-      <div class="desc">每人日工作量的成本</div>
+      <div class="desc">Cost per person-day of work (modelled: see Assumptions)</div>
       <div class="mini" id="mCheap"></div>
       <div class="mini-foot" id="xSave"></div>
     </article>
     <article class="card" id="cSteady">
-      <div class="eyebrow">更稳</div>
+      <div class="eyebrow">More stable</div>
       <div class="value" id="vSteady"></div>
-      <div class="desc">每 100 项新应用和新功能的上线后缺陷</div>
+      <div class="desc">Post-release defects per 100 new apps and new features</div>
       <div class="mini" id="mSteady"></div>
       <div class="mini-foot" id="xCaught"></div>
     </article>
   </section>
 
+  <details class="assume" id="assume"><summary>Assumptions behind these numbers (simulated company)</summary><ul id="assumeList"></ul></details>
+
+  <section class="card" id="measuredBox">
+    <div class="chart-head"><h2>Measured runs against the estimate</h2></div>
+    <div id="measuredBody"></div>
+  </section>
+
   <section class="card chart-card">
     <div class="chart-head">
-      <h2>每周上线</h2><span class="sub" id="chartSub"></span>
+      <h2>Weekly releases</h2><span class="sub" id="chartSub"></span>
       <span class="grow" style="flex:1"></span>
-      <div class="seg" role="group" aria-label="图表或表格"><button id="asChart" aria-pressed="true">图</button><button id="asTable" aria-pressed="false">表格</button></div>
+      <div class="seg" role="group" aria-label="Chart or table"><button id="asChart" aria-pressed="true">Chart</button><button id="asTable" aria-pressed="false">Table</button></div>
     </div>
     <div class="legend" id="legend"></div>
     <div class="plot" id="plot"><div class="tip" id="tip"></div></div>
@@ -318,33 +319,33 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
 
   <section class="card flow">
     <div class="now-head">
-      <span class="dot is-live"></span><h2>需求流动</h2><span class="sub">快照时的状态</span>
+      <span class="dot is-live"></span><h2>Requirement flow</h2><span class="sub">State at the time of the snapshot</span>
       <span class="grow"></span>
     </div>
     <div class="now-stats" id="nowStats"></div>
     <div class="now-note" id="nowNote"></div>
-    <div class="kanban" id="kanban" role="table" aria-label="需求流动看板"></div>
-    <div class="pop" id="pop" hidden role="dialog" aria-label="这次交付中负责人的决定"></div>
+    <div class="kanban" id="kanban" role="table" aria-label="Requirement flow board"></div>
+    <div class="pop" id="pop" hidden role="dialog" aria-label="The owner's decisions in this delivery"></div>
   </section>
 
   <section class="card ledger">
     <div class="ledger-head">
-      <h2>交付清单</h2>
-      <div class="seg" role="group" aria-label="类型" id="kindSeg"></div>
-      <button class="btn small" id="realOnly" aria-pressed="false">只看实测</button>
+      <h2>Delivery list</h2>
+      <div class="seg" role="group" aria-label="Type" id="kindSeg"></div>
+      <button class="btn small" id="realOnly" aria-pressed="false">Measured only</button>
       <span class="org" id="ledgerCount"></span>
     </div>
     <table>
-      <thead><tr><th>交付</th><th>业务线</th><th>类型</th><th>规模</th><th>上线</th><th>周期</th><th>签字</th><th>Issue · PR</th><th>来源</th></tr></thead>
+      <thead><tr><th>Delivery</th><th>Business line</th><th>Type</th><th>Size</th><th>Released</th><th>Cycle</th><th>Signed by</th><th>Issue · PR</th><th>Source</th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
-    <button class="btn small more" id="more">显示更多</button>
+    <button class="btn small more" id="more">Show more</button>
   </section>
 
-  <p class="sample-note">离线版：数据为生成时的快照，跳转需在 Kiro Crew 中打开 CTO 视图。<button class="btn small" id="theme">切换明暗</button></p>
+  <p class="sample-note">Offline version: the data is a snapshot of when it was made; to jump to a delivery, open the CTO view in Kiro Crew. <button class="btn small" id="theme">Switch light / dark</button></p>
 
   <details class="notes">
-    <summary>口径</summary>
+    <summary>Method</summary>
     <ul id="notes"></ul>
   </details>
 </div>
@@ -356,20 +357,19 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
 (() => {
   const D = JSON.parse(document.getElementById('data').textContent);
   const M = D.meta;
-  const KIND = { app: '新应用', feat: '新功能', fix: '修复' };
+  const KIND = { app: 'New app', feat: 'New feature', fix: 'Fix' };
   const KIND_VAR = { app: '--s1', feat: '--s2', fix: '--s3' };
-  const SIZE = { S: '小', M: '中', L: '大' };
+  const SIZE = { S: 'Small', M: 'Medium', L: 'Large' };
   const $ = (id) => document.getElementById(id);
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
-  const fmt = (n) => Math.round(n).toLocaleString('zh-CN');
-  const wan = (n) => (n >= 1e8 ? (n / 1e8).toFixed(2) + ' 亿' : fmt(n / 1e4) + ' 万');
+  const fmt = (n) => Math.round(n).toLocaleString('en-US');
+  const kilo = (n) => (n >= 1e7 ? (n / 1e6).toFixed(2) + 'M' : fmt(n / 1e3) + 'k');
   const day1 = (d) => (d >= 10 ? Math.round(d) : Math.round(d * 10) / 10);
-  const money = (n) => (n == null ? '' : n >= 1e4 ? `¥${(n / 1e4).toFixed(1)} 万` : `¥${fmt(n)}`);
+  const money = (n) => (n == null ? '' : n >= 1e4 ? `$${(n / 1e3).toFixed(1)}k` : `$${fmt(n)}`);
   const mean = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
   const md = (iso) => iso.slice(5).replace('-', '-');
 
   const state = { line: -1, kind: 'all', realOnly: false, limit: 12, extra: [], sim: 0, live: null };
-  // 「以前」：引入前 12 周同规模交付的平均周期（全组织，不随筛选变化）
   const BASE_CYC = {};
   for (const s of ['S', 'M', 'L']) BASE_CYC[s] = mean(D.items.filter((i) => i.period === 'base' && i.size === s).map((i) => i.cyc));
 
@@ -391,7 +391,6 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
     const unit = eq ? cost / eq : 0;
     const built = agent.filter((i) => i.kind !== 'fix');
     const adv = mean(built.map((i) => Math.max(0, BASE_CYC[i.size] - i.cyc)));
-    // 更稳: defects after release per 100 new apps and features (a measured run has had no time after release: left out)
     const watched = (arr) => arr.filter((i) => i.kind !== 'fix' && !i.real);
     const defects = (arr) => arr.reduce((a, i) => a + ((i.defects || []).length), 0);
     const per100 = (arr) => (arr.length ? (defects(arr) / arr.length) * 100 : 0);
@@ -405,13 +404,15 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
   }
 
   function renderHeader(m) {
-    const scope = state.line < 0 ? `研发中心 ${m.seats} 人 · ${M.lines.length} 条业务线` : `${M.lines[state.line]} · ${m.seats} 人`;
-    $('org').textContent = `桃源科技 · ${scope} · 引入 AI-DLC 第 12 周`;
+    const scope = state.line < 0 ? `R&D centre ${m.seats} people · ${M.lines.length} business lines` : `${M.lines[state.line]} · ${m.seats} people`;
+    $('org').textContent = `${M.company || 'Larkspur Outfitters'} · ${scope} · week 12 since AI-DLC was introduced`;
     const real = m.agent.filter((i) => i.real).length;
-    $('heroSub').textContent = `近 12 周对比引入 AI-DLC 之前的 12 周 · 只计签字放行的交付` + (real ? ` · 其中 ${real} 项为真实运行（实测）` : '');
+    $('heroTitle').textContent = `Same ${m.seats} people: the last 12 weeks against the 12 weeks before AI-DLC`;
+    $('simTag').textContent = `Simulated company · ${real} measured`;
+    $('heroSub').textContent = 'Simulated company: its history is generated from the assumptions below, not measured · only signed-off deliveries count' + (real ? ` · ${real} of them ${real === 1 ? 'is a real run' : 'are real runs'} (measured)` : ' · no measured run yet');
+    $('heroHonest').textContent = 'Only what is marked Measured comes from a real run. The assumptions are listed under Assumptions.';
   }
 
-  // 卡片小图表共用：提示框挂在卡片上（值在前、名称在后）
   function cardTip(card, rows, x, y) {
     let tip = card.querySelector(':scope > .tip'); if (!tip) { tip = el('div', 'tip'); card.append(tip); }
     tip.replaceChildren();
@@ -429,7 +430,7 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
     svg.append(r);
   }
   const svText = (svg, x, y, text, attrs) => { const t = sv('text', { x, y, ...(attrs || {}) }); t.textContent = text; svg.append(t); return t; };
-  function barEnd(svg, x0, y0, w, h, fill) {   // 右端 4px 圆角，基线端方角
+  function barEnd(svg, x0, y0, w, h, fill) {
     const r = Math.min(4, w, h / 2);
     svg.append(sv('path', { d: `M${x0},${y0} H${x0 + w - r} Q${x0 + w},${y0} ${x0 + w},${y0 + r} V${y0 + h - r} Q${x0 + w},${y0 + h} ${x0 + w - r},${y0 + h} H${x0} Z`, fill }));
   }
@@ -437,9 +438,9 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
   function drawMore(m) {
     const card = $('cMore'), box = $('mMore'); box.replaceChildren();
     const W = box.clientWidth, L = 64, R = 70, bh = 22, gap = 14, H = 2 * bh + gap + 4;
-    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': `交付量：前 12 周 ${m.base.length} 项，近 12 周 ${m.agent.length} 项` });
+    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': `Deliveries: ${m.base.length} in the first 12 weeks, ${m.agent.length} in the last 12` });
     const maxT = Math.max(m.base.length, m.agent.length, 1), pw = W - L - R;
-    [['前 12 周', m.base], ['近 12 周', m.agent]].forEach(([lab, arr], r) => {
+    [['First 12 weeks', m.base], ['Last 12 weeks', m.agent]].forEach(([lab, arr], r) => {
       const y0 = 2 + r * (bh + gap), now = r === 1;
       svText(svg, 0, y0 + bh / 2 + 4, lab, now ? { class: 'strong' } : {});
       let cum = 0; const segs = ['app', 'feat', 'fix'].map((k) => [k, m.cnt(arr, k)]).filter(([, n]) => n > 0);
@@ -449,14 +450,14 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
         if (j === segs.length - 1) barEnd(svg, x0, y0, x1 - x0, bh, `var(${KIND_VAR[k]})`);
         else svg.append(sv('rect', { x: x0, y: y0, width: x1 - x0, height: bh, fill: `var(${KIND_VAR[k]})` }));
       });
-      svText(svg, L + (cum / maxT) * pw + 8, y0 + bh / 2 + 4, `${fmt(arr.length)} 项`, now ? { class: 'strong' } : {});
+      svText(svg, L + (cum / maxT) * pw + 8, y0 + bh / 2 + 4, `${fmt(arr.length)} items`, now ? { class: 'strong' } : {});
       hitRow(svg, card, box, L - 4, y0 - 3, (cum / maxT) * pw + 8, bh + 6,
-        [[fmt(arr.length), `${lab} 合计`], ...['app', 'feat', 'fix'].map((k) => [fmt(m.cnt(arr, k)), KIND[k], `var(${KIND_VAR[k]})`])]);
+        [[fmt(arr.length), `${lab} total`], ...['app', 'feat', 'fix'].map((k) => [fmt(m.cnt(arr, k)), KIND[k], `var(${KIND_VAR[k]})`])]);
     });
     box.append(svg);
     const lg = $('lMore'); lg.replaceChildren();
     for (const k of ['app', 'feat', 'fix']) {
-      const b = el('button'); b.setAttribute('aria-pressed', String(state.kind === k)); b.title = `前 12 周 ${m.cnt(m.base, k)} 项；点击筛选下方交付清单`;
+      const b = el('button'); b.setAttribute('aria-pressed', String(state.kind === k)); b.title = `${m.cnt(m.base, k)} in the first 12 weeks; click to filter the delivery list below`;
       const sw = el('i', 'sw'); sw.style.background = `var(${KIND_VAR[k]})`;
       b.append(sw, document.createTextNode(KIND[k]), el('b', null, fmt(m.cnt(m.agent, k))));
       b.onclick = () => { setKind(state.kind === k ? 'all' : k); document.querySelector('.ledger').scrollIntoView({ behavior: 'smooth' }); };
@@ -466,9 +467,9 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
 
   function drawFast(m) {
     const card = $('cFast'), box = $('mFast'); box.replaceChildren();
-    const rows = [['大型', 'L'], ['中型', 'M'], ['小型', 'S']].map(([lab, s]) => [lab, BASE_CYC[s], m.cyc(m.agent, s)]);
+    const rows = [['Large', 'L'], ['Medium', 'M'], ['Small', 'S']].map(([lab, s]) => [lab, BASE_CYC[s], m.cyc(m.agent, s)]);
     const W = box.clientWidth, L = 40, R = 104, rh = 26, H = rows.length * rh;
-    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': '交付周期，以前与现在：' + rows.map(([l, b, a]) => `${l} ${day1(b)} 天 → ${day1(a)} 天`).join('，') });
+    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': 'Delivery cycle, before and now: ' + rows.map(([l, b, a]) => `${l} ${day1(b)} days → ${day1(a)} days`).join(', ') });
     const max = Math.max(...rows.map(([, b, a]) => Math.max(b, a)), 1), pw = W - L - R, x = (v) => L + (v / max) * pw;
     svg.append(sv('line', { x1: L, x2: L, y1: 2, y2: H - 2, stroke: 'var(--axis)', 'stroke-width': 1 }));
     rows.forEach(([lab, b, a], r) => {
@@ -479,9 +480,9 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
       svg.append(sv('circle', { cx: x(a), cy, r: 5, fill: 'var(--s4)', stroke: 'var(--card)', 'stroke-width': 2 }));
       const t = sv('text', { x: W, y: cy + 4, 'text-anchor': 'end' });
       const t1 = sv('tspan', {}); t1.textContent = `${day1(b)} → `;
-      const t2 = sv('tspan', { class: 'strong', style: 'fill:var(--text-strong);font-weight:600' }); t2.textContent = `${day1(a)} 天`;
+      const t2 = sv('tspan', { class: 'strong', style: 'fill:var(--text-strong);font-weight:600' }); t2.textContent = `${day1(a)} days`;
       t.append(t1, t2); svg.append(t);
-      hitRow(svg, card, box, 0, cy - rh / 2 + 1, W, rh - 2, [[`${day1(b)} 天`, '以前', 'var(--deemph)'], [`${day1(a)} 天`, '现在', 'var(--s4)'], [`${Math.round((1 - a / b) * 100)}%`, '缩短']]);
+      hitRow(svg, card, box, 0, cy - rh / 2 + 1, W, rh - 2, [[`${day1(b)} days`, 'Before', 'var(--deemph)'], [`${day1(a)} days`, 'Now', 'var(--s4)'], [`${Math.round((1 - a / b) * 100)}%`, 'Shorter']]);
     });
     box.append(svg);
   }
@@ -489,15 +490,15 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
   function drawCheap(m) {
     const card = $('cCheap'), box = $('mCheap'); box.replaceChildren();
     const W = box.clientWidth, L = 40, R = 70, bh = 22, gap = 14, H = 2 * bh + gap + 4;
-    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': `每人日工作量的成本：以前 ¥${fmt(M.dayRate)}，现在 ¥${fmt(m.unit)}` });
+    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': `Cost per person-day of work: before $${fmt(M.dayRate)}, now $${fmt(m.unit)}` });
     const pw = W - L - R, human = m.eq ? (m.human * M.dayRate) / m.eq : 0, agentPart = m.eq ? m.sub / m.eq : 0;
-    [['以前', M.dayRate, 'var(--deemph)'], ['现在', m.unit, 'var(--s4)']].forEach(([lab, v, fill], r) => {
+    [['Before', M.dayRate, 'var(--deemph)'], ['Now', m.unit, 'var(--s4)']].forEach(([lab, v, fill], r) => {
       const y0 = 2 + r * (bh + gap), w = (v / M.dayRate) * pw;
       svText(svg, 0, y0 + bh / 2 + 4, lab, r === 1 ? { class: 'strong' } : {});
       barEnd(svg, L, y0, w, bh, fill);
-      svText(svg, L + w + 8, y0 + bh / 2 + 4, `¥${fmt(v)}`, r === 1 ? { class: 'strong' } : {});
-      hitRow(svg, card, box, L - 4, y0 - 3, w + 8, bh + 6, r === 0 ? [[`¥${fmt(v)}`, '人工完成，每人日']] :
-        [[`¥${fmt(v)}`, 'agent 协作，每人日'], [`¥${fmt(human)}`, '其中人的时间'], [`¥${fmt(agentPart)}`, '其中 agent 订阅']]);
+      svText(svg, L + w + 8, y0 + bh / 2 + 4, `$${fmt(v)}`, r === 1 ? { class: 'strong' } : {});
+      hitRow(svg, card, box, L - 4, y0 - 3, w + 8, bh + 6, r === 0 ? [[`$${fmt(v)}`, 'Done by people, per person-day']] :
+        [[`$${fmt(v)}`, 'With agent collaboration, per person-day'], [`$${fmt(human)}`, "Of which people's time"], [`$${fmt(agentPart)}`, 'Of which agent subscription']]);
     });
     box.append(svg);
   }
@@ -505,39 +506,39 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
   function drawSteady(m) {
     const card = $('cSteady'), box = $('mSteady'); box.replaceChildren();
     const st = m.steady, W = box.clientWidth, L = 40, R = 70, bh = 22, gap = 14, H = 2 * bh + gap + 4, max = Math.max(st.before, st.now, 0.1);
-    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': `每 100 项新应用和新功能的上线后缺陷：以前 ${st.before.toFixed(1)}，现在 ${st.now.toFixed(1)}` });
+    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': `Post-release defects per 100 new apps and new features: before ${st.before.toFixed(1)}, now ${st.now.toFixed(1)}` });
     const pw = W - L - R;
-    [['以前', st.before, 'var(--deemph)', st.dBefore, st.nBefore], ['现在', st.now, 'var(--s4)', st.dNow, st.nNow]].forEach(([lab, v, fill, d, n], r) => {
+    [['Before', st.before, 'var(--deemph)', st.dBefore, st.nBefore], ['Now', st.now, 'var(--s4)', st.dNow, st.nNow]].forEach(([lab, v, fill, d, n], r) => {
       const y0 = 2 + r * (bh + gap), w = (v / max) * pw;
       svText(svg, 0, y0 + bh / 2 + 4, lab, r === 1 ? { class: 'strong' } : {});
       barEnd(svg, L, y0, Math.max(w, 1), bh, fill);
       svText(svg, L + w + 8, y0 + bh / 2 + 4, v.toFixed(1), r === 1 ? { class: 'strong' } : {});
-      hitRow(svg, card, box, L - 4, y0 - 3, w + 8, bh + 6, [[v.toFixed(1), '每 100 项的上线后缺陷'], [fmt(d), '上线后缺陷'], [fmt(n), '新应用和新功能']]);
+      hitRow(svg, card, box, L - 4, y0 - 3, w + 8, bh + 6, [[v.toFixed(1), 'Post-release defects per 100'], [fmt(d), 'Post-release defects'], [fmt(n), 'New apps and new features']]);
     });
     box.append(svg);
   }
 
   function renderCards(m) {
     const ratio = m.base.length ? m.agent.length / m.base.length : 0;
-    $('vMore').textContent = ratio.toFixed(1) + ' 倍';
-    $('dMore').textContent = `交付量 · 同样 ${m.seats} 人`;
+    $('vMore').textContent = ratio.toFixed(1) + '×';
+    $('dMore').textContent = `Delivery volume · same ${m.seats} people`;
     const bL = BASE_CYC.L, aL = m.cyc(m.agent, 'L');
-    $('vFast').textContent = aL ? `${day1(bL)} 天 → ${day1(aL)} 天` : `${day1(bL)} 天 → —`;
-    $('xAdv').textContent = `新应用和新功能平均每项提前 ${day1(m.adv)} 天上线`;
+    $('vFast').textContent = aL ? `${day1(bL)} days → ${day1(aL)} days` : `${day1(bL)} days → —`;
+    $('xAdv').textContent = `New apps and new features ship ${day1(m.adv)} days earlier on average`;
     renderValue(m);
     $('vCheap').textContent = '−' + Math.round((1 - m.unit / M.dayRate) * 100) + '%';
-    $('xSave').textContent = `近 12 周相当于节省研发投入 ¥${wan(m.save)}`;
+    $('xSave').textContent = `The last 12 weeks are equivalent to saving $${kilo(m.save)} of R&D spend`;
     const st = m.steady;
     $('vSteady').textContent = `${st.before.toFixed(1)} → ${st.now.toFixed(1)}`;
     const top = st.risks[0];
-    $('xCaught').textContent = (st.reals ? `${st.reals} 项实测交付上线前拦下 ${fmt(st.caughtAll)} 个问题：检查 ${st.caught.checks} · 审查 ${st.caught.review} · 人 ${st.caught.person}` : '上线前拦下的问题：实测交付才有')
-      + (top ? `；拦下的风险：${top.what}${top.amount != null ? ' ' + money(top.amount) : ''}` : '');
+    $('xCaught').textContent = (st.reals ? `${st.reals} measured deliver${st.reals === 1 ? 'y' : 'ies'} caught ${fmt(st.caughtAll)} problem${st.caughtAll === 1 ? '' : 's'} before release: checks ${st.caught.checks} · review ${st.caught.review} · people ${st.caught.person}` : 'Problems caught before release: measured deliveries only')
+      + (top ? `; risk stopped: ${top.what}${top.amount != null ? ' ' + money(top.amount) : ''}` : '');
     drawMore(m); drawFast(m); drawCheap(m); drawSteady(m);
   }
 
   function renderValue(m) {
     const v = Number($('perDay').value);
-    $('vValue').textContent = v > 0 ? `¥${wan(m.built.length * m.adv * v)}` : '—';
+    $('vValue').textContent = v > 0 ? `$${kilo(m.built.length * m.adv * v)}` : '—';
   }
 
   function weekly() {
@@ -564,7 +565,7 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
   function renderChart() {
     const W = weekly();
     const before = mean(W.slice(0, 12).map((w) => w.total)), after = mean(W.slice(12).map((w) => w.total));
-    $('chartSub').textContent = `前 12 周平均每周 ${fmt(before)} 项 → 近 12 周平均每周 ${fmt(after)} 项；最近一周 ${fmt(W[W.length - 1].total)} 项（截至 ${md(M.today)}）`;
+    $('chartSub').textContent = `First 12 weeks average ${fmt(before)} per week → last 12 weeks ${fmt(after)} per week; latest week ${fmt(W[W.length - 1].total)} (as of ${md(M.today)})`;
     const legend = $('legend'); legend.replaceChildren();
     for (const k of ['app', 'feat', 'fix']) { const s = el('span'); const sw = el('i', 'sw'); sw.style.background = `var(${KIND_VAR[k]})`; s.append(sw, document.createTextNode(KIND[k])); legend.append(s); }
 
@@ -574,7 +575,7 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
     const pw = Wd - L - R, ph = H - T - B, slot = pw / W.length, bw = Math.min(24, slot * 0.56);
     const ymax = niceMax(Math.max(...W.map((w) => w.total)));
     const y = (v) => T + ph - (v / ymax) * ph;
-    const svg = sv('svg', { viewBox: `0 0 ${Wd} ${H}`, role: 'img', 'aria-label': '每周上线数量，按类型堆叠' });
+    const svg = sv('svg', { viewBox: `0 0 ${Wd} ${H}`, role: 'img', 'aria-label': 'Deliveries per week, stacked by type' });
     for (let t = 0; t <= 4; t++) {
       const v = (ymax / 4) * t, yy = Math.round(y(v)) + 0.5;
       svg.append(sv('line', { x1: L, x2: Wd - R, y1: yy, y2: yy, stroke: t === 0 ? 'var(--axis)' : 'var(--grid)', 'stroke-width': 1 }));
@@ -582,8 +583,8 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
     }
     const xm = Math.round(L + 12 * slot) + 0.5;
     svg.append(sv('line', { x1: xm, x2: xm, y1: T - 8, y2: T + ph, stroke: 'var(--muted)', 'stroke-width': 1 }));
-    const ml = sv('text', { x: xm + 6, y: T - 10, class: 'mark-label' }); ml.textContent = '引入 AI-DLC'; svg.append(ml);
-    const pl = sv('text', { x: L + 6 * slot, y: T - 10, class: 'mark-label', 'text-anchor': 'middle' }); pl.textContent = '引入前 12 周'; svg.append(pl);
+    const ml = sv('text', { x: xm + 6, y: T - 10, class: 'mark-label' }); ml.textContent = 'AI-DLC introduced'; svg.append(ml);
+    const pl = sv('text', { x: L + 6 * slot, y: T - 10, class: 'mark-label', 'text-anchor': 'middle' }); pl.textContent = 'Before AI-DLC (12 weeks)'; svg.append(pl);
     W.forEach((w, i) => {
       const cx = L + slot * i + slot / 2, x0 = cx - bw / 2;
       let cum = 0;
@@ -602,8 +603,8 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
       if (i % 2 === 0) { const tx = sv('text', { x: cx, y: T + ph + 18, 'text-anchor': 'middle' }); tx.textContent = md(w.start).replace(/^0/, '').replace('-0', '-').replace('-', '/'); svg.append(tx); }
       const hit = sv('rect', { x: L + slot * i, y: T, width: slot, height: ph, class: 'hit', tabindex: 0 });
       const show = () => {
-        tip.replaceChildren(el('div', 'when', `${md(w.start).replace('-', '/')} 起的一周 · ${i < 12 ? '引入前' : '引入后第 ' + (i - 11) + ' 周'}`));
-        const tot = el('div', 'row'); tot.append(el('b', null, fmt(w.total)), el('span', null, '合计')); tip.append(tot);
+        tip.replaceChildren(el('div', 'when', `Week from ${md(w.start).replace('-', '/')} · ${i < 12 ? 'before AI-DLC' : 'week ' + (i - 11) + ' with AI-DLC'}`));
+        const tot = el('div', 'row'); tot.append(el('b', null, fmt(w.total)), el('span', null, 'Total')); tip.append(tot);
         for (const k of ['app', 'feat', 'fix']) { const r = el('div', 'row'); const key = el('i', 'key'); key.style.background = `var(${KIND_VAR[k]})`; r.append(el('b', null, fmt(w[k])), key, el('span', null, KIND[k])); tip.append(r); }
         tip.style.display = 'block';
         const left = Math.min(Math.max(cx - tip.offsetWidth / 2, 0), Wd - tip.offsetWidth);
@@ -616,9 +617,9 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
     plot.prepend(svg);
 
     const tb = el('table'); const hr = el('tr');
-    for (const h of ['一周起始', '新应用', '新功能', '修复', '合计']) hr.append(el('th', h === '一周起始' ? null : 'num', h));
+    for (const h of ['Week start', 'New app', 'New feature', 'Fix', 'Total']) hr.append(el('th', h === 'Week start' ? null : 'num', h));
     tb.append(el('thead')); tb.firstChild.append(hr); const body = el('tbody');
-    W.forEach((w, i) => { const r = el('tr'); r.append(el('td', null, `${w.start}${i === 12 ? '（引入 AI-DLC）' : ''}`)); for (const k of ['app', 'feat', 'fix', 'total']) r.append(el('td', 'num', fmt(w[k]))); body.append(r); });
+    W.forEach((w, i) => { const r = el('tr'); r.append(el('td', null, `${w.start}${i === 12 ? ' (AI-DLC introduced)' : ''}`)); for (const k of ['app', 'feat', 'fix', 'total']) r.append(el('td', 'num', fmt(w[k]))); body.append(r); });
     tb.append(body); $('wkTable').replaceChildren(tb);
   }
 
@@ -632,46 +633,76 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
 
   function renderLedger() {
     const seg = $('kindSeg'); seg.replaceChildren();
-    for (const k of ['all', 'app', 'feat', 'fix']) { const b = el('button', null, k === 'all' ? '全部' : KIND[k]); b.setAttribute('aria-pressed', String(state.kind === k)); b.onclick = () => setKind(k); seg.append(b); }
+    for (const k of ['all', 'app', 'feat', 'fix']) { const b = el('button', null, k === 'all' ? 'All' : KIND[k]); b.setAttribute('aria-pressed', String(state.kind === k)); b.onclick = () => setKind(k); seg.append(b); }
     $('realOnly').setAttribute('aria-pressed', String(state.realOnly));
     const xs = rowsFor(), body = $('rows'); body.replaceChildren();
-    $('ledgerCount').textContent = `共 ${fmt(xs.length)} 项${state.realOnly ? '' : '，实测置顶'}`;
+    $('ledgerCount').textContent = `${fmt(xs.length)} item${xs.length === 1 ? '' : 's'}${state.realOnly ? '' : ', measured first'}`;
     for (const i of xs.slice(0, state.limit)) {
       const tr = el('tr'); if (i.real) tr.className = 'is-real'; if (i.fresh) tr.className += ' is-new';
-      tr.style.cursor = 'pointer'; tr.title = '交付详情'; tr.onclick = () => crew(`交付详情 › ${i.t}`);
-      const t = el('td'); t.append(el('div', null, i.t)); if (i.tests) t.append(el('div', 'was', `检查 ${i.tests} 通过`));
-      if (i.defects && i.defects.length) t.append(el('div', 'defect', `上线后缺陷 ${i.defects.length} · 修复见 ${i.defects.join('、')}`));
-      if (i.origin) t.append(el('div', 'was', `修复 ${i.origin} 上线后的缺陷`));
+      tr.style.cursor = 'pointer'; tr.title = 'Delivery detail'; tr.onclick = () => crew(`Delivery detail › ${i.t}`);
+      const t = el('td'); t.append(el('div', null, i.t)); if (i.tests) t.append(el('div', 'was', `Checks ${i.tests} passed`));
+      if (i.defects && i.defects.length) t.append(el('div', 'defect', `Post-release defects ${i.defects.length} · fixes in ${i.defects.join(', ')}`));
+      if (i.origin) t.append(el('div', 'was', `Fix of the post-release defect of ${i.origin}`));
       tr.append(t);
       tr.append(el('td', null, M.lines[i.line]));
       const kd = el('td'); const k = el('span', 'kind'); const sw = el('i', 'sw'); sw.style.background = `var(${KIND_VAR[i.kind]})`; k.append(sw, document.createTextNode(KIND[i.kind])); kd.append(k); tr.append(kd);
       tr.append(el('td', null, SIZE[i.size]));
-      tr.append(el('td', 'num', i.fresh ? '刚刚' : md(i.ship)));
-      const c = el('td'); c.append(el('div', null, i.mins != null ? `${i.mins} 分钟` : `${day1(i.cyc)} 天`), el('div', 'was', `以前约 ${day1(BASE_CYC[i.size])} 天`)); tr.append(c);
+      tr.append(el('td', 'num', i.fresh ? 'just now' : md(i.ship)));
+      const c = el('td'); c.append(el('div', null, i.mins != null ? `${i.mins} min` : `${day1(i.cyc)} days`), el('div', 'was', `Before: about ${day1(BASE_CYC[i.size])} days`)); tr.append(c);
       tr.append(el('td', null, i.signer));
       const ids = el('td', 'ids');
-      if (i.issue) { const n = el('div', 'mono', i.issue); if (i.reporter) { n.append(el('span', 'was', ` ${i.reporter}`)); n.title = `${i.reporter}提出` + (i.created ? `，${md(i.created)} 创建` : ''); } ids.append(n); if (i.pr) ids.append(el('div', 'was mono', `PR #${i.pr}`)); } else ids.textContent = '—';
+      if (i.issue) { const n = el('div', 'mono', i.issue); if (i.reporter) { n.append(el('span', 'was', ` ${i.reporter}`)); n.title = `Raised by ${i.reporter}` + (i.created ? `, created ${md(i.created)}` : ''); } ids.append(n); if (i.pr) ids.append(el('div', 'was mono', `PR #${i.pr}`)); } else ids.textContent = '—';
       tr.append(ids);
       const s = el('td'); const box = el('div', 'src');
-      if (i.real) { box.append(el('span', 'tag real', '实测')); const b = el('button', 'btn small', '▶ 回放 ↗'); b.onclick = (e) => { e.stopPropagation(); crew(`运行 ${i.real === 'live' ? '（现场运行）' : i.real} › 回放`); }; box.append(b); }
-      else box.append(el('span', 'tag', '模拟'));
+      if (i.real) { box.append(el('span', 'tag real', 'Measured')); const b = el('button', 'btn small', '▶ Replay ↗'); b.onclick = (e) => { e.stopPropagation(); crew(`Run ${i.real === 'live' ? '(live run)' : i.real} › Replay`); }; box.append(b); }
+      else box.append(el('span', 'tag', 'Simulated'));
       s.append(box); tr.append(s); body.append(tr);
     }
     $('more').hidden = xs.length <= state.limit;
-    $('more').textContent = `显示更多（还有 ${fmt(xs.length - state.limit)} 项）`;
+    $('more').textContent = `Show more (${fmt(xs.length - state.limit)} more)`;
   }
 
+  function renderAssume() {
+    const u = $('assumeList'); u.replaceChildren();
+    for (const s of [
+      `The company: ${M.company || 'Larkspur Outfitters'} (fictitious), ${M.lines.length} business lines × ${M.peoplePerLine} people = ${M.lines.length * M.peoplePerLine}.`,
+      `Work, people alone: small ${M.eq.S}, medium ${M.eq.M}, large ${M.eq.L} person-days per delivery (equivalent work behind Cheaper, and the estimate for a measured run).`,
+      `Work, with the agent team: small ${M.human.S}, medium ${M.human.M}, large ${M.human.L} person-days of people's time per delivery.`,
+      `One person-day costs $${fmt(M.dayRate)} (${M.currency || 'USD'}, fully loaded).`,
+      `Agent seat: $${M.seatUsdMonth} per person per month × ${M.months} months (rate ${M.fx}).`,
+      'Volume, cycle times and post-release defects: generated with a fixed random seed (scripts/cto_history.py); they show how the page reads, they do not measure a gain.',
+    ]) u.append(el('li', null, s));
+  }
+  function renderMeasured() {
+    const body = $('measuredBody'); body.replaceChildren();
+    const reals = all().filter((i) => i.real);
+    if (!reals.length) { body.append(el('p', 'sub', 'No measured run yet. Raise a requirement on the team board and sign the delivery off: its real time, credits and checks appear here, next to what the same work would take people alone (an assumption).')); return; }
+    const t = el('table'), hd = el('tr');
+    for (const h of ['Delivery', 'Measured: this run', 'Estimate: people alone', 'Estimate: with the agent team']) hd.append(el('th', null, h));
+    t.append(el('thead')); t.firstChild.append(hd);
+    const tb = el('tbody');
+    for (const i of reals) {
+      const r = el('tr'), pd = (n) => `${n} person-day${n === 1 ? '' : 's'}`;
+      r.append(el('td', null, `${i.t} (${SIZE[i.size]} · ${KIND[i.kind]})`),
+        el('td', null, `${i.mins != null ? i.mins + ' min' : '—'} run time · ${i.credits != null ? fmt(i.credits) + ' credits' : 'credits not recorded'}${i.tests ? ' · checks ' + i.tests : ''}${i.members ? ' · ' + i.members + ' members' : ''}`),
+        el('td', 'est', `${pd(M.eq[i.size])} ≈ $${fmt(M.eq[i.size] * M.dayRate)}`),
+        el('td', 'est', `${pd(M.human[i.size])} of people's time ≈ $${fmt(M.human[i.size] * M.dayRate)}, plus the run`));
+      tb.append(r);
+    }
+    t.append(tb); body.append(t, el('p', 'sub', 'The left column is measured from the run. The two estimates use the size confirmed at the gate and the assumptions above; they are not measured.'));
+  }
   function renderNotes() {
     const n = $('notes'); n.replaceChildren();
     for (const s of [
-      `数据：模拟的桃源科技研发中心（${M.lines.length} 条业务线，每条 ${M.peoplePerLine} 人）近 12 周与引入 AI-DLC 之前 12 周的交付记录` + (D.items.some((i) => i.real) ? `；另有 ${D.items.filter((i) => i.real).length} 项来自真实运行并签字的交付（含从其他电脑导入的运行），标为「实测」` : '') + '。只计签字放行的交付。',
-      '更多：近 12 周上线项数 ÷ 前 12 周上线项数，同一组织、人数不变。',
-      '更快：交付周期 = 上线日 − Issue 创建日；「以前」为引入前 12 周同规模交付的平均周期。模拟历史里的周期是示例值，不代表实测的效率提升。',
-      `更省：每人日工作量的成本 =（实际人工人日 × ¥${fmt(M.dayRate)} + agent 订阅）÷ 完成的等价工作量。等价工作量按规模：小 ${M.eq.S}、中 ${M.eq.M}、大 ${M.eq.L} 人日；agent 协作下的人工投入：小 ${M.human.S}、中 ${M.human.M}、大 ${M.human.L} 人日；订阅按每人 Kiro Pro+ 每月 ${M.seatUsdMonth} 美元、汇率 ${M.fx}（示例值，见 cto/history.json 的 meta）。`,
-      '价值：本页不推算收入。填入每项每天带来的毛利后，按「新应用和新功能的项数 × 平均提前天数 × 每天毛利」估算。',
-      '交付标签（类型、规模、业务线）由第一个关卡上的角色提议，负责人在关卡上确认。',
-      '更稳：每 100 项新应用和新功能在上线后报出的缺陷（上线后报出的缺陷记为修复类交付，并链接回原交付）；实测交付还没有上线后的观察期，不计入这个比例。上线前拦下的问题 = 实测交付中检查、独立审查和人在关卡上的退回次数；拦下的风险由负责人在关卡退回时填写内容和金额。',
-      'Issue 与 PR：每项交付对应一个 Issue（提出方、创建日）和一个合入 main 的 PR；实测运行的 PR 是它的运行分支，负责人签字放行时合入。上线后报出的缺陷记为修复类交付，与原交付互相链接。',
+      `Data: delivery records of the last 12 weeks and the 12 weeks before AI-DLC for the simulated ${M.company || 'Larkspur Outfitters'} R&D centre (${M.lines.length} business lines, ${M.peoplePerLine} people each)` + (D.items.some((i) => i.real) ? `; plus ${D.items.filter((i) => i.real).length} deliver${D.items.filter((i) => i.real).length === 1 ? 'y' : 'ies'} from real runs that were signed off (including runs imported from other computers), marked Measured` : '') + '. Only signed-off deliveries count.',
+      'Simulated, not measured: the deliveries before AI-DLC and the simulated ones after it are generated from the assumptions listed under Assumptions (fixed random seed). They show how the page reads and prove nothing about a team\'s efficiency. A delivery is measured only when it is marked Measured. The estimate beside a measured run uses the assumptions too.',
+      'More: items released in the last 12 weeks ÷ items released in the first 12 weeks, same organisation and headcount.',
+      'Faster: delivery cycle = release date − Issue creation date; "Before" is the average cycle of deliveries of the same size in the 12 weeks before AI-DLC. Cycles in the simulated history are sample values and do not stand for measured efficiency gains.',
+      `Cheaper: cost per person-day of work = (actual person-days × $${fmt(M.dayRate)} + agent subscription) ÷ equivalent work completed. Equivalent work by size: small ${M.eq.S}, medium ${M.eq.M}, large ${M.eq.L} person-days; human effort with agent collaboration: small ${M.human.S}, medium ${M.human.M}, large ${M.human.L} person-days; the subscription is the agent seat at USD ${M.seatUsdMonth} per person per month, converted at ${M.fx}. All of these are assumptions.`,
+      'More stable: defects reported after release per 100 new apps and new features (a defect reported after release is recorded as a fix delivery and linked back to the original delivery); measured deliveries have no post-release observation period yet and are not counted in this ratio. Problems caught before release = send-backs by checks, independent review and people at the gates in measured deliveries; for a risk stopped, the owner fills in the content and the amount when sending back at a gate.',
+      'Value: this page does not estimate revenue. After you enter the gross margin per item per day, it is estimated as "number of new apps and new features × average days earlier × daily gross margin".',
+      'Delivery tags (type, size, business line) are proposed by the role at the first gate and confirmed by the owner at the gate.',
+      'Issue and PR: each delivery has one Issue (raised by, creation date) and one PR merged into main; the PR of a measured run is its run branch, merged when the owner signs off. A defect reported after release is recorded as a fix delivery and linked both ways with the original delivery.',
     ]) n.append(el('li', null, s));
   }
 
@@ -684,83 +715,83 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
     const nav = $('lines'); nav.replaceChildren();
     [-1].concat(M.lines.map((_, i) => i)).forEach((li) => {
       const b = el('button'); b.setAttribute('aria-pressed', String(state.line === li));
-      b.append(el('b', null, li < 0 ? '全部' : M.lines[li]), el('span', null, `交付量 ${ratioOf(li).toFixed(1)} 倍`));
+      b.append(el('b', null, li < 0 ? 'All' : M.lines[li]), el('span', null, `Delivery volume ${ratioOf(li).toFixed(1)}×`));
       b.onclick = () => { state.line = li; state.limit = 12; render(); };
       nav.append(b);
     });
   }
-  const crew = (where) => toast(document.documentElement.dataset.snapshot ? `离线快照：请在 Kiro Crew 中打开 CTO 视图后再跳转（${where}）` : `请在 Kiro Crew 中打开：Agent 研发团队 › ${where}`);
-  const waited = (h) => (h < 1 ? `${Math.max(1, Math.round(h * 60))} 分钟` : `${h.toFixed(1)} 小时`);
-  const COLS = [['需求池', '已提交，待组队'], ['构思', '意图 · 约束 · 范围'], ['启动', '需求 · 设计 · 分工'], ['构建', '代码 · 测试 · 独立审查'], ['运维', '部署 · 上线 · 签字'], ['已交付', '近 7 天 · 实测可点开']];
-  const STAGES = ['构思', '启动', '构建', '运维'];
+  const crew = (where) => toast(document.documentElement.dataset.snapshot ? `Offline snapshot: open the CTO view in Kiro Crew to jump there (${where})` : `Open in Kiro Crew: Agent R&D Team › ${where}`);
+  const waited = (h) => (h < 1 ? `${Math.max(1, Math.round(h * 60))} min` : `${h.toFixed(1)} h`);
+  const COLS = [['Backlog', 'Submitted, waiting for a team'], ['Ideation', 'Intent · Constraints · Scope'], ['Inception', 'Requirements · Design · Work split'], ['Construction', 'Code · Tests · Independent review'], ['Operation', 'Deploy · Release · Sign-off'], ['Delivered', 'Last 7 days · open a measured one']];
+  const STAGES = ['Ideation', 'Inception', 'Construction', 'Operation'];
   function kcard(w) {
     const c = el('div', 'kcard' + (w.live ? ' is-live' : ''));
     const top = el('div', 'ktop');
-    if (w.state === 'wait') top.append(el('span', 'gate', w.gate), el('span', null, `已等 ${waited(w.hours)}`));
-    else if (w.state === 'agent') top.append(el('span', null, `${w.members} 位成员 · 已用 ${w.mins} 分钟`));
-    else top.append(el('span', null, '待组队'), el('span', null, `${w.mins} 分钟前提交`));
+    if (w.state === 'wait') top.append(el('span', 'gate', w.gate), el('span', null, `Waited ${waited(w.hours)}`));
+    else if (w.state === 'agent') top.append(el('span', null, `${w.members} member${w.members === 1 ? '' : 's'} · ${w.mins} min used`));
+    else top.append(el('span', null, 'Waiting for a team'), el('span', null, `Submitted ${w.mins} min ago`));
     const tt = el('div', 'ktitle', w.t); tt.title = w.t; c.append(top, tt);
     if (w.state === 'wait') c.append(el('div', 'kfocus', w.focus));
-    const km = el('div', 'kmeta', M.lines[w.line] + (w.issue ? ` · ${w.issue}` : '') + (w.pr ? ` · PR #${w.pr} 待合并` : '') + (w.state === 'wait' ? ` · 等 ${w.who}` : ''));
-    if (w.reporter) km.title = `${w.issue || ''} · ${w.reporter}提出`;
+    const km = el('div', 'kmeta', M.lines[w.line] + (w.issue ? ` · ${w.issue}` : '') + (w.pr ? ` · PR #${w.pr} waiting to merge` : '') + (w.state === 'wait' ? ` · waiting for ${w.who}` : ''));
+    if (w.reporter) km.title = `${w.issue || ''} · raised by ${w.reporter}`;
     c.append(km);
     if (w.live) {
-      const where = w.state === 'wait' ? '现场运行 › 上线关卡（打开审批弹窗）' : '现场运行 › 团队图';
-      const b = el('button', 'btn small primary', w.state === 'wait' ? '去审批 ↗' : '打开 ↗');
+      const where = w.state === 'wait' ? 'Live run › Release gate (opens the approval dialog)' : 'Live run › Team graph';
+      const b = el('button', 'btn small primary', w.state === 'wait' ? 'Go to approve ↗' : 'Open ↗');
       b.onclick = (e) => { e.stopPropagation(); crew(where); }; c.onclick = () => crew(where); c.append(b);
-    } else { c.style.cursor = 'pointer'; c.title = '交付详情'; c.onclick = () => crew(`交付详情 › ${w.t}`); }
+    } else { c.style.cursor = 'pointer'; c.title = 'Delivery detail'; c.onclick = () => crew(`Delivery detail › ${w.t}`); }
     return c;
   }
   function fill(cell, list, order) {
     list.sort(order).slice(0, 2).forEach((w) => cell.append(kcard(w)));
-    if (list.length > 2) cell.append(el('div', 'kmore', `+${list.length - 2} 项`));
+    if (list.length > 2) cell.append(el('div', 'kmore', `+${list.length - 2} more`));
   }
   function renderFlow() {
     const W = D.wip.concat(state.live ? [state.live] : []).filter(inLine);
     const waits = W.filter((w) => w.state === 'wait'), agents = W.filter((w) => w.state === 'agent'), pool = W.filter((w) => w.state === 'pool');
-    const st = $('nowStats'); st.replaceChildren(document.createTextNode(`进行中 ${waits.length + agents.length} 项`), el('span', null, '·'), document.createTextNode(`agent 在做 ${agents.length} 项`), el('span', null, '·'), document.createTextNode(`等人批准 ${waits.length} 项`), el('span', null, '·'), document.createTextNode(`需求池 ${pool.length} 项`));
-    $('nowNote').textContent = `等人批准的平均已等 ${waited(mean(waits.map((w) => w.hours)))}；agent 完成一次运行，实测平均 ${M.realAvgMins} 分钟。`;
+    const st = $('nowStats'); st.replaceChildren(document.createTextNode(`In progress ${waits.length + agents.length}`), el('span', null, '·'), document.createTextNode(`Agent working ${agents.length}`), el('span', null, '·'), document.createTextNode(`Awaiting approval ${waits.length}`), el('span', null, '·'), document.createTextNode(`Backlog ${pool.length}`));
+    $('nowNote').textContent = `Items awaiting approval have waited ${waited(mean(waits.map((w) => w.hours)))} on average; an agent run takes ${M.realAvgMins} min on average (measured).`;
     const d7 = (() => { const [y, m, d] = M.today.split('-').map(Number); const t = new Date(y, m - 1, d - 6); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`; })(); // local days, as the app (metrics.daysBefore)
     const done = scoped().filter((i) => i.period === 'agent' && i.ship >= d7);
     const kb = $('kanban'); kb.replaceChildren(el('div'));
     for (const [name, sub] of COLS) {
-      const n = name === '需求池' ? pool.length : name === '已交付' ? done.length : W.filter((w) => w.col === name && w.state !== 'pool').length;
+      const n = name === 'Backlog' ? pool.length : name === 'Delivered' ? done.length : W.filter((w) => w.col === name && w.state !== 'pool').length;
       const h = el('div', 'kb-h'); const t = el('div'); t.append(el('b', null, name), el('span', 'n', fmt(n))); h.append(t, el('div', 'st', sub)); kb.append(h);
     }
     const byLive = (a, b) => (b.live ? 1 : 0) - (a.live ? 1 : 0);
-    kb.append(el('div', 'kb-lane is-wait', '等人批准'));
+    kb.append(el('div', 'kb-lane is-wait', 'Awaiting approval'));
     const pc = el('div', 'kb-cell span'); fill(pc, pool, (a, b) => a.mins - b.mins); kb.append(pc);
-    for (const col of STAGES) { const c = el('div', 'kb-cell is-wait'); const ws = waits.filter((w) => w.col === col); if (!ws.length) c.append(el('div', 'kb-empty', col === '构建' ? '这一阶段没有人的关卡：检查不过自动退回给 agent' : '此刻没有')); fill(c, ws, (a, b) => byLive(a, b) || b.hours - a.hours); kb.append(c); }
+    for (const col of STAGES) { const c = el('div', 'kb-cell is-wait'); const ws = waits.filter((w) => w.col === col); if (!ws.length) c.append(el('div', 'kb-empty', col === 'Construction' ? 'No human gate in this phase: failed checks are sent back to the agent automatically' : 'None right now')); fill(c, ws, (a, b) => byLive(a, b) || b.hours - a.hours); kb.append(c); }
     const dc = el('div', 'kb-cell span');
     const pin = (i) => (i.fresh ? 0 : i.real ? 1 : 2);
     const shown = done.slice().sort((a, b) => pin(a) - pin(b) || (a.ship < b.ship ? 1 : -1)).slice(0, 4);
     for (const i of shown) {
       const c = el('div', 'kcard' + (i.real ? ' is-real' : '') + (i.fresh ? ' is-new' : ''));
-      const top = el('div', 'ktop'); top.append(el('span', null, i.fresh ? '刚刚' : md(i.ship)), i.real ? el('span', 'tag real', '实测') : el('span', null, '模拟'));
+      const top = el('div', 'ktop'); top.append(el('span', null, i.fresh ? 'just now' : md(i.ship)), i.real ? el('span', 'tag real', 'Measured') : el('span', null, 'Simulated'));
       const tt = el('div', 'ktitle', i.t); tt.title = i.t;
-      c.append(top, tt, el('div', 'kmeta', `${M.lines[i.line]} · ${i.mins != null ? i.mins + ' 分钟' : day1(i.cyc) + ' 天'}`));
-      if (i.real) { c.title = '点开看负责人的决定'; c.onclick = (e) => { e.stopPropagation(); openPop(i, c); }; }
-      else { c.style.cursor = 'pointer'; c.title = '交付详情'; c.onclick = () => crew(`交付详情 › ${i.t}`); }
+      c.append(top, tt, el('div', 'kmeta', `${M.lines[i.line]} · ${i.mins != null ? i.mins + ' min' : day1(i.cyc) + ' days'}`));
+      if (i.real) { c.title = "Open the owner's decisions"; c.onclick = (e) => { e.stopPropagation(); openPop(i, c); }; }
+      else { c.style.cursor = 'pointer'; c.title = 'Delivery detail'; c.onclick = () => crew(`Delivery detail › ${i.t}`); }
       dc.append(c);
     }
-    if (done.length > shown.length) dc.append(el('div', 'kmore', `+${fmt(done.length - shown.length)} 项（见下方交付清单）`));
+    if (done.length > shown.length) dc.append(el('div', 'kmore', `+${fmt(done.length - shown.length)} more (see the delivery list below)`));
     kb.append(dc);
-    kb.append(el('div', 'kb-lane', 'agent 在做'));
+    kb.append(el('div', 'kb-lane', 'Agent working'));
     for (const col of STAGES) { const c = el('div', 'kb-cell'); fill(c, agents.filter((w) => w.col === col), (a, b) => byLive(a, b) || b.mins - a.mins); kb.append(c); }
 
   }
 
   function openPop(i, anchor) {
     const pop = $('pop'), sec = document.querySelector('.flow');
-    const rid = i.real === 'live' ? '现场运行' : `运行 ${i.real}`;
-    const head = el('div', 'pop-head'); head.append(el('b', null, i.t), el('span', 'tag real', '实测'));
-    const x = el('button', 'x', '×'); x.setAttribute('aria-label', '关闭'); x.onclick = closePop; head.append(x);
+    const rid = i.real === 'live' ? 'Live run' : `Run ${i.real}`;
+    const head = el('div', 'pop-head'); head.append(el('b', null, i.t), el('span', 'tag real', 'Measured'));
+    const x = el('button', 'x', '×'); x.setAttribute('aria-label', 'Close'); x.onclick = closePop; head.append(x);
     const ol = el('ol', 'decisions'); for (const [g, d] of i.decisions || []) { const li = el('li'); li.append(el('b', null, g), el('span', null, d)); ol.append(li); }
     const act = el('div', 'pop-act');
-    for (const [label, where, primary] of [['▶ 回放 ↗', `${rid} › 回放（30 倍速）`, true], ['签字单 ↗', `${rid} › 签字单`]]) { const b = el('button', 'btn small' + (primary ? ' primary' : ''), label); b.onclick = () => crew(where); act.append(b); }
-    pop.replaceChildren(head, el('div', 'pop-facts', `${M.lines[i.line]} · ${i.mins} 分钟 · ${i.members} 位 agent 成员 · 检查 ${i.tests} 通过 · 签字：${i.signer}`),
-      ...(i.issue ? [el('div', 'pop-facts', `Issue ${i.issue}` + (i.reporter ? `（${i.reporter}提出）` : '') + (i.pr ? ` → PR #${i.pr}，签字放行时合入 main` : ''))] : []),
-      el('div', 'pop-sub', `负责人在关卡上的 ${(i.decisions || []).length} 个决定`), ol, act);
+    for (const [label, where, primary] of [['▶ Replay ↗', `${rid} › Replay (30× speed)`, true], ['Sign-off sheet ↗', `${rid} › Sign-off sheet`]]) { const b = el('button', 'btn small' + (primary ? ' primary' : ''), label); b.onclick = () => crew(where); act.append(b); }
+    pop.replaceChildren(head, el('div', 'pop-facts', `${M.lines[i.line]} · ${i.mins} min · ${i.members} agent members · checks ${i.tests} passed · signed by ${i.signer}`),
+      ...(i.issue ? [el('div', 'pop-facts', `Issue ${i.issue}` + (i.reporter ? ` (raised by ${i.reporter})` : '') + (i.pr ? ` → PR #${i.pr}, merged into main when signed off` : ''))] : []),
+      el('div', 'pop-sub', `${(i.decisions || []).length} owner decisions at the gates`), ol, act);
     pop.hidden = false;
     const s = sec.getBoundingClientRect(), a = anchor.getBoundingClientRect();
     pop.style.top = Math.max(8, a.top - s.top - 8) + 'px';
@@ -770,7 +801,7 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
   document.addEventListener('click', (e) => { if (!$('pop').hidden && !$('pop').contains(e.target)) closePop(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePop(); });
 
-  function render() { closePop(); const m = metrics(); renderHeader(m); renderLines(); renderCards(m); renderChart(); renderFlow(); renderLedger(); }
+  function render() { closePop(); const m = metrics(); renderHeader(m); renderLines(); renderCards(m); renderMeasured(); renderChart(); renderFlow(); renderLedger(); }
   function setKind(k) { state.kind = k; state.limit = 12; render(); }
   let toastTimer;
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.style.display = 'none'; }, 3200); }
@@ -778,51 +809,49 @@ body.is-projecting #dl, body.is-projecting #theme, body.is-projecting .now-head 
   $('realOnly').onclick = () => { state.realOnly = !state.realOnly; state.limit = 12; renderLedger(); };
   $('more').onclick = () => { state.limit += 30; renderLedger(); };
   $('perDay').oninput = () => renderValue(metrics());
-  $('calcToggle').onclick = () => { const r = $('calcRow'); r.hidden = !r.hidden; $('calcToggle').textContent = r.hidden ? '估算价值 ▸' : '收起 ▾'; if (!r.hidden) $('perDay').focus(); };
+  $('calcToggle').onclick = () => { const r = $('calcRow'); r.hidden = !r.hidden; $('calcToggle').textContent = r.hidden ? 'Estimate value ▸' : 'Collapse ▾'; if (!r.hidden) $('perDay').focus(); };
   const redraw = () => { renderChart(); renderCards(metrics()); };
   $('asChart').onclick = () => { $('plot').hidden = false; $('legend').hidden = false; $('wkTable').hidden = true; $('asChart').setAttribute('aria-pressed', 'true'); $('asTable').setAttribute('aria-pressed', 'false'); renderChart(); };
   $('asTable').onclick = () => { $('plot').hidden = true; $('legend').hidden = true; $('wkTable').hidden = false; $('asChart').setAttribute('aria-pressed', 'false'); $('asTable').setAttribute('aria-pressed', 'true'); };
   $('theme').onclick = () => { const r = document.documentElement; r.dataset.mode = r.dataset.mode === 'light' ? 'dark' : 'light'; renderChart(); };
 
-  // 下载：PDF（浏览器打印）、清单 CSV、离线版 HTML
   const SNAP = document.documentElement.dataset.snapshot;
-  if (SNAP) { $('snapTag').hidden = false; $('snapTag').textContent = `离线快照 · 生成于 ${SNAP}`; }
+  if (SNAP) { $('snapTag').hidden = false; $('snapTag').textContent = `Offline snapshot · made ${SNAP}`; }
   function download(text, name, type) {
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name;
     document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
   }
-  const scopeName = () => (state.line < 0 ? '全部业务线' : M.lines[state.line]);
+  const scopeName = () => (state.line < 0 ? 'All business lines' : M.lines[state.line]);
   $('dlCsv').onclick = () => {
     $('dl').open = false;
     const q = (v) => (/[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
-    const head = ['交付', '业务线', '类型', '规模', 'Issue', '提出方', 'Issue 创建日', '上线日', '周期（天）', '以前同规模平均周期（天）', '签字', 'PR', '上线后缺陷', '修复的 Issue', '来源', '运行编号'];
+    const head = ['Delivery', 'Business line', 'Type', 'Size', 'Issue', 'Raised by', 'Issue created', 'Release date', 'Cycle (days)', 'Average cycle before (same size, days)', 'Signed by', 'PR', 'Post-release defects', 'Fixed Issue', 'Source', 'Run id'];
     const lines = rowsFor().map((i) => [i.t, M.lines[i.line], KIND[i.kind], SIZE[i.size], i.issue || '', i.reporter || '', i.created || '', i.fresh ? M.today : i.ship, (i.mins != null ? i.mins / 1440 : i.cyc).toFixed(2), BASE_CYC[i.size].toFixed(1), i.signer,
-      i.pr ? `#${i.pr}` : '', (i.defects || []).join(' '), i.origin || '', i.real ? '实测' : '模拟', i.real && i.real !== 'live' ? i.real : ''].map(q).join(','));
-    download('\ufeff' + [head.join(',')].concat(lines).join('\r\n'), `CTO视图-交付清单-${scopeName()}-${M.today}.csv`, 'text/csv;charset=utf-8');
-    toast(`已导出 ${fmt(lines.length)} 行（${scopeName()}${state.kind === 'all' ? '' : ' · ' + KIND[state.kind]}${state.realOnly ? ' · 只看实测' : ''}）`);
+      i.pr ? `#${i.pr}` : '', (i.defects || []).join(' '), i.origin || '', i.real ? 'Measured' : 'Simulated', i.real && i.real !== 'live' ? i.real : ''].map(q).join(','));
+    download('\ufeff' + [head.join(',')].concat(lines).join('\r\n'), `CTO-view-delivery-list-${scopeName()}-${M.today}.csv`, 'text/csv;charset=utf-8');
+    toast(`Exported ${fmt(lines.length)} row${lines.length === 1 ? '' : 's'} (${scopeName()}${state.kind === 'all' ? '' : ' · ' + KIND[state.kind]}${state.realOnly ? ' · measured only' : ''})`);
   };
   let printMode = null;
   window.addEventListener('beforeprint', () => {
     printMode = document.documentElement.dataset.mode; document.documentElement.dataset.mode = 'light';
-    document.querySelector('.notes').open = true;
-    $('printMeta').textContent = `桃源科技 · ${scopeName()} · 导出于 ${new Date().toLocaleString('zh-CN', { hour12: false })} · 口径见末尾`;
+    document.querySelectorAll('.notes, .assume').forEach((d) => { d.open = true; });
+    $('printMeta').textContent = `${M.company || 'Larkspur Outfitters'} · ${scopeName()} · exported ${new Date().toLocaleString('en-US', { hour12: false })} · see Method at the end`;
     renderChart();
   });
   window.addEventListener('afterprint', () => { if (printMode) document.documentElement.dataset.mode = printMode; renderChart(); });
   $('dlPdf').onclick = () => { $('dl').open = false; closePop(); setTimeout(() => window.print(), 50); };
 
-  // 投影：全屏、大字
   $('project').onclick = () => {
     const on = !document.body.classList.contains('is-projecting');
-    document.body.classList.toggle('is-projecting', on); $('project').textContent = on ? '退出投影' : '投影';
+    document.body.classList.toggle('is-projecting', on); $('project').textContent = on ? 'Exit projection' : 'Projection';
     if (on && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
     if (!on && document.fullscreenElement) document.exitFullscreen();
     setTimeout(redraw, 200);
   };
-  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && document.body.classList.contains('is-projecting')) { document.body.classList.remove('is-projecting'); $('project').textContent = '投影'; setTimeout(redraw, 200); } });
-  $('toBoard').onclick = () => crew('团队看板');
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && document.body.classList.contains('is-projecting')) { document.body.classList.remove('is-projecting'); $('project').textContent = 'Projection'; setTimeout(redraw, 200); } });
+  $('toBoard').onclick = () => crew('Team board');
   let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(redraw, 120); });
-  renderNotes(); render();
+  renderNotes(); renderAssume(); render();
 })();
 </script>
 </body>

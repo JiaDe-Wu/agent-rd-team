@@ -224,10 +224,10 @@ def clean_risk(raw: Any) -> dict[str, Any] | None:
 
 
 def money(amount: float | None) -> str:
-    """¥206.0k · ¥8,000 · '' (no amount)."""
+    """$206.0k · $8,000 · '' (no amount)."""
     if amount is None:
         return ""
-    return f"¥{amount / 1e3:,.1f}k" if amount >= 1e4 else f"¥{amount:,.0f}"
+    return f"${amount / 1e3:,.1f}k" if amount >= 1e4 else f"${amount:,.0f}"
 
 
 def review_targets(text: str, roles: list[dict[str, Any]]) -> list[str]:
@@ -1365,8 +1365,8 @@ class TeamRun:
         got = self.s.get("issue") if isinstance(self.s.get("issue"), dict) else {}
         d = self.delivery()
         return {"id": str(got.get("id") or delivery_mod.issue_id(self.rid)),
-                # data enum: the UI's type of the Issue kind (shown there as requirement / defect)
-                "kind": str(got.get("kind") or ("缺陷" if d["kind"] == "修复" else "需求")),
+                # protocol token: kept in Chinese (UI type of the Issue kind)
+                "kind": str(delivery_mod.issue_kind(got.get("kind") or delivery_mod.issue_kind_of(d))),
                 "reporter": str(got.get("reporter") or delivery_mod.REPORTERS[d["line"]]),
                 "created_at": float(got.get("created_at") or self.s.get("started_at") or 0)}
 

@@ -21,7 +21,7 @@ import { errorText } from '../board/useBoard'
 import type { BoardEntry, CtoEntry, ItemEntry } from '../nav'
 import { MiniCycle, MiniSplit, fmtSec } from './charts'
 import { deliveryLabel, issueKind } from '../board/format'
-import { decisionLabel, segLabel, zh } from './vocab'
+import { decisionLabel, segLabel, word } from './vocab'
 import { KIND, SIZE, baseCycles, day1, md, money, waited } from './metrics'
 import { StreamChart, VS_COLOR, VS_NAME, boardAt, markAt, segAt, segKind } from './stream'
 import { CTO_CSS } from './styles'
@@ -174,7 +174,7 @@ export function ItemView({ entry, onCto, onItem, onBoard, onBack, returning = fa
       </header>
       {wip && (
         <p className="cto-item-now" data-testid="item-now">
-          {wip.state === 'wait' ? `Now: ${zh(wip.gate)}, waited ${waited(wip.hours ?? 0)}, ${wip.focus ?? ''}` : wip.state === 'agent' ? `Now: agent working · ${zh(wip.col)} · ${wip.members} member${wip.members === 1 ? '' : 's'}` : `Now: in the backlog, submitted ${wip.mins} min ago, waiting for a team`}
+          {wip.state === 'wait' ? `Now: ${word(wip.gate)}, waited ${waited(wip.hours ?? 0)}, ${wip.focus ?? ''}` : wip.state === 'agent' ? `Now: agent working · ${word(wip.col)} · ${wip.members} member${wip.members === 1 ? '' : 's'}` : `Now: in the backlog, submitted ${wip.mins} min ago, waiting for a team`}
         </p>
       )}
 
@@ -252,7 +252,7 @@ export function ItemView({ entry, onCto, onItem, onBoard, onBack, returning = fa
               {flow.risks.map((r, i) => (
                 <div className="cto-legend" key={i}>
                   <button type="button" data-testid="cto-item-risk" onClick={() => onBoard({ run: run as string, ...(r.role ? { role: r.role } : {}), at: Math.round(r.at) })} title="Replay the board to this send-back">
-                    Risk stopped: {r.what}{r.amount != null ? ` ${money(r.amount)}` : ''} ({zh(r.gate)} gate) ↗
+                    Risk stopped: {r.what}{r.amount != null ? ` ${money(r.amount)}` : ''} ({word(r.gate)} gate) ↗
                   </button>
                 </div>
               ))}
@@ -328,7 +328,7 @@ export function ItemView({ entry, onCto, onItem, onBoard, onBack, returning = fa
             <thead><tr><th>Time</th><th>Decision</th><th>Comment</th><th /></tr></thead>
             <tbody>
               {flow.decisions.map((d) => {
-                const ok = d.gate.startsWith('批准') // protocol token: kept in Chinese
+                const ok = d.gate.startsWith('Approved')
                 return (
                   <tr key={`${d.at}-${d.gate}`}>
                     <td className="kt-mono cto-dim">{fmtClock(d.at)}</td>

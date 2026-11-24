@@ -2,7 +2,7 @@
 the same deterministic way the team pick works. The page shows what matched and why; every role's task lists them, and
 the roles look the originals up in the Crew knowledge base themselves.
 
-A team names its company's standards file (``standards``: a JSON file in the app, e.g. ``packs/taoyuan/standards.json``):
+A team names its company's standards file (``standards``: a JSON file in the app, e.g. ``packs/larkspur/standards.json``):
 a list of ``{id, title, kind: "standard" | "data", owner, doc, rules, keywords}``. ``standards_always`` lists the ids
 a team always works by (the raffle page always has the raffle rules and the personal data standard in it, whatever the wording).
 """
