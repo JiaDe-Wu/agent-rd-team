@@ -55,13 +55,13 @@ def test_a_send_back_keeps_its_risk_and_an_approval_does_not(tmp_path):
 
     board = mod("board").detail(run, mgr=FakeManager(), scrub=str, now=NOW)
     assert board["risks"] == [{"what": "Price-protection refund above the 300,000 approval line", "amount": 206000.0, "gate": "Release", "role": "compliance", "at": NOW}]
-    assert next(x for x in board["roles"] if x["key"] == "compliance")["gate_revise_risk"] == {"what": "Price-protection refunds exceed the 300k-yuan approval line", "amount": 206100.0}
+    assert next(x for x in board["roles"] if x["key"] == "compliance")["gate_revise_risk"] == {"what": "Price-adjustment payouts exceed the $20,000 approval line", "amount": 9100.0}
 
 
 def test_the_promotion_team_presets_the_risk_of_sending_its_release_back():
     t = team_mod.load_team(PROMO_TEAM)
     roles = {r["key"]: r for r in t["roles"]}
-    assert team_mod.clean_risk(roles["compliance"]["gate_revise_risk"]) == {"what": "Price-protection refunds exceed the 300k-yuan approval line", "amount": 206100.0}
+    assert team_mod.clean_risk(roles["compliance"]["gate_revise_risk"]) == {"what": "Price-adjustment payouts exceed the $20,000 approval line", "amount": 9100.0}
     bad = {**t, "roles": [{**r, "gate_revise_risk": {"what": "", "amount": "a lot"}} if r["key"] == "compliance" else r for r in t["roles"]]}
     with pytest.raises(ValueError, match="gate_revise_risk"):
         team_mod.check_team(bad)

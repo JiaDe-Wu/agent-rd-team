@@ -85,8 +85,8 @@ def lines(found):
 
 def test_a_role_task_names_the_standards_to_look_up_in_the_knowledge_base():
     text = lines(standards.match(DIRECTORY_REQ, team("team-aidlc.json")))
-    assert 'knowledge source "Larkspur Outfitters"' in text and "standard \"Personal Data Display Standard\": PII-1" in text and "data \"Employee directory\"" in text
-    assert lines([]) == "(This requirement touches no company standard)"
+    assert 'the knowledge base source "Larkspur Outfitters"' in text and 'Standard "Personal Data Display Standard": PII-1' in text and 'Data "Employee directory"' in text
+    assert lines([]) == "(This requirement touches no company standards.)"
 
 
 def _wall(wt, t):
