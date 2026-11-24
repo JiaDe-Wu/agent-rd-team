@@ -10,11 +10,13 @@ from teamkit import FakeManager, make_deps, mod
 
 team_mod, cto, constants = mod("team"), mod("cto"), mod("constants")
 NOW = datetime(2026, 10, 20, 12, 0).timestamp()
+# the promotion team file: named team-promo.json since the example company became Larkspur Outfitters, team-taoyuan-promo.json before
+PROMO_TEAM = next(p for p in (constants.TEAM_DIR / "team-promo.json", constants.TEAM_DIR / "team-taoyuan-promo.json") if p.exists())
 REQ = "Black Friday official store sale: pick 20 appliances, discount them and add spend-and-save offers; the campaign page shows a countdown, the strikethrough price and the final price; operations set it up in the back office and release with one click."
 
 
 def promo_run(tmp_path):
-    t = team_mod.load_team(constants.TEAM_DIR / "team-taoyuan-promo.json")
+    t = team_mod.load_team(PROMO_TEAM)
     state = team_mod.new_state("r1020bbbb", REQ, t, "{brief}", tmp_path / "work", constants.APP_ROOT / "starters" / "mall", NOW - 3600)
     return team_mod.TeamRun(state, make_deps(tmp_path, FakeManager(), None, now=lambda: NOW))
 
@@ -57,7 +59,7 @@ def test_a_send_back_keeps_its_risk_and_an_approval_does_not(tmp_path):
 
 
 def test_the_promotion_team_presets_the_risk_of_sending_its_release_back():
-    t = team_mod.load_team(constants.TEAM_DIR / "team-taoyuan-promo.json")
+    t = team_mod.load_team(PROMO_TEAM)
     roles = {r["key"]: r for r in t["roles"]}
     assert team_mod.clean_risk(roles["compliance"]["gate_revise_risk"]) == {"what": "Price-protection refunds exceed the 300k-yuan approval line", "amount": 206100.0}
     bad = {**t, "roles": [{**r, "gate_revise_risk": {"what": "", "amount": "a lot"}} if r["key"] == "compliance" else r for r in t["roles"]]}
