@@ -1,6 +1,6 @@
 {
   "name": "agent-rd-team",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "displayName": "Agent R&D Team",
   "description": "An agent R&D team on Kiro Crew, built on AI-DLC and your own standards: from a one-sentence requirement through human gates, company checks and an independent review to a local deployment, keeping the lessons you tick for later runs. With a live team board and a CTO view.",
   "author": "JiaDe-Wu",
@@ -34,7 +34,7 @@
     {"label": "AI-DLC Workflows", "url": "https://github.com/awslabs/aidlc-workflows"},
     {"label": "Samples this app comes from", "url": "https://github.com/aws-samples/sample-ai-for-software-engineering-on-aws"}
   ],
-  "minKiroCrewVersion": "0.8.0",
+  "minKiroCrewVersion": "0.13.0",
   "dependencies": {
     "commands": ["git", "node"]
   },

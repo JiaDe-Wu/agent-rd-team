@@ -27,6 +27,7 @@ from collections import deque
 from pathlib import Path
 from typing import Any, Callable
 
+from . import sandbox
 from .constants import NODE_BIN
 
 TTL_S = 30 * 60
@@ -170,16 +171,19 @@ class Site:
             env = {"PATH": os.pathsep.join([str(Path(self.node).parent), "/usr/bin", "/bin"]),
                    "HOME": os.environ.get("HOME", "/tmp"), "LANG": "en_US.UTF-8", "NO_COLOR": "1",
                    "PORT": str(self.port), "HOST": "127.0.0.1", "NODE_ENV": "production"}
-            try:
-                self.proc = await asyncio.create_subprocess_exec(
-                    self.node, self.entry, cwd=str(wt), env=env, stdin=asyncio.subprocess.DEVNULL,
-                    stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT, start_new_session=True)
+            try:  # the server is what a role session wrote: it runs in Kiro Crew's sandbox, and not at all where there is none
+                proc, cleanup = await sandbox.spawn([self.node, self.entry], cwd=str(wt), env=env,
+                                                    stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT)
+            except sandbox.SandboxUnavailable as exc:
+                self.error = f"The site was not started: {exc}"[:300]
+                return self.status(rid)
             except OSError as exc:
                 self.error = f"Cannot run node: {exc}"
                 return self.status(rid)
-            proc = self.proc
+            self.proc = proc
             self._keep({"pid": proc.pid, "port": self.port, "run": rid, "cwd": str(wt.resolve()), "at": self.started_at})
-            self._tasks = [asyncio.create_task(self._pump(proc)), asyncio.create_task(self._expire(proc))]
+            self._tasks = [asyncio.create_task(self._pump(proc)), asyncio.create_task(self._expire(proc)),
+                           asyncio.create_task(self._release(proc, cleanup))]
             if not await self._ready(proc):
                 last = next((ln for ln in reversed(self.lines) if ln.strip()), "")
                 self.error = ("The site did not start: " + (last or f"no answer on port {self.port} within {self.ready_s:g} s"))[:300]
@@ -204,6 +208,13 @@ class Site:
         with contextlib.suppress(Exception):
             async for raw in proc.stdout:
                 self.lines.append(self.scrub(raw.decode("utf-8", "replace").rstrip())[:300])
+
+    async def _release(self, proc: asyncio.subprocess.Process, cleanup: str | None) -> None:
+        """What the sandbox prepared for the site goes once the site has exited (or has been stopped)."""
+        try:
+            await proc.wait()
+        finally:
+            sandbox.release(cleanup)
 
     async def _expire(self, proc: asyncio.subprocess.Process) -> None:
         await asyncio.sleep(self._ttl)

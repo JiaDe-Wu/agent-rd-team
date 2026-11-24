@@ -14,6 +14,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from . import sandbox
 from .constants import NODE_BIN
 from .gitwork import matches
 
@@ -187,11 +188,13 @@ async def run_file(node: str, wt: Path, rel: str, timeout: float) -> tuple[int |
     and never closed must not outlive the run, nor hold the pipes open."""
     env = {"PATH": os.pathsep.join([str(Path(node).parent), "/usr/bin", "/bin"]), "HOME": os.environ.get("HOME", "/tmp"),
            "TMPDIR": tempfile.gettempdir(), "LANG": "en_US.UTF-8", "NO_COLOR": "1", "NODE_ENV": "test"}
+    # The test file is what a role session wrote: it runs in Kiro Crew's sandbox, and not at all where there is none.
     try:
-        proc = await asyncio.create_subprocess_exec(
-            node, "--test", "--test-reporter=tap", "--test-force-exit", "--test-timeout=30000", rel, cwd=str(wt), env=env,
-            stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
-            start_new_session=True)
+        proc, cleanup = await sandbox.spawn(
+            [node, "--test", "--test-reporter=tap", "--test-force-exit", "--test-timeout=30000", rel], cwd=str(wt), env=env,
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    except sandbox.SandboxUnavailable as exc:
+        return None, "", f"Cannot run the tests: {exc}", False
     except OSError as exc:
         return None, "", f"Cannot run node ({node}): {exc}", False
     readers = [asyncio.ensure_future(proc.stdout.read()), asyncio.ensure_future(proc.stderr.read())]
@@ -207,6 +210,9 @@ async def run_file(node: str, wt: Path, rel: str, timeout: float) -> tuple[int |
     finally:
         for task in readers:
             task.cancel()
+        with contextlib.suppress(asyncio.TimeoutError):
+            await asyncio.wait_for(proc.wait(), 5)  # the sandbox's files go once the child has exited
+        sandbox.release(cleanup)
     out, err = (r.result().decode("utf-8", "replace") if r.done() and not r.cancelled() and not r.exception() else ""
                 for r in readers)
     return proc.returncode, out, err, timed_out

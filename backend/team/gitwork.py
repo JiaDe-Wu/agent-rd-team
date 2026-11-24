@@ -6,14 +6,15 @@ config, hooks and signing. Layout: ``<root>/repo`` (base = the requirement commi
 from __future__ import annotations
 
 import asyncio
-import contextlib
 import functools
 import os
 import re
 import shutil
+import subprocess
 from pathlib import Path
 from typing import Any
 
+from . import sandbox
 from .constants import GIT_BIN
 
 AUTHOR = ("agent-rd-team", "team@localhost")
@@ -40,16 +41,15 @@ async def git(cwd: Path | str, *args: str, ok: tuple[int, ...] | None = (0,), ti
     env = dict(_ENV, **({} if locks else {"GIT_OPTIONAL_LOCKS": "0"}))
     cmd = [GIT_BIN, "-C", str(cwd), "-c", "core.hooksPath=/dev/null", "-c", "commit.gpgsign=false",
            "-c", "core.quotepath=false", "-c", "gc.auto=0", *args]
-    proc = await asyncio.create_subprocess_exec(*cmd, stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.PIPE,
-                                                stderr=asyncio.subprocess.PIPE, env=env)
+    # git reads the run repository's .git/config, which the role sessions can edit: it runs in Kiro Crew's sandbox.
     try:
-        out, err = await asyncio.wait_for(proc.communicate(), timeout)
-    except BaseException:
-        with contextlib.suppress(ProcessLookupError):
-            proc.kill()
-        raise
-    rc = proc.returncode if proc.returncode is not None else -1
-    o, e = out.decode("utf-8", "replace"), err.decode("utf-8", "replace")
+        done = await sandbox.run(cmd, env=env, timeout=timeout)
+    except sandbox.SandboxUnavailable as exc:
+        raise GitError(f"git {args[0] if args else ''} not run: {exc}") from exc
+    except subprocess.TimeoutExpired:
+        raise asyncio.TimeoutError(f"git {args[0] if args else ''} did not finish within {timeout:g} s") from None
+    rc = done.returncode if done.returncode is not None else -1
+    o, e = done.stdout.decode("utf-8", "replace"), done.stderr.decode("utf-8", "replace")
     if ok is not None and rc not in ok:
         raise GitError(f"git {args[0] if args else ''} failed ({rc}): {(e or o).strip()[:300]}")
     return rc, o, e

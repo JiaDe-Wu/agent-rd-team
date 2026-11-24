@@ -37,7 +37,7 @@ Open the app from the sidebar, write a one-sentence requirement and hand it to t
 
 ### Requirements
 
-- Kiro Crew 0.8.0 or newer, on macOS or Linux. Windows is not supported.
+- Kiro Crew 0.13.0 or newer (the first release with the sandboxed spawn for app backends), on macOS or Linux. Windows is not supported.
 - `git`, and Node 22 or newer: the company checks run with `node --test`.
 - The Kiro Crew members the team files name (for example `aidlc-product-agent`) on the Agents page. A role whose
   member is missing waits, unless the team file marks it `optional`. `python3 scripts/install_members.py` writes the
@@ -63,6 +63,14 @@ Kiro Crew runs this app's Python only after you trust it. Its manifest asks for:
 asking you each time. Other Kiro Crew sessions are not changed. Each role works in its own git worktree under
 `~/workplace/agent-rd-team/`. Its task lists the paths it may write and tells it not to push; the app records a change
 outside those paths as a violation, but it does not sandbox the session.
+
+Three kinds of commands run in the app's own process, and a role session can write what they run: the company checks
+(`node --test` on the test files), the site of a run (`server.js`), and every `git` call on a run repository (git reads
+its `.git/config`). The app starts all three under Kiro Crew's sandbox, at the `standard` tier, through the app-backend
+SDK (`run_sandboxed_async` and `sandboxed_argv_async`), not with your full rights. Where the host cannot sandbox a
+command, that step stops and says so; the app does not run it another way. A `git` call costs about 0.16 s more that
+way (measured on Ubuntu 22.04: 160 ms against 2 ms for `git rev-parse`). `backend/team/sandbox.py` is the one place
+that starts them, and a test fails if another place in `backend/` starts a command.
 
 ### Lessons
 
@@ -167,7 +175,9 @@ gates is kept as knowledge the next run reads. What exists today is narrower:
 ## Test
 
 ```bash
-python3 -m pytest -q                 # backend tests: Python 3.10+ and pytest
+python3 -m pytest -q                 # backend tests: Python 3.10+ and pytest; Kiro Crew's sandbox SDK is a stand-in
+# the same tests in the host's real sandbox (Kiro Crew 0.13.0+ source on PYTHONPATH):
+AGENT_RD_TEAM_REAL_SANDBOX=1 PYTHONPATH=/path/to/KiroCrew/src python3 -m pytest -q
 (cd ui && npm ci && npm run check)   # UI: type check, component tests, build
 ```
 
