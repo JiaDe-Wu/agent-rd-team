@@ -1,4 +1,4 @@
 {
-  "now": "2026-11-01T20:00:00+08:00",
-  "note": "演示环境：服务启动时把服务器时间对齐到这一刻，之后按真实时间走（见 server/lib/clock.js）。正式环境删掉这个文件。"
+  "now": "2026-11-27T20:00:00-05:00",
+  "note": "Demo environment: when the server starts it sets the server time to this moment and then runs in real time (see server/lib/clock.js). Delete this file in production."
 }

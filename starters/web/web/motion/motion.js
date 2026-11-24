@@ -1,18 +1,18 @@
-// 品牌动效：按 README「动效接口」实现。模板里是不带动画的占位：页面照样能用，只是没有动效。
+// Brand motion: implement it from the README, "Motion interface". Here it is a placeholder with no animation: pages work, just without motion.
 export const prefersReduced = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
-// 把 el 的文字换成 text（数字跳动用）
+// Change el's text to text (for changing digits)
 export function flip(el, text) {
   if (el) el.textContent = text
 }
 
-// 卡片、列表项依次出现（给每个加 is-in）
+// Cards and list items appear one after another (add is-in to each)
 export function reveal(items) {
   for (const it of items) it.classList.add('is-in')
 }
 
-// 点按反馈：让 el 跳一下
+// Tap feedback: make el bounce
 export function bump(el) {}
 
-// 在全屏 canvas 上放一次庆祝
+// Play a celebration on the full-screen canvas
 export function celebrate(canvas) {}

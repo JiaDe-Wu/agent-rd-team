@@ -1,4 +1,4 @@
-// 公司网页模板：调接口。出错时抛 Error，message 是接口给的中文说明。
+// Company web template: calling the API. On an error it throws an Error whose message is the API's plain-English explanation.
 async function call(method, path, body) {
   const res = await fetch(path, {
     method,
@@ -7,7 +7,7 @@ async function call(method, path, body) {
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    const err = new Error(data?.error?.message || `请求失败（${res.status}）`)
+    const err = new Error(data?.error?.message || `The request failed (${res.status})`)
     err.status = res.status
     err.code = data?.error?.code
     throw err

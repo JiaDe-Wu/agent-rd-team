@@ -1,22 +1,22 @@
-// 价格引擎：由后端开发按 README「价格引擎」和知识库的《价格与促销合规规范》《毛利与定价规则》《价保规则》实现。
-// 公司检查直接调用这里导出的函数，函数名和参数、返回值的外形按 README 写，不要改。模板里只是占位。
+// The price engine: backend developers implement it from the README, "Price engine", and the knowledge base's Pricing and Promotion Compliance Standard, Margin and Pricing Rules and Price-Adjustment Guarantee Rules.
+// The company checks call the functions exported here directly; the names, parameters and return shapes are as the README says: do not change them. Here they are placeholders.
 
-// MGN-1 到手价
+// MGN-1 final price
 export function finalPrice(price, pct) {
-  throw new Error('价格引擎还没实现：finalPrice')
+  throw new Error('The price engine is not implemented yet: finalPrice')
 }
 
-// PRC-1 划线价
+// PRC-1 reference price (the struck-through price)
 export function linePrice(sku, data, config) {
-  throw new Error('价格引擎还没实现：linePrice')
+  throw new Error('The price engine is not implemented yet: linePrice')
 }
 
-// PRC-5 上线前体检
+// PRC-5 pre-launch check
 export function check(config, data) {
-  throw new Error('价格引擎还没实现：check')
+  throw new Error('The price engine is not implemented yet: check')
 }
 
-// 购物车算价（满减）
+// cart quote (spend and save)
 export function quote(items, config, data) {
-  throw new Error('价格引擎还没实现：quote')
+  throw new Error('The price engine is not implemented yet: quote')
 }

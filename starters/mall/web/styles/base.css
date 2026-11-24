@@ -1,4 +1,4 @@
-/* 公司活动页模板的全站样式：舞台背景、页头、玻璃卡片、按钮、标签、表格、状态。只用 tokens.css 的变量。 */
+/* Company campaign template: site-wide styles: stage background, header, glass cards, buttons, chips, tables, states. Only variables from tokens.css. */
 @font-face {
   font-family: "Space Grotesk";
   src: url("../fonts/SpaceGrotesk-latin.woff2") format("woff2");
@@ -19,7 +19,7 @@ body {
 a { color: inherit; text-decoration: none; }
 img { display: block; max-width: 100%; }
 
-/* ---- 舞台背景：深紫底，紫色和桃色的光斑缓慢漂移，点阵 ---- */
+/* ---- Stage background: deep purple, purple and peach glows drifting slowly, a dot grid ---- */
 .stage-bg { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
   background: radial-gradient(1200px 700px at 50% -10%, var(--brand-stage-2), var(--brand-stage) 70%); }
 .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.55; will-change: transform; }
@@ -33,7 +33,7 @@ img { display: block; max-width: 100%; }
 @keyframes drift-b { to { transform: translate(-100px, 60px) scale(0.92); } }
 .fx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 5; }
 
-/* ---- 页头 ---- */
+/* ---- Header ---- */
 .topbar { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between;
   padding: var(--space-5) var(--space-7); }
 .brand { display: flex; align-items: center; gap: var(--space-3); font-weight: 700; letter-spacing: 0.02em; }
@@ -45,7 +45,7 @@ img { display: block; max-width: 100%; }
 .nav a.is-active { background: var(--brand-glass-strong); color: var(--brand-white); }
 .app { position: relative; z-index: 1; padding: 0 var(--space-7) var(--space-7); max-width: 1440px; margin: 0 auto; }
 
-/* ---- 文字 ---- */
+/* ---- Text ---- */
 .eyebrow { margin: 0; font-size: var(--fs-small); font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: var(--brand-peach-soft); }
 .display { margin: var(--space-2) 0; font-size: var(--fs-hero); font-weight: 700; line-height: 1.02; letter-spacing: -0.02em;
   background: linear-gradient(120deg, var(--brand-white) 10%, var(--brand-300) 55%, var(--brand-peach) 95%);
@@ -55,14 +55,14 @@ img { display: block; max-width: 100%; }
 .muted { color: var(--brand-text-dim); }
 .num { font-variant-numeric: tabular-nums; }
 
-/* ---- 卡片 ---- */
+/* ---- Cards ---- */
 .glass { background: linear-gradient(160deg, var(--brand-glass-strong), var(--brand-glass)); border: 1px solid var(--brand-line);
   border-radius: var(--radius-lg); box-shadow: var(--shadow); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
 .panel { padding: var(--space-6); }
 .hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: var(--space-7) var(--space-6); }
 .mascot { filter: drop-shadow(0 14px 30px var(--brand-glow-peach)); }
 
-/* ---- 按钮 ---- */
+/* ---- Buttons ---- */
 .btn { appearance: none; border: 1px solid var(--brand-line); border-radius: 999px; padding: var(--space-3) var(--space-5);
   font: inherit; font-weight: 700; color: var(--brand-text); background: var(--brand-glass); cursor: pointer;
   transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast), box-shadow var(--dur-fast); }
@@ -74,27 +74,27 @@ img { display: block; max-width: 100%; }
 .btn--primary:hover { box-shadow: 0 0 0 1px var(--brand-line), 0 22px 60px var(--brand-glow); }
 .btn--ghost { background: transparent; }
 
-/* ---- 标签 ---- */
+/* ---- Chips ---- */
 .chip { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: 999px;
   border: 1px solid var(--brand-line); background: var(--brand-glass); color: var(--brand-text-dim); font-size: 14px; font-weight: 600; }
 .chip--active { color: var(--brand-white); border-color: var(--brand-400); background: var(--brand-glass-strong); box-shadow: 0 0 24px var(--brand-glow); }
 .chip--done { color: var(--brand-peach-soft); border-style: dashed; }
 
-/* ---- 数字块 ---- */
+/* ---- Stat blocks ---- */
 .stat { display: flex; flex-direction: column; gap: var(--space-1); }
 .stat b { font-size: 28px; font-variant-numeric: tabular-nums; }
 .stat small { color: var(--brand-text-dim); font-size: var(--fs-small); }
 
-/* ---- 表格 ---- */
+/* ---- Tables ---- */
 .table { width: 100%; border-collapse: collapse; font-size: 15px; }
 .table th { text-align: left; font-size: var(--fs-small); color: var(--brand-text-dim); font-weight: 600; padding: var(--space-3); border-bottom: 1px solid var(--brand-line); }
 .table td { padding: var(--space-3); border-bottom: 1px solid var(--brand-line); font-variant-numeric: tabular-nums; }
 
-/* ---- 加载、空、出错 ---- */
+/* ---- Loading, empty, error ---- */
 .state { padding: var(--space-7); text-align: center; color: var(--brand-text-dim); }
 .state--error { color: var(--brand-danger); }
 
-/* UX-1：系统要求减少动态效果时，背景不漂移 */
+/* UX-1: when the system asks for reduced motion, the background does not drift */
 @media (prefers-reduced-motion: reduce) {
   .blob { animation: none; }
   .btn { transition: none; }

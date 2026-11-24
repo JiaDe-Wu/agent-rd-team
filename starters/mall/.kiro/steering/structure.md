@@ -2,18 +2,18 @@
 inclusion: always
 ---
 
-# 桃源科技官方商城：目录
+# Larkspur Outfitters Official Store: layout
 
-| 路径 | 是什么 |
+| Path | What it is |
 |---|---|
-| `server/lib/pricing.js` | 价格引擎：到手价、划线价、上线前体检、购物车算价 |
-| `server/routes/` | 接口 |
-| `server/data/` | 数据（从知识库取来） |
-| `server/config/campaign.json` | 活动配置（运营方案） |
-| `web/pages/campaign.js` | 双十一活动页 |
-| `web/pages/admin.js` | 运营后台 |
-| `web/motion/` | 品牌动效 |
-| `web/styles/` | 样式：`tokens.css` 品牌变量、`base.css` 全站组件，页面各自一个 css |
-| `tools/check-campaign.js` | 上线前体检的命令行（`npm run check-campaign`） |
-| `tests/` | 测试；`tests/enterprise/` 是公司下发的检查 |
-| `docs/aidlc/` | 各阶段的产出 |
+| `server/lib/pricing.js` | The price engine: final price, reference price, pre-launch check, cart quote |
+| `server/routes/` | The API |
+| `server/data/` | Data (from the knowledge base) |
+| `server/config/campaign.json` | The campaign configuration (Operations' plan) |
+| `web/pages/campaign.js` | The Black Friday campaign page |
+| `web/pages/admin.js` | The operations back office |
+| `web/motion/` | Brand motion |
+| `web/styles/` | Styles: `tokens.css` brand variables, `base.css` site-wide components, and one css file per page |
+| `tools/check-campaign.js` | The pre-launch check on the command line (`npm run check-campaign`) |
+| `tests/` | Tests; `tests/enterprise/` holds the checks the company issues |
+| `docs/aidlc/` | What each stage produces |

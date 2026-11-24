@@ -1,4 +1,4 @@
-// 公司商城活动模板：读数据和活动配置。数据从知识库取来放进 server/data/，配置放进 server/config/，这里只负责读。
+// Company store campaign template: reads the data and the campaign configuration. The data comes from the knowledge base into server/data/, the configuration goes in server/config/; this only reads.
 import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
@@ -10,12 +10,12 @@ function read(dir, name, empty) {
   return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : empty
 }
 
-// { products: 商品[], orders: 订单[] }：字段见 README「数据」
+// { products: [...], orders: [...] }: the fields are in the README, "Data"
 export function loadData() {
   return { products: read(DATA, 'products.json', []), orders: read(DATA, 'orders.json', []) }
 }
 
-// 活动配置（server/config/campaign.json）：运营提报的方案，字段见 README「活动配置」。还没有就是 null
+// The campaign configuration (server/config/campaign.json): the plan Operations submitted; the fields are in the README, "Campaign configuration". null when there is none yet
 export function loadConfig() {
   return read(CONFIG, 'campaign.json', null)
 }

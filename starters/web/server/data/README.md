@@ -1,3 +1,3 @@
-# 数据
+# Data
 
-数据从 Kiro Crew 知识库「桃源科技」取来：知识库里的说明文档写了完整数据文件（JSON）的路径，原样复制到这里，不改内容。`server/lib/data.js` 按文件名读：`employees.json` 在接口里是 `ctx.data.employees`。
+The data comes from the Kiro Crew knowledge source "Larkspur Outfitters": the explanatory documents in the knowledge base give the paths of the full data files (JSON). Copy them here as they are and do not change them. `server/lib/data.js` reads them by file name: `employees.json` is `ctx.data.employees` in the API.

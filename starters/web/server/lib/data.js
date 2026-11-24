@@ -1,10 +1,10 @@
-// 公司网页模板：读 server/data/ 下的数据文件（JSON）。数据从知识库取来放进去，这里只负责读，不改内容。
+// Company web template: reads the data files (JSON) under server/data/. The data comes from the knowledge base; this only reads and never changes it.
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 const DIR = fileURLToPath(new URL('../data/', import.meta.url))
 
-// { <文件名>: 内容 }：server/data/employees.json 读成 data.employees，没有数据文件就是 {}
+// { <file name>: contents }: server/data/employees.json is read as data.employees; with no data files it is {}
 export function loadData() {
   if (!existsSync(DIR)) return {}
   const out = {}

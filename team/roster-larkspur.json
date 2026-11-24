@@ -1,0 +1,19 @@
+{
+  "name": "Larkspur Outfitters R&D team",
+  "note": "The company's agent R&D team: 13 positions, each held by one AI-DLC expert (a member on the Crew Agents page). The orchestrator picks people from it by requirement: those picked join this run's workflow, the rest sit this run out. Every role in a team file (team-*.json that names this roster) must be listed here.",
+  "people": [
+    {"key": "product", "title": "Product manager", "member": "aidlc-product-agent", "icon": "product"},
+    {"key": "architect", "title": "Architect", "member": "aidlc-architect-agent", "icon": "architect"},
+    {"key": "designer", "title": "UI designer", "member": "aidlc-design-agent", "icon": "designer"},
+    {"key": "backend1", "title": "Backend developer #1", "member": "aidlc-developer-agent", "icon": "backend"},
+    {"key": "backend2", "title": "Backend developer #2", "member": "aidlc-developer-agent", "icon": "backend"},
+    {"key": "frontend1", "title": "Frontend developer #1", "member": "aidlc-developer-agent", "icon": "frontend"},
+    {"key": "frontend2", "title": "Frontend developer #2", "member": "aidlc-developer-agent", "icon": "frontend"},
+    {"key": "motion", "title": "Motion designer", "member": "larkspur-motion-agent", "icon": "motion"},
+    {"key": "tester", "title": "Test engineer", "member": "aidlc-quality-agent", "icon": "tester"},
+    {"key": "security", "title": "Security review", "member": "aidlc-devsecops-agent", "icon": "security"},
+    {"key": "compliance", "title": "Compliance review", "member": "aidlc-compliance-agent", "icon": "compliance"},
+    {"key": "deploy", "title": "Deploy engineer", "member": "aidlc-pipeline-deploy-agent", "icon": "deploy"},
+    {"key": "ops", "title": "Operations engineer", "member": "aidlc-operations-agent", "icon": "ops"}
+  ]
+}

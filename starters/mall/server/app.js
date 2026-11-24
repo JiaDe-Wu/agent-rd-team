@@ -1,5 +1,5 @@
-// 公司商城活动模板：服务器骨架。同时提供接口（/api/*）和网页（web/ 下的静态文件）。
-// 接口的路由表在 routes/index.js；这个文件一般不需要改。
+// Company store campaign template: the server skeleton. It serves the API (/api/*) and the web pages (static files under web/).
+// The route table is in routes/index.js; you usually do not change this file.
 
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
@@ -22,7 +22,7 @@ const TYPES = {
   '.woff2': 'font/woff2',
   '.json': 'application/json; charset=utf-8',
 }
-// 公司安全基线：所有响应都带这些头（脚本只能来自本站，不允许内联脚本）
+// The company security baseline: every response carries these headers (scripts only from this site, no inline scripts)
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'same-origin',
@@ -31,9 +31,9 @@ const SECURITY_HEADERS = {
     "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
 }
 
-// data、config、clock 可以传进来（公司检查用）；不传就读 server/data/、server/config/ 和服务器时间
+// data, config and clock can be passed in (the company checks do); without them it reads server/data/, server/config/ and the server time
 export function createApp({ data = loadData(), config = loadConfig(), clock = now } = {}) {
-  // 这一次服务进程里的活动配置（拷贝，运营后台改的是它）和状态；重启就回到 server/config/campaign.json
+  // The campaign configuration (a copy; the back office changes this one) and status of this server process; a restart goes back to server/config/campaign.json
   const state = { config: config ? structuredClone(config) : null, status: 'draft' }
   return createServer(async (req, res) => {
     for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.setHeader(k, v)
@@ -44,14 +44,14 @@ export function createApp({ data = loadData(), config = loadConfig(), clock = no
     } catch (err) {
       if (err instanceof HttpError) return sendJson(res, err.status, { error: { code: err.code, message: err.message } })
       console.error(err)
-      return sendJson(res, 500, { error: { code: 'internal', message: '服务器出错了，请稍后再试' } })
+      return sendJson(res, 500, { error: { code: 'internal', message: 'Something went wrong on our side. Please try again later.' } })
     }
   })
 }
 
 async function api(req, res, url, data, state, clock) {
   const hit = matchRoute(routes, req.method, url.pathname)
-  if (!hit) throw new HttpError(404, 'not_found', '没有这个接口')
+  if (!hit) throw new HttpError(404, 'not_found', 'No such endpoint')
   let body
   const ctx = {
     req,
@@ -61,7 +61,7 @@ async function api(req, res, url, data, state, clock) {
     now: clock,
     params: hit.params,
     query: url.searchParams,
-    // 请求体按需读：await ctx.body()
+    // Read the request body when you need it: await ctx.body()
     body: async () => (body === undefined ? (body = await readJson(req)) : body),
     send: (status, data) => sendJson(res, status, data),
   }
@@ -74,21 +74,21 @@ async function api(req, res, url, data, state, clock) {
 }
 
 async function staticFile(req, res, url) {
-  if (req.method !== 'GET' && req.method !== 'HEAD') throw new HttpError(405, 'method_not_allowed', '不支持这个方法')
+  if (req.method !== 'GET' && req.method !== 'HEAD') throw new HttpError(405, 'method_not_allowed', 'This method is not supported')
   let rel
   try {
     rel = decodeURIComponent(url.pathname)
   } catch {
-    throw new HttpError(404, 'not_found', '页面不存在')
+    throw new HttpError(404, 'not_found', 'Page not found')
   }
   if (rel === '/' || rel === '') rel = '/index.html'
   const file = normalize(WEB + rel)
-  if (!file.startsWith(WEB) || file.includes(`${sep}..${sep}`)) throw new HttpError(404, 'not_found', '页面不存在')
+  if (!file.startsWith(WEB) || file.includes(`${sep}..${sep}`)) throw new HttpError(404, 'not_found', 'Page not found')
   let data
   try {
     data = await readFile(file)
   } catch {
-    throw new HttpError(404, 'not_found', '页面不存在')
+    throw new HttpError(404, 'not_found', 'Page not found')
   }
   res.writeHead(200, { 'Content-Type': TYPES[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' })
   res.end(req.method === 'HEAD' ? undefined : data)

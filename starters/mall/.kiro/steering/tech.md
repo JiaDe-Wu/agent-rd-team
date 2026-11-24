@@ -2,9 +2,9 @@
 inclusion: always
 ---
 
-# 桃源科技官方商城：技术约定
+# Larkspur Outfitters Official Store: technical conventions
 
-- 只用 Node 22 自带的模块，不装任何 npm 包；网页用原生 ES 模块，不用框架、不用打包工具。
-- 模板约定在 `README.md`「公司模板约定」：目录分工、接口外形、页面的 `render` / `mount`、动效接口、全站组件。按约定写，不改模板自带的文件。
-- 测试在 `tests/`，用 `node:test`；公司下发的检查在 `tests/enterprise/`，谁都不能改。跑全部：`node tests/enterprise/_run.cjs`；只跑一部分：`node tests/enterprise/_run.cjs <文件名里的词>`。
-- 颜色、字体、缓动只用 `web/styles/tokens.css` 的变量。
+- Use only the modules that come with Node 22 and install no npm packages. Web pages use native ES modules: no framework and no bundler.
+- The template conventions are in `README.md`, "Company template conventions": who owns which folder, the shape of the API, a page's `render` / `mount`, the motion interface and the site-wide components. Write to the conventions and do not change files that come with the template.
+- Tests are in `tests/` and use `node:test`; the checks the company issues are in `tests/enterprise/` and nobody may change them. Run everything: `node tests/enterprise/_run.cjs`; run part: `node tests/enterprise/_run.cjs <a word in the file name>`.
+- Colours, fonts and easing come only from the variables in `web/styles/tokens.css`.

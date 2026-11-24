@@ -16,7 +16,7 @@ NOW = datetime(2026, 10, 20, 12, 0).timestamp()
 
 
 def promo_run(tmp_path, rid="r1020aaaa", started=NOW - 3600):
-    t = team_mod.load_team(constants.TEAM_DIR / "team-taoyuan-promo.json")
+    t = team_mod.load_team(constants.TEAM_DIR / "team-promo.json")
     state = team_mod.new_state(rid, PROMO_REQ, t, "{brief}", tmp_path / "work", constants.APP_ROOT / "starters" / "mall", started)
     return team_mod.TeamRun(state, make_deps(tmp_path, FakeManager(), None, now=lambda: NOW))
 

@@ -1,6 +1,6 @@
-// 公司网页模板：拼 HTML 和格式化。
-//   html`<p>${name}</p>`  插进去的值自动转义（数组会逐项拼接，嵌套的 html`` 不再转义）
-//   raw(s)                确定安全的 HTML 片段（只给模板自己的常量用）
+// Company web template: building HTML and formatting.
+//   html`<p>${name}</p>`  values put in are escaped automatically (an array is joined item by item; a nested html`` is not escaped again)
+//   raw(s)                an HTML fragment known to be safe (only for the template's own constants)
 
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
 export const escape = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ESC[c])
@@ -30,5 +30,5 @@ export function html(strings, ...values) {
   return new Safe(out)
 }
 
-// 2026-10-11T12:30:05.000Z → 20:30:05（本地时间）
-export const clock = (iso) => new Date(iso).toLocaleTimeString('zh-CN', { hour12: false })
+// 2026-10-11T12:30:05.000Z → 12:30:05 (local time)
+export const clock = (iso) => new Date(iso).toLocaleTimeString('en-US', { hour12: false })
