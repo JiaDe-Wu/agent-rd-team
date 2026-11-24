@@ -143,8 +143,24 @@ def build_routes(svc: Any, AppRoute: Any, *, web: Any = None, is_owner: Any = No
     async def stop_site(request: Any) -> Any:
         return kit.json(await svc.stop_site(str(request.match_info.get("rid", ""))))
 
+    async def setup_status(request: Any) -> Any:
+        return kit.json(await svc.setup.describe())
+
+    async def setup_templates(request: Any) -> Any:
+        return kit.json(await svc.setup.install_templates())
+
+    async def setup_knowledge(request: Any) -> Any:
+        return kit.json(await svc.setup.add_knowledge())
+
+    async def setup_sample(request: Any) -> Any:
+        return kit.json(await svc.setup.load_sample())
+
     return [
         AppRoute("GET", "/health", health),
+        AppRoute("GET", "/setup", kit.guarded(setup_status)),
+        AppRoute("POST", "/setup/templates", kit.guarded(setup_templates)),
+        AppRoute("POST", "/setup/knowledge", kit.guarded(setup_knowledge)),
+        AppRoute("POST", "/setup/sample", kit.guarded(setup_sample)),
         AppRoute("GET", "/board", kit.guarded(board)),
         AppRoute("GET", "/cto", kit.guarded(cto)),
         AppRoute("GET", "/cto/offline", kit.guarded(cto_offline)),

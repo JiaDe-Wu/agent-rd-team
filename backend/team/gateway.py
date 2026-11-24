@@ -191,6 +191,25 @@ class Gateway:
         rows = data.get("sources") if isinstance(data, dict) else data
         return [r for r in rows or [] if isinstance(r, dict)]
 
+    async def workspaces(self) -> list[dict[str, Any]]:
+        """Kiro Crew's workspaces (``/api/workspaces``, in the app's permissions). Creating one is the owner's: not done here."""
+        return _rows(await self.request("GET", "/api/workspaces"), "workspaces")
+
+    async def add_knowledge_source(self, name: str, folder: str) -> dict[str, Any]:
+        """Add a folder of documents as a knowledge source (``POST /api/knowledge/sources``); the source Kiro Crew made."""
+        data = await self.request("POST", "/api/knowledge/sources", body={"name": name, "source_type": "local_folder", "uri": folder})
+        if isinstance(data, dict) and isinstance(data.get("source"), dict):
+            return data["source"]
+        return data if isinstance(data, dict) else {}
+
+    async def confirm_knowledge_source(self, source_id: str) -> None:
+        """Confirm a folder source Kiro Crew holds as ``pending_confirmation``: it then starts reading the folder."""
+        await self.request("POST", f"/api/knowledge/sources/{q(source_id)}/confirm", body={})
+
+    async def sync_knowledge_source(self, source_id: str) -> None:
+        """Have Kiro Crew read a confirmed source's documents again now."""
+        await self.request("POST", f"/api/knowledge/sources/{q(source_id)}/sync", body={})
+
     async def set_project(self, key: str, project: str) -> None:
         await self.request("POST", f"/api/chat/slots/{q(key)}/project", body={"project": project})
 

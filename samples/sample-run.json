@@ -1,0 +1,419 @@
+{
+ "format": 1,
+ "run": {
+  "version": 1,
+  "id": "r11247c53",
+  "title": "A sample requirement",
+  "requirement": "A sample requirement",
+  "source": null,
+  "status": "failed",
+  "started_at": 1795519474.0871863,
+  "ended_at": 1795519474.0947692,
+  "repo": "/tmp/tmpyp27pc7z/rec/work/runs/r11247c53/repo",
+  "base": null,
+  "branch": "team/r11247c53/run",
+  "run_wt": "/tmp/tmpyp27pc7z/rec/work/runs/r11247c53/wt/_run",
+  "team": {
+   "version": 1,
+   "delivery_defaults": {
+    "kind": "new app",
+    "size": "medium",
+    "line": "e-commerce"
+   },
+   "test_command": [
+    "npm",
+    "test"
+   ],
+   "roles": [
+    {
+     "key": "pm",
+     "title": "Product manager",
+     "emoji": "🧭",
+     "depends_on": [],
+     "writable": [
+      "docs/product/**"
+     ],
+     "outputs": [
+      "docs/product/acceptance.md"
+     ],
+     "brief": "Write the requirement in the README as numbered acceptance criteria AC-1, AC-2, ..., one sentence each and testable, into docs/product/acceptance.md.",
+     "phase": "",
+     "stage": ""
+    },
+    {
+     "key": "architect",
+     "title": "Architect",
+     "emoji": "🏛️",
+     "depends_on": [
+      "pm"
+     ],
+     "writable": [
+      "docs/architecture/**",
+      "contracts/**"
+     ],
+     "outputs": [
+      "contracts/api.md",
+      "docs/architecture/layout.md"
+     ],
+     "brief": "From the acceptance criteria, define the HTTP API contract (paths, requests, responses, error codes) in contracts/api.md, and the file layout of the backend, frontend, tests and ops in docs/architecture/layout.md.",
+     "phase": "",
+     "stage": ""
+    },
+    {
+     "key": "designer",
+     "title": "UI design",
+     "emoji": "🎨",
+     "depends_on": [
+      "pm"
+     ],
+     "writable": [
+      "docs/design/**",
+      "frontend/styles/**"
+     ],
+     "outputs": [
+      "docs/design/pages.md",
+      "frontend/styles/main.css"
+     ],
+     "brief": "Design the structure and interaction of the home page, event detail page, sign-up form and list page in docs/design/pages.md; write a ready-to-use frontend/styles/main.css that also works well on a phone.",
+     "phase": "",
+     "stage": ""
+    },
+    {
+     "key": "tester",
+     "title": "Testing",
+     "emoji": "🧪",
+     "depends_on": [
+      "architect"
+     ],
+     "writable": [
+      "tests/**"
+     ],
+     "outputs": [
+      "tests/"
+     ],
+     "brief": "Write tests from the acceptance criteria and the API contract, with node --test and zero dependencies. Put API tests in tests/api-*.test.js and page tests in tests/web-*.test.js (page tests read the files under frontend/ or call the frontend's pure functions; no browser), and project-level checks (npm scripts, ops/start.sh, Dockerfile: anything you can judge without starting the service) in tests/ops-*.test.js. The file name decides who a failing test is sent back to. Start each test name with the acceptance criterion's number, for example `AC-3: a full event cannot be joined`. API tests start backend/server.js themselves on a random port. The implementation is not written yet, so the tests should be red now; that is correct.",
+     "phase": "",
+     "stage": ""
+    },
+    {
+     "key": "backend",
+     "title": "Backend",
+     "emoji": "⚙️",
+     "depends_on": [
+      "architect",
+      "tester"
+     ],
+     "writable": [
+      "backend/**"
+     ],
+     "outputs": [
+      "backend/server.js"
+     ],
+     "brief": "Implement the backend as contracts/api.md says: the entry point is backend/server.js, which also serves frontend/ as static files; zero dependencies, data in memory. Make the API tests in tests/ pass.",
+     "phase": "",
+     "stage": ""
+    },
+    {
+     "key": "frontend",
+     "title": "Frontend",
+     "emoji": "🖥️",
+     "depends_on": [
+      "architect",
+      "designer",
+      "tester"
+     ],
+     "writable": [
+      "frontend/**"
+     ],
+     "outputs": [
+      "frontend/index.html"
+     ],
+     "brief": "Write the frontend pages as docs/design/pages.md and contracts/api.md say, getting data only through the HTTP API; use frontend/styles/main.css. A failed sign-up must show the reason.",
+     "phase": "",
+     "stage": ""
+    },
+    {
+     "key": "ops",
+     "title": "Operations",
+     "emoji": "🚀",
+     "depends_on": [
+      "architect"
+     ],
+     "writable": [
+      "ops/**",
+      "Dockerfile",
+      ".dockerignore",
+      "package.json"
+     ],
+     "outputs": [
+      "ops/start.sh",
+      "Dockerfile"
+     ],
+     "brief": "Write ops/start.sh (check the Node version, start the service, health check), a Dockerfile and a .dockerignore; the scripts in the root package.json are yours too: make sure `npm start` starts the service and `npm test` runs all the tests. Do not change other roles' directories.",
+     "phase": "",
+     "stage": ""
+    },
+    {
+     "key": "reviewer",
+     "title": "Review",
+     "emoji": "🔍",
+     "depends_on": [
+      "backend",
+      "frontend",
+      "ops"
+     ],
+     "writable": [],
+     "outputs": [],
+     "brief": "Read-only: change no files. Look at the whole change of the run branch against the requirement commit and check it against docs/product/acceptance.md item by item: anything missing, any obvious defect, any change in another role's directory. On the first line of your last reply write `DONE: ready to deliver` or `DONE: changes needed`; if changes are needed, list each one and name the role it belongs to on a line such as `Send back: Backend`.",
+     "phase": "",
+     "stage": ""
+    }
+   ],
+   "defaults": {
+    "model": "claude-opus-5.5",
+    "max_fix_rounds": 2
+   },
+   "test_owners": [
+    {
+     "glob": "tests/api-*",
+     "role": "backend"
+    },
+    {
+     "glob": "tests/web-*",
+     "role": "frontend"
+    },
+    {
+     "glob": "tests/ops-*",
+     "role": "ops"
+    }
+   ]
+  },
+  "task_template": "[agent-rd-team run={run} role={role} branch={branch} worktree={worktree}]\n\nYou are the \"{title}\" on a development team. The team is building a small website; the other roles work at the same time in their own directories.\n\nRequirement: {repo}/README.md (there is a copy in your working directory too).\n\nYour working directory: {worktree} (git branch {branch}). Work only in this directory.\nYou may change only these paths: {writable}. Other directories belong to other roles: you may read them, not change them.\n\nRead these upstream outputs first (if any): {inputs}\n\nYour task: {brief}\n\nWhen you are done:\n1. In {worktree}, `git add` the files you changed and commit to {branch}; start the commit message with `[{role}]`.\n2. Write `DONE: ` and a one-sentence summary on the first line of your last reply.\n3. Do not push, do not touch other branches, do not change git config.\n",
+  "seq": 2,
+  "needs_test": false,
+  "lanes": {
+   "pm": {
+    "status": "waiting",
+    "attempt": 0,
+    "attempts": [],
+    "conv": null,
+    "worktree": null,
+    "branch": null,
+    "fork": null,
+    "files": [],
+    "file_count": 0,
+    "lines": {
+     "added": 0,
+     "removed": 0
+    },
+    "commits": [],
+    "violations": [],
+    "started_at": null,
+    "done_at": null,
+    "summary": null,
+    "seen_commits": [],
+    "tool_seen": "",
+    "tool_at": 0.0
+   },
+   "architect": {
+    "status": "waiting",
+    "attempt": 0,
+    "attempts": [],
+    "conv": null,
+    "worktree": null,
+    "branch": null,
+    "fork": null,
+    "files": [],
+    "file_count": 0,
+    "lines": {
+     "added": 0,
+     "removed": 0
+    },
+    "commits": [],
+    "violations": [],
+    "started_at": null,
+    "done_at": null,
+    "summary": null,
+    "seen_commits": [],
+    "tool_seen": "",
+    "tool_at": 0.0
+   },
+   "designer": {
+    "status": "waiting",
+    "attempt": 0,
+    "attempts": [],
+    "conv": null,
+    "worktree": null,
+    "branch": null,
+    "fork": null,
+    "files": [],
+    "file_count": 0,
+    "lines": {
+     "added": 0,
+     "removed": 0
+    },
+    "commits": [],
+    "violations": [],
+    "started_at": null,
+    "done_at": null,
+    "summary": null,
+    "seen_commits": [],
+    "tool_seen": "",
+    "tool_at": 0.0
+   },
+   "tester": {
+    "status": "waiting",
+    "attempt": 0,
+    "attempts": [],
+    "conv": null,
+    "worktree": null,
+    "branch": null,
+    "fork": null,
+    "files": [],
+    "file_count": 0,
+    "lines": {
+     "added": 0,
+     "removed": 0
+    },
+    "commits": [],
+    "violations": [],
+    "started_at": null,
+    "done_at": null,
+    "summary": null,
+    "seen_commits": [],
+    "tool_seen": "",
+    "tool_at": 0.0
+   },
+   "backend": {
+    "status": "waiting",
+    "attempt": 0,
+    "attempts": [],
+    "conv": null,
+    "worktree": null,
+    "branch": null,
+    "fork": null,
+    "files": [],
+    "file_count": 0,
+    "lines": {
+     "added": 0,
+     "removed": 0
+    },
+    "commits": [],
+    "violations": [],
+    "started_at": null,
+    "done_at": null,
+    "summary": null,
+    "seen_commits": [],
+    "tool_seen": "",
+    "tool_at": 0.0
+   },
+   "frontend": {
+    "status": "waiting",
+    "attempt": 0,
+    "attempts": [],
+    "conv": null,
+    "worktree": null,
+    "branch": null,
+    "fork": null,
+    "files": [],
+    "file_count": 0,
+    "lines": {
+     "added": 0,
+     "removed": 0
+    },
+    "commits": [],
+    "violations": [],
+    "started_at": null,
+    "done_at": null,
+    "summary": null,
+    "seen_commits": [],
+    "tool_seen": "",
+    "tool_at": 0.0
+   },
+   "ops": {
+    "status": "waiting",
+    "attempt": 0,
+    "attempts": [],
+    "conv": null,
+    "worktree": null,
+    "branch": null,
+    "fork": null,
+    "files": [],
+    "file_count": 0,
+    "lines": {
+     "added": 0,
+     "removed": 0
+    },
+    "commits": [],
+    "violations": [],
+    "started_at": null,
+    "done_at": null,
+    "summary": null,
+    "seen_commits": [],
+    "tool_seen": "",
+    "tool_at": 0.0
+   },
+   "reviewer": {
+    "status": "waiting",
+    "attempt": 0,
+    "attempts": [],
+    "conv": null,
+    "worktree": null,
+    "branch": null,
+    "fork": null,
+    "files": [],
+    "file_count": 0,
+    "lines": {
+     "added": 0,
+     "removed": 0
+    },
+    "commits": [],
+    "violations": [],
+    "started_at": null,
+    "done_at": null,
+    "summary": null,
+    "seen_commits": [],
+    "tool_seen": "",
+    "tool_at": 0.0
+   }
+  },
+  "merges": [],
+  "standards": [],
+  "tests": {
+   "at": null,
+   "head": null,
+   "command": "npm test",
+   "cases": [],
+   "passed": 0,
+   "failed": 0,
+   "total": 0,
+   "history": []
+  },
+  "lessons_file": "/tmp/tmpyp27pc7z/rec/work/lessons.json",
+  "lessons_in": [],
+  "roster": null,
+  "paused_s": 0.0
+ },
+ "events": [
+  {
+   "seq": 1,
+   "at": 1795519474.0873473,
+   "kind": "run",
+   "role": null,
+   "text": "Run started: A sample requirement",
+   "from": null,
+   "to": null,
+   "data": null
+  },
+  {
+   "seq": 2,
+   "at": 1795519474.0947738,
+   "kind": "run",
+   "role": null,
+   "text": "Run failed: could not set up the repository: git init not run: Kiro Crew's sandbox SDK is not available (this app needs Kiro Crew 0.13.0 or newer)",
+   "from": null,
+   "to": null,
+   "data": null
+  }
+ ]
+}

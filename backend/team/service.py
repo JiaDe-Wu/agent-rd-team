@@ -20,6 +20,7 @@ from .constants import (APP_NAME, APP_ROOT, MODEL_RE, MODELS_TTL_S, TARGET_TEMPL
 from .gateway import Gateway, GatewayError
 from .sessions import SessionManager
 from .httpkit import AppError
+from .setup import Setup
 from .store import RID_RE, Store
 from . import team as team_mod
 from .team import Deps, TeamRun, load_team, new_rid, new_state
@@ -69,6 +70,7 @@ class Service:
         self._live_runs: set[str] = set()  # the runs seen going last pulse: one that has ended since keeps its roster
         self._events_cache: dict[str, tuple[int, list[dict[str, Any]]]] = {}  # rid → (seq, every event): the CTO view
         self._models: tuple[float, list[dict[str, Any]]] | None = None  # (read at, the models): the start form's list
+        self.setup = Setup(self)  # the example team's one-click setup (setup.py)
 
     def manager(self) -> Any:
         """The agent manager the runs, the board and Outputs use: the role sessions."""
@@ -329,8 +331,7 @@ class Service:
         if (decision == "revise" and pending and not spec.get("writable")
                 and not team_mod.review_targets(note, run.team["roles"])
                 and not team_mod.review_targets(run.overrule_review(role), run.team["roles"])):
-            # protocol token: kept in Chinese (the 打回： line the send-back is matched on)
-            raise AppError("To send back, say to whom, for example \"打回：Web #2\"", "no_target")
+            raise AppError("To send back, say to whom, for example \"Send back: Web #2\"", "no_target")
         if not await run.gate(role, decision, note, delivery, answers, risk if decision == "revise" else None):
             raise AppError("This role is not waiting for approval", "not_gated", 409)
         return {"ok": True, "run": run.rid, "role": role, "decision": decision, "status": run.s["status"]}
