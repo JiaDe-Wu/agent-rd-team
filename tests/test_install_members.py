@@ -12,8 +12,8 @@ import install_members  # noqa: E402
 def test_every_member_a_team_file_names_has_a_template():
     have = set(install_members.member_names(ROOT / "agents"))
     named = install_members.roles_members(ROOT / "team")
-    # taoyuan-motion-agent is the one custom member the sample adds by hand, and its role is optional
-    missing = named - have - {"taoyuan-motion-agent"}
+    # larkspur-motion-agent is the one custom member the sample adds by hand, and its role is optional
+    missing = named - have - {"larkspur-motion-agent"}
     assert not missing, f"team files name members with no template: {sorted(missing)}"
 
 
@@ -58,4 +58,4 @@ def test_the_kiro_agent_file_is_named_like_the_template_the_app_boots():
 
 
 def test_the_team_files_share_one_workspace_and_the_installer_uses_it():
-    assert install_members.team_workspace(ROOT / "team") == "taoyuan"
+    assert install_members.team_workspace(ROOT / "team") == "larkspur"

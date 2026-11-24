@@ -1,6 +1,6 @@
-// 公司模板：HTTP 小工具。零依赖，只用 Node 自带的模块。
-// 路由处理函数抛 HttpError，app.js 会把它写成统一的错误格式：
-//   { "error": { "code": "<英文短码>", "message": "<给用户看的中文>" } }
+// Company template: small HTTP helpers. No dependencies, only Node's own modules.
+// A route handler throws HttpError, and app.js writes it in the one error format:
+//   { "error": { "code": "<short code>", "message": "<plain English for the user>" } }
 
 export class HttpError extends Error {
   constructor(status, code, message) {
@@ -10,7 +10,7 @@ export class HttpError extends Error {
   }
 }
 
-export const BODY_LIMIT = 16 * 1024 // 请求体上限 16KB，超过返回 413
+export const BODY_LIMIT = 16 * 1024 // request body limit 16KB; over it returns 413
 
 export function sendJson(res, status, body) {
   const text = JSON.stringify(body)
@@ -22,7 +22,7 @@ export function sendJson(res, status, body) {
   res.end(text)
 }
 
-// 读 JSON 请求体：超过上限抛 413，不是合法 JSON 抛 400。
+// Read a JSON request body: over the limit throws 413, invalid JSON throws 400.
 export function readJson(req, limit = BODY_LIMIT) {
   return new Promise((resolve, reject) => {
     let size = 0
@@ -30,7 +30,7 @@ export function readJson(req, limit = BODY_LIMIT) {
     req.on('data', (chunk) => {
       size += chunk.length
       if (size > limit) {
-        reject(new HttpError(413, 'body_too_large', '请求内容太大'))
+        reject(new HttpError(413, 'body_too_large', 'The request is too large'))
         req.destroy()
         return
       }
@@ -42,14 +42,14 @@ export function readJson(req, limit = BODY_LIMIT) {
       try {
         resolve(JSON.parse(text))
       } catch {
-        reject(new HttpError(400, 'invalid_json', '请求内容不是合法的 JSON'))
+        reject(new HttpError(400, 'invalid_json', 'The request is not valid JSON'))
       }
     })
     req.on('error', reject)
   })
 }
 
-// 路由表里的 path 可以带参数：'/api/products/:id'。匹配上返回 { route, params }。
+// A path in the route table can take parameters: '/api/products/:id'. A match returns { route, params }.
 export function matchRoute(routes, method, pathname) {
   for (const route of routes) {
     if (route.method !== method) continue

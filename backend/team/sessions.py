@@ -1,5 +1,5 @@
 """Role agents as Kiro Crew chat sessions: every role of a run gets one session, in a folder of the run under
-"AI-DLC 团队" in the dashboard's sidebar. A person can open any of them, read every step and type into it; the app
+"AI-DLC Team" in the dashboard's sidebar. A person can open any of them, read every step and type into it; the app
 still dispatches, merges, tests and sends work back. This is the only way the app runs agents: it talks to Kiro Crew
 through its HTTP API (``gateway.py``) and never reaches into the Crew process.
 
@@ -38,7 +38,8 @@ from .gateway import GatewayError
 
 PREFIX = "s-"
 # protocol token: kept in Chinese (the name of the Crew folder the sessions live in; existing folders carry it)
-ROOT_FOLDER = "AI-DLC 团队"
+ROOT_FOLDER = "AI-DLC Team"
+OLD_ROOT_FOLDERS = ("AI-DLC 团队",)  # the folder runs of earlier versions are in: still found, and used while it exists
 IDLE_POLLS = 2          # idle this many polls in a row (after the reply is in) = the turn is over
 MISSING_POLLS = 3       # gone from this many listings in a row = closed or deleted by someone
 RESENDS = 2             # a turn KiroCrew refused to start is sent again at most this often
@@ -360,8 +361,9 @@ class SessionManager:
             if have and have.get("id"):
                 return str(have["id"])
             folders = await self.gw.folders()
-            root = next((f for f in folders if f.get("name") == ROOT_FOLDER and not f.get("parent_id")
-                         and f.get("owner_app") in (self.app, None, "")), None)
+            roots = [f for f in folders if f.get("name") in (ROOT_FOLDER, *OLD_ROOT_FOLDERS) and not f.get("parent_id")
+                     and f.get("owner_app") in (self.app, None, "")]
+            root = next((f for f in roots if f.get("name") == ROOT_FOLDER), None) or (roots[0] if roots else None)
             if root is None:
                 root = await self.gw.create_folder(ROOT_FOLDER)
             run_dir = str(Path(info.cwd).parents[1]) if info.cwd and len(Path(info.cwd).parents) > 1 else None
@@ -441,9 +443,9 @@ class SessionManager:
         info.last_tool = f"Interrupted ({why}); the orchestrator asked it to carry on (time {info.nudges})"
         self._dirty = True
         self.log.info("agent-rd-team: session %s was cut short (%s), continuing (%d)", info.slot, why, info.nudges)
-        # agent-facing text: stays in Chinese
-        await self.gw.send(str(info.slot), "（编排器）你上一轮被中断了：" + why + "。你已经做的改动都在工作目录里：先 `git status`、"
-                           "`git log --oneline -3` 看一眼做到哪了，再接着把原来的任务做完；做完照原来的要求提交，最后一条回复的第一行写 `DONE: ` 加一句话总结。", sid)
+        await self.gw.send(str(info.slot), "(Orchestrator) Your last round was interrupted: " + why + ". The changes you already made are in your "
+                           "working directory: run `git status` and `git log --oneline -3` to see how far you got, then carry on and finish the original task; "
+                           "when you are done, commit as originally required and write `DONE: ` and a one-sentence summary on the first line of your last reply.", sid)
 
     async def poll(self) -> None:
         """One look at every live session: a single listing, then the transcript of each one that is live."""
@@ -538,7 +540,7 @@ class SessionManager:
 
     async def cleanup(self, keep_parents: set[str]) -> dict[str, int]:
         """Delete every session this app opened, except those of *keep_parents* (runs still going), and hide the run
-        folders they leave empty under "AI-DLC 团队": KiroCrew lets only a person delete a folder."""
+        folders they leave empty under "AI-DLC Team": KiroCrew lets only a person delete a folder."""
         keep_slots = {i.slot for i in self._infos.values() if i.parent_session_key in keep_parents and i.slot}
         keep_folders = {str(v.get("id")) for k, v in self._folders.items() if k in keep_parents}
         slots = [r for r in await self.gw.slots() if r.get("app") == self.app and str(r.get("key")) not in keep_slots]
@@ -550,7 +552,7 @@ class SessionManager:
             except Exception as exc:  # noqa: BLE001
                 self.log.info("agent-rd-team: deleting session %s: %s", r.get("key"), exc)
         folders = await self.gw.folders()
-        root_ids = {str(f.get("id")) for f in folders if f.get("name") == ROOT_FOLDER and not f.get("parent_id")}
+        root_ids = {str(f.get("id")) for f in folders if f.get("name") in (ROOT_FOLDER, *OLD_ROOT_FOLDERS) and not f.get("parent_id")}
         gone = 0
         for f in folders:
             fid = str(f.get("id"))

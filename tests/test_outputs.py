@@ -1,4 +1,4 @@
-"""The 产出 view (each role's task, reply, tool calls and files) and 打开网站 (the finished product on a local port)."""
+"""The Outputs view (each role's task, reply, tool calls and files) and Open site (the finished product on a local port)."""
 
 import asyncio
 import json
@@ -32,14 +32,14 @@ def test_each_role_shows_its_task_reply_and_delivered_files(tmp_path):
         assert pm["files"] == [{"path": "docs/product/acceptance.md", "added": 2, "removed": 0, "status": "A",
                                 "output": True, "owner": "pm"}]
         [att] = pm["attempts"]
-        assert att["reply"].endswith("DONE: 做完了") and att["summary"] == "做完了" and not att["live"]
+        assert att["reply"].endswith("DONE: done") and att["summary"] == "done" and not att["live"]
         assert att["task"].startswith("[agent-rd-team run=r1006test role=pm ") and att["calls"] == []
 
         designer = await outputs.role_output(run, "designer", mgr=mgr, scrub=str)
         assert {f["path"]: f["output"] for f in designer["files"]} == {"docs/design/pages.md": True, "frontend/styles/main.css": True}
 
         reviewer = await outputs.role_output(run, "reviewer", mgr=mgr, scrub=str)
-        assert reviewer["files"] == [] and reviewer["attempts"][0]["reply"].endswith("DONE: 可以交付")
+        assert reviewer["files"] == [] and reviewer["attempts"][0]["reply"].endswith("DONE: ready to deliver")
 
         product = await outputs.role_output(run, "run", mgr=mgr, scrub=str)
         owners = {f["path"]: f["owner"] for f in product["files"]}
@@ -74,13 +74,13 @@ def test_older_runs_get_their_replies_filled_in_once(tmp_path):
         run = await finished_run(tmp_path, mgr)
         for att in run.lane("pm")["attempts"]:  # as a run from before replies and calls were kept
             att.pop("reply"), att.pop("calls")
-        mgr.agents[run.lane("pm")["attempts"][0]["agent"]].result = "DONE: 写好了验收标准\n\n- AC-1 首页"
-        pm = await outputs.role_output(run, "pm", mgr=mgr, scrub=lambda s: s.replace("AC-1", "AC-一"))
+        mgr.agents[run.lane("pm")["attempts"][0]["agent"]].result = "DONE: acceptance criteria written\n\n- AC-1 home page"
+        pm = await outputs.role_output(run, "pm", mgr=mgr, scrub=lambda s: s.replace("AC-1", "AC-one"))
         att = pm["attempts"][0]
-        assert att["reply"] == "DONE: 写好了验收标准\n\n- AC-一 首页" and att["calls"] == []
-        mgr.agents[run.lane("pm")["attempts"][0]["agent"]].result = "换了"
+        assert att["reply"] == "DONE: acceptance criteria written\n\n- AC-one home page" and att["calls"] == []
+        mgr.agents[run.lane("pm")["attempts"][0]["agent"]].result = "changed"
         await outputs.role_output(run, "pm", mgr=mgr, scrub=str)
-        assert run.lane("pm")["attempts"][0]["reply"].startswith("DONE: 写好了")  # kept, on disk too
+        assert run.lane("pm")["attempts"][0]["reply"].startswith("DONE: acceptance")  # kept, on disk too
 
     asyncio.run(go())
 
@@ -89,7 +89,7 @@ SERVER = textwrap.dedent("""
     import http from 'node:http'
     const port = Number(process.env.PORT)
     console.log('listening on', port, process.env.HOST)
-    http.createServer((req, res) => { res.end('<h1>活动报名</h1>') }).listen(port, process.env.HOST)
+    http.createServer((req, res) => { res.end('<h1>Event sign-up</h1>') }).listen(port, process.env.HOST)
 """)
 
 

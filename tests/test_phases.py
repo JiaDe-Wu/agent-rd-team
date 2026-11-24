@@ -1,4 +1,4 @@
-"""v2：构思之后的人工批准关卡，架构师写的分工文件决定开发角色的目录，用不到的角色跳过。"""
+"""v2: a human approval gate after ideation; the assignment file the architect writes decides the developer roles' directories, and a role that is not needed is skipped."""
 
 import asyncio
 import json
@@ -10,17 +10,17 @@ team_mod = mod("team")
 
 def phased_team() -> dict:
     role = lambda key, title, deps, **kw: {"key": key, "title": title, "emoji": "", "depends_on": deps,  # noqa: E731
-                                           "outputs": [], "brief": f"{title}的活", **kw}
+                                           "outputs": [], "brief": f"{title}'s work", **kw}
     return team_mod.check_team({
         "version": 1, "test_command": ["node", "tests/enterprise/_run.cjs"],
         "ownership": {"file": "docs/inception/ownership.json", "from": "architect"},
         "roles": [
-            role("scope", "意图与范围", [], writable=["docs/ideation/**"], phase="ideation", stage="1.4 范围定义",
-                 gate="human", gate_label="范围"),
-            role("architect", "架构师", ["scope"], writable=["docs/inception/**"], phase="inception"),
-            role("backend", "后端", ["architect"], writable_from="ownership", phase="construction"),
-            role("mobile", "安卓", ["architect"], writable_from="ownership", phase="construction"),
-            role("reviewer", "评审", ["backend", "mobile"], writable=[], phase="review"),
+            role("scope", "Intent and scope", [], writable=["docs/ideation/**"], phase="ideation", stage="1.4 Scope definition",
+                 gate="human", gate_label="Scope"),
+            role("architect", "Architect", ["scope"], writable=["docs/inception/**"], phase="inception"),
+            role("backend", "Backend", ["architect"], writable_from="ownership", phase="construction"),
+            role("mobile", "Android", ["architect"], writable_from="ownership", phase="construction"),
+            role("reviewer", "Review", ["backend", "mobile"], writable=[], phase="review"),
         ],
         "defaults": {"model": "claude-sonnet-5.5", "effort": "high", "max_fix_rounds": 2},
         "test_owners": [],
@@ -36,31 +36,31 @@ def test_a_gate_waits_for_the_person_and_the_ownership_file_dispatches_the_team(
 
     async def go():
         mgr = FakeManager()
-        run = make_run(tmp_path, mgr, tests, team=phased_team(), requirement="下个月推给全公司用")
+        run = make_run(tmp_path, mgr, tests, team=phased_team(), requirement="Roll out to the whole company next month")
         assert run.roles["backend"]["writable"] == [team_mod.PENDING_GLOB]
         await run.tick()
         act(mgr.by_role("scope"), {"docs/ideation/scope.md": "SEC-1 SEC-2\n"})
-        finish(mgr.by_role("scope"), "范围 2 条")
+        finish(mgr.by_role("scope"), "2 scope items")
         await run.tick()
         assert run.lane("scope")["gate"] == "pending" and run.s["status"] == "gating"
         assert [mgr.role_of(a) for a in mgr.live()] == []  # nothing starts behind the gate
         await run.tick()
         assert not run.ended  # waiting for a person is not the end
 
-        assert await run.gate("scope", "approve", "去掉 SEC-2，这次只做 SEC-1")
+        assert await run.gate("scope", "approve", "Drop SEC-2, do only SEC-1 this time")
         await run.tick()
         arch = mgr.by_role("architect")
-        assert "去掉 SEC-2，这次只做 SEC-1" in arch.task  # the person's word travels downstream
+        assert "Drop SEC-2, do only SEC-1 this time" in arch.task  # the person's word travels downstream
 
         act(arch, own({"backend": ["tests/x/**"]}))  # a role may never be given the tests
         finish(arch)
         await run.tick()
         redo = run.lane("architect")["attempts"][-1]
-        assert redo["kind"] == "revise" and "分工文件" in redo["task"] and run.lane("architect")["status"] == "fixing"
+        assert redo["kind"] == "revise" and "assignment file" in redo["task"] and run.lane("architect")["status"] == "fixing"
         assert not run.lane("architect").get("merged_sha")  # a wrong ownership file is not merged
 
         act(mgr.by_role("architect"), own({"backend": ["backend/**"], "mobile": []}, {"api": "backend"}))
-        finish(mgr.by_role("architect"), "分工写好了")
+        finish(mgr.by_role("architect"), "assignment written")
         await run.tick()
         await run.tick()
         assert run.roles["backend"]["writable"] == ["backend/**"] and run.lane("mobile")["status"] == "skipped"
@@ -76,7 +76,7 @@ def test_a_gate_waits_for_the_person_and_the_ownership_file_dispatches_the_team(
             await run.tick()
             for a in mgr.live():
                 if mgr.role_of(a) == "reviewer":
-                    finish(a, "可以交付")
+                    finish(a, "ready to deliver")
         assert run.s["status"] == "done" and run.lane("mobile")["status"] == "skipped"
 
     asyncio.run(go())
@@ -85,15 +85,15 @@ def test_a_gate_waits_for_the_person_and_the_ownership_file_dispatches_the_team(
 def test_a_person_can_send_the_gated_work_back(tmp_path):
     async def go():
         mgr = FakeManager()
-        run = make_run(tmp_path, mgr, FakeTests([]), team=phased_team(), requirement="上架")
+        run = make_run(tmp_path, mgr, FakeTests([]), team=phased_team(), requirement="Store listing")
         await run.tick()
         act(mgr.by_role("scope"), {"docs/ideation/scope.md": "STORE-1\n"})
         finish(mgr.by_role("scope"))
         await run.tick()
         assert not await run.gate("architect", "approve")  # only a role behind a gate can be approved
-        assert await run.gate("scope", "revise", "漏了账号删除")
+        assert await run.gate("scope", "revise", "Missed account deletion")
         att = run.lane("scope")["attempts"][-1]
-        assert att["kind"] == "revise" and "漏了账号删除" in att["task"] and run.lane("scope")["gate"] is None
+        assert att["kind"] == "revise" and "Missed account deletion" in att["task"] and run.lane("scope")["gate"] is None
         act(mgr.by_role("scope"), {"docs/ideation/scope.md": "STORE-1\nCOMP-1\n"})
         finish(mgr.by_role("scope"))
         await run.tick()
@@ -111,7 +111,7 @@ def test_ownership_problems_are_named():
 def test_the_v2_team_file_loads():
     team = team_mod.load_team(mod("constants").TEAM_DIR / "team-aidlc.json")
     phases = [r["phase"] for r in team["roles"]]
-    assert phases[0] == "ideation" and phases[-3:] == ["review", "operation", "operation"]  # the review, the deployment, 沉淀
+    assert phases[0] == "ideation" and phases[-3:] == ["review", "operation", "operation"]  # the review, the deployment, lessons
     assert any(r.get("gate") == "human" for r in team["roles"])
     assert team["ownership"]["from"] == "architect"
 

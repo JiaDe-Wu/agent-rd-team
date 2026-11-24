@@ -2,9 +2,9 @@
 inclusion: always
 ---
 
-# 桃源科技内部网页：产品
+# Larkspur Outfitters internal web pages: product
 
-桃源科技（智能家电和消费电子品牌）给自己的部门做的内部网页和小工具，从公司的网页模板开工。需求写在 `README.md` 末尾的「需求」一节。
+Internal web pages and small tools that Larkspur Outfitters' departments build for themselves, started from the company's web template. The requirement is in the "Requirement" section at the end of `README.md`.
 
-- 公司的规范、业务规则和数据在 Kiro Crew 知识库「桃源科技」里，动手前先查（`local_knowledge_search`），按知识库里写的路径读数据文件。
-- 品牌吉祥物是小桃子（`web/img/mascot.svg`），按《品牌规范》用。
+- The company's standards, business rules and data are in the Kiro Crew knowledge source "Larkspur Outfitters". Look them up before you start (`local_knowledge_search`) and read the data files at the paths the knowledge base gives.
+- The brand mascot is Pip (`web/img/mascot.svg`); use it as the Brand Standard says.

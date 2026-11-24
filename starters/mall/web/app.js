@@ -1,6 +1,6 @@
-// 公司商城活动模板：页面外壳和路由。一般不需要改。
-//   #/        双十一活动页（pages/campaign.js），顾客看的
-//   #/admin   运营后台（pages/admin.js）：改折扣、看上线前体检、一键上线
+// Company store campaign template: the page shell and routing. You usually do not change it.
+//   #/        the Black Friday campaign page (pages/campaign.js), for shoppers
+//   #/admin   the operations back office (pages/admin.js): change discounts, see the pre-launch check, launch
 import { api } from './lib/api.js'
 import * as motion from './motion/motion.js'
 import * as campaign from './pages/campaign.js'

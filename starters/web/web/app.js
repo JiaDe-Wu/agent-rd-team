@@ -1,6 +1,6 @@
-// 公司网页模板：页面外壳和路由。一般不需要改，页面在 pages/index.js 里登记。
-//   #/<页面名>  显示 pages/<页面名>.js；没写页面名时显示登记的第一个
-//   每个页面自己的样式是 styles/<页面名>.css（有就加载）
+// Company web template: the page shell and routing. You usually do not change it; pages are registered in pages/index.js.
+//   #/<page name>  shows pages/<page name>.js; with no page name it shows the first registered page
+//   a page's own style is styles/<page name>.css (loaded when it exists)
 import { api } from './lib/api.js'
 import * as motion from './motion/motion.js'
 import { pages } from './pages/index.js'

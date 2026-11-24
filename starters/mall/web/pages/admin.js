@@ -1,11 +1,11 @@
-// 运营后台：由前端开发按 README「页面约定」实现（render 纯函数 + mount 绑事件）。模板里只是占位。
+// The operations back office: frontend developers implement it from the README, "Page conventions" (render is a pure function, mount binds events). Here it is a placeholder.
 import { html } from '../lib/format.js'
 
 export function render(state) {
   return html`<section class="panel glass">
-    <p class="eyebrow">运营后台</p>
-    <h1 class="title">双十一活动配置</h1>
-    <p class="muted">${state.status === 'error' ? state.error : '页面还没开发'}</p>
+    <p class="eyebrow">Back office</p>
+    <h1 class="title">Campaign setup</h1>
+    <p class="muted">${state.status === 'error' ? state.error : 'This page has not been built yet'}</p>
   </section>`.toString()
 }
 

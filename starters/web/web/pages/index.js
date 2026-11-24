@@ -1,5 +1,5 @@
-// 页面登记：{ 页面名: { title: 导航上的名字, load: () => import('./<页面名>.js') } }，第一个是首页。
-// 前端开发加页面时在这里登记一行（页面名只用小写字母和短横线，和文件名一致）。
+// Page registry: { page name: { title: the name in the navigation, load: () => import('./<page name>.js') } }, and the first is the home page.
+// Frontend developers add a line here when they add a page (page names use only lower-case letters and hyphens, the same as the file name).
 export const pages = {
-  home: { title: '首页', load: () => import('./home.js') },
+  home: { title: 'Home', load: () => import('./home.js') },
 }

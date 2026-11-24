@@ -2,10 +2,10 @@
 inclusion: always
 ---
 
-# 桃源科技官方商城：产品
+# Larkspur Outfitters Official Store: product
 
-桃源科技是做智能家电和消费电子的品牌，官方商城卖自家的电视、空调、冰箱、洗衣机、厨卫、清洁电器和数码。这个项目是双十一大促：顾客看的活动页，和运营配活动、看上线前体检、一键上线的后台。
+Larkspur Outfitters is a fictional outdoor-gear retailer, and the official store sells its own tents, sleeping bags, packs, footwear, camp kitchen, apparel and electronics. This project is the Black Friday to Cyber Monday sale: the campaign page shoppers see, and the back office where Operations configures the sale, reads the pre-launch check and launches it.
 
-- 公司的规范（价格合规、毛利、价保、前端、品牌）和数据在 Kiro Crew 知识库「桃源科技」里，动手前先查（`local_knowledge_search`），按知识库里写的路径读数据文件。
-- 价格一上线就是对全网顾客的承诺：划线价、到手价、满减、价保都要按规范算，算不对、不合规的不能上线。
-- 活动页要有大促的样子：深色舞台、紫色和桃色的光、到手价大字、倒计时；运营后台要让人一眼看出能不能上线、为什么。
+- The company's standards (pricing compliance, margin, price adjustment, frontend, brand) and data are in the Kiro Crew knowledge source "Larkspur Outfitters". Look them up before you start (`local_knowledge_search`) and read the data files at the paths the knowledge base gives.
+- Once live, a price is a promise to every shopper: the reference price, final price, spend-and-save and price adjustment must follow the standards, and a sale that gets them wrong or breaks a rule cannot launch.
+- The campaign page should look like a big sale: a dark stage, purple and peach light, the final price in large type, a countdown. The back office should show at a glance whether the sale can launch and why.

@@ -6,7 +6,7 @@ first line), and every git step checks what is already done. Every role's agent 
 A role: waiting → (its dependencies merged) worktree from the run branch head, handoffs, spawn → queued / running /
 stalled / awaiting_approval → done → the app commits its leftovers and merges it into the run branch → merged (or a
 conflict, sent back) → the app runs the tests; failing cases go back to their owner, whose conversation is continued
-(fixing), until green or out of fix rounds → the read-only reviewer → the run is done (failed if it still says 要改 (changes needed) when
+(fixing), until green or out of fix rounds → the read-only reviewer → the run is done (failed if it still says "changes needed" when
 its rounds are used up; a reviewer behind a person's gate hands that to the person instead).
 
 A role marked ``"optional": true`` may sit a run out: its Crew member is not on the team's Agents page when the run is
@@ -42,26 +42,55 @@ ENDED = ("done", "failed", "stopped")
 LOST_GRACE_S = 60.0  # an agent KiroCrew no longer knows is given up on after this
 TOOL_EVENT_GAP_S = 3.0  # at most one ``tool`` event per role this often
 STATS_GAP_S, STATS_EVERY_S = 6.0, 30.0  # a running worktree's git stats: at most / at least this often
-HUMAN_MARK = "【负责人退回】"  # agent-facing marker: kept in Chinese; a review-kind fix task that a person, not the reviewer, sent back
+HUMAN_MARK = "[Sent back by the owner]"  # marks a review-kind fix task that a person, not the reviewer, sent back
+HUMAN_MARKS = (HUMAN_MARK, "【负责人退回】")  # the second is what runs of earlier versions stored: both are read
 # a turn the model backend could not finish (an HTTP 5xx, a runtime that died): worth one more go in a new session
 TRANSIENT_ERROR = re.compile(r"transient|HTTP 5\d\d|5xx|runtime failed|timed? ?out|overloaded|rate.?limit|throttl", re.I)
 ERRORS_TO_FAIL = 30  # this many failing ticks in a row (about a minute) end the run
 REPLY_KEEP = 20_000  # characters of an agent's last reply kept for the Outputs view
 _DONE_RE = re.compile(r"(?<![A-Za-z])DONE\s*[:：]\s*(.*)$", re.M)  # also mid-line: KiroCrew joins messages with no break
-REVIEW_KEEP = 12_000  # characters of a 要改 (changes needed) review a bounced role is given
+REVIEW_KEEP = 12_000  # characters of a "changes needed" review a bounced role is given
 TALK_KEEP = 2_000  # characters of a role's answer in a discussion at its gate, kept for the gate card
 DECISIONS_FILE = "docs/aidlc/decisions.md"  # what people decided at the gates, written into the run branch by the app
 KNOWLEDGE_FILE = "docs/aidlc/knowledge.md"  # what the person chose to keep at the last gate (lessons), written by the app
 MULTI_OPTIONS = 10  # options of a multiple-choice question: a person ticks any of them
-# A review names who fixes what: its own `打回：` line (role keys or titles), else every 归X it writes.
-# protocol token: kept in Chinese (what the reviewing agent writes is matched here)
-_BOUNCE_LINE_RE = re.compile(r"^\s*(?:[-*+]\s+|\d+[.)、]\s*)?[*_`]*打回[*_`]*\s*[:：]\s*(.+)$", re.M)  # a list item too
-_OWNER_RE = re.compile(r"归([^）)，,；;。\n]{1,40})")
+# A review names who fixes what: its own `Send back: <role>` line (role keys or titles), else every `owner: <role>` it writes.
+# What the reviewing agent writes is matched here; the words runs of earlier versions used (`打回：`, `归X`) still count.
+_BOUNCE_LINE_RE = re.compile(r"^\s*(?:[-*+]\s+|\d+[.)、]\s*)?[*_`]*(?:send[ -]?back|打回)[*_`]*\s*[:：]\s*(.+)$", re.M | re.I)  # a list item too
+_OWNER_RE = re.compile(r"(?:归|\bowner\s*[:：]\s*)([^）)，,；;。\n]{1,40})", re.I)
+_ROLE_SPLIT_RE = re.compile(r"[、,，/;；和及与]|\s+and\s+", re.I)
 _ROLE_ALIASES = {"后端": "backend", "服务端": "backend", "前端": "frontend", "网页": "frontend", "网页前端": "frontend",
                  "移动端": "mobile", "安卓": "mobile", "Android": "mobile", "运维": "ops", "合规": "compliance",
                  "安全": "compliance", "合规与安全": "compliance", "测试": "tester", "体验设计": "designer",
                  "设计": "designer", "UI 设计": "designer", "产品经理": "pm", "产品": "pm", "架构师": "architect",
-                 "架构": "architect"}
+                 "架构": "architect",
+                 "server": "backend", "back end": "backend", "web": "frontend", "front end": "frontend", "web frontend": "frontend",
+                 "mobile": "mobile", "android": "mobile", "operations": "ops", "deploy": "ops", "compliance": "compliance",
+                 "security": "compliance", "compliance & security": "compliance", "testing": "tester", "qa": "tester",
+                 "designer": "designer", "ui design": "designer", "product manager": "pm", "product": "pm",
+                 "architecture": "architect"}
+# The reviewer's verdict, the first words after ``DONE:``. New runs write English; the Chinese words are what earlier runs stored.
+_CHANGES_WORDS = ("changes needed", "要改")
+_READY_WORDS = ("ready to deliver", "可以交付")
+
+
+def verdict_is(summary: str | None, words: tuple[str, ...]) -> bool:
+    text = (summary or "").lstrip().lower()
+    return any(text.startswith(w) for w in words)
+
+
+def changes_needed(summary: str | None) -> bool:
+    """The review's verdict is "changes needed" (or, in a run of an earlier version, 要改)."""
+    return verdict_is(summary, _CHANGES_WORDS)
+
+
+def ready_to_deliver(summary: str | None) -> bool:
+    return verdict_is(summary, _READY_WORDS)
+
+
+def human_mark_of(review: str) -> str:
+    """The marker a person's send-back starts with ("" when it is the reviewer's own review)."""
+    return next((m for m in HUMAN_MARKS if (review or "").startswith(m)), "")
 
 
 @dataclass
@@ -195,24 +224,26 @@ def clean_risk(raw: Any) -> dict[str, Any] | None:
 
 
 def money(amount: float | None) -> str:
-    """¥20.6 万 · ¥8,000 · '' (no amount)."""
+    """¥206.0k · ¥8,000 · '' (no amount)."""
     if amount is None:
         return ""
-    # kept in Chinese: mirrors the UI's money() (万 = 10,000)
-    return f"¥{amount / 1e4:,.1f} 万" if amount >= 1e4 else f"¥{amount:,.0f}"
+    return f"¥{amount / 1e3:,.1f}k" if amount >= 1e4 else f"¥{amount:,.0f}"
 
 
 def review_targets(text: str, roles: list[dict[str, Any]]) -> list[str]:
-    """The writing roles a 要改 (changes needed) review sends back, in team order: its ``打回：`` lines (one per role is fine), else every
-    归X it names."""
+    """The writing roles a "changes needed" review sends back, in team order: its ``Send back: <role>`` lines (one per role is fine),
+    else every ``owner: <role>`` it names (the older ``打回：`` and ``归X`` read the same)."""
     writers = [r["key"] for r in roles if r.get("writable")]
-    # a role may carry the Chinese name its agents' briefs use (``name_zh``): the reviewer writes that one
-    names = {**_ROLE_ALIASES, **{r["title"]: r["key"] for r in roles}, **{r["name_zh"]: r["key"] for r in roles if r.get("name_zh")},
-             **{k: k for k in writers}}
+    # a role's title is what the reviewer is told to write; a team file may also carry a second name (``name_zh``, older teams)
+    names = {**{k.lower(): v for k, v in _ROLE_ALIASES.items()}, **{r["title"].lower(): r["key"] for r in roles},
+             **{r["name_zh"]: r["key"] for r in roles if r.get("name_zh")}, **{k.lower(): k for k in writers}}
     lines = _BOUNCE_LINE_RE.findall(text or "")
     chunks = lines or _OWNER_RE.findall(text or "")
-    found = {names.get(tok.strip(" `*_（）()")) for chunk in chunks for tok in re.split(r"[、,，/和及与\s]+", chunk)}
-    found |= {r["key"] for r in roles if r.get("writable") and any(r["title"] in chunk or (r.get("name_zh") and r["name_zh"] in chunk) for chunk in chunks)}
+    # a token is a whole title ("Web developer #2") or a key or a single word; a word list ("backend frontend") also counts word by word
+    found = {names.get(t.strip(" `*_（）()").lower()) for chunk in chunks for tok in _ROLE_SPLIT_RE.split(chunk) for t in (tok, *tok.split())}
+    found |= {r["key"] for r in roles if r.get("writable") and any(r["title"].lower() in chunk.lower() or (r.get("name_zh") and r["name_zh"] in chunk) for chunk in chunks)}
+    # a review written in Chinese (an earlier version): the Chinese role words may sit anywhere in the chunk, as in "后端（删掉…）"
+    found |= {k for chunk in chunks for word, k in _ROLE_ALIASES.items() if not word.isascii() and word in chunk and k in writers}
     return [k for k in writers if k in found]
 
 
@@ -514,7 +545,7 @@ class TeamRun:
     async def _start(self, key: str, kind: str, mgr: Any, *, failing: list[dict[str, Any]] | None = None,
                      conflicts: list[str] | None = None, review: str = "") -> None:
         """A new attempt: ``work`` (the role's first, or a retry of it), ``fix`` (failing tests), ``conflict`` (its
-        merge) or ``review`` (what a 要改 (changes needed) review found in its area)."""
+        merge) or ``review`` (what a "changes needed" review found in its area)."""
         s, lane, role, now = self.s, self.lane(key), self.roles[key], self.d.now()
         again = kind == "work" and bool(lane["attempts"]) and bool(lane.get("worktree"))  # a retry: its worktree stays
         if again and not role["writable"]:  # read-only: it looks at what is merged now, in its own snapshot
@@ -763,11 +794,11 @@ class TeamRun:
         failed later is sent back with what is failing now, or its merge is tried again."""
         async with self._lock:
             failed = [k for k in self.order if self.lane(k)["status"] == "failed"]
-            if not keys and not failed and self.ended:  # it ended on a 要改 (changes needed) review: the person sends that back
+            if not keys and not failed and self.ended:  # it ended on a "changes needed" review: the person sends that back
                 rev = next((k for k in self.order if not self.roles[k]["writable"] and self.lane(k)["status"] == "done"), None)
                 last = self.lane(rev)["attempts"][-1] if rev and self.lane(rev)["attempts"] else {}
                 review = last.get("reply") or ""
-                if (last.get("summary") or "").startswith("要改") and review_targets(review, self.team["roles"]):
+                if changes_needed(last.get("summary")) and review_targets(review, self.team["roles"]):
                     self._resume()
                     if note:  # the person's decisions on what the review left to them
                         self.s["review_note"] = note
@@ -834,9 +865,8 @@ class TeamRun:
             err = ownership_problem(wt / own["file"], [k for k in self.order if self.roles[k].get("writable_from")])
             if err:  # the team cannot be dispatched from a wrong ownership file: it goes back before it is merged
                 self.emit("bounce", f"The assignment file is wrong, sent back to {self.title(key)}: {err}", role=key, frm="run", to=key)
-                # agent-facing text below: stays in Chinese
-                await self._start(key, "revise", self.d.manager(), review=f"你写的分工文件 `{own['file']}` 用不了：{err}。"
-                                  "按任务说明里的格式改好它（只改这个文件也行），再提交。")
+                await self._start(key, "revise", self.d.manager(), review=f"The assignment file `{own['file']}` you wrote cannot be used: {err}. "
+                                  "Fix it in the format the task describes (changing only this file is fine), then commit.")
                 return
         res = await gitwork.merge(Path(s["run_wt"]), lane["branch"], f"[run] Merge {self.title(key)} (round {lane['attempt']})")
         self._head = None
@@ -960,7 +990,7 @@ class TeamRun:
             if not failing:
                 continue
             owners = sorted({c["owner"] for c in failing}, key=self.order.index)
-            said = "\n".join(f"- {self.title(o)}：{self.lane(o).get('summary') or self.lane(o)['attempts'][-1].get('summary') or '没说原因'}"  # agent-facing text: stays in Chinese
+            said = "\n".join(f"- {self.title(o)}: {self.lane(o).get('summary') or self.lane(o)['attempts'][-1].get('summary') or 'gave no reason'}"
                               for o in owners)
             names = ", ".join(c["ac"] or c["name"] for c in failing[:6]) + (" and more" if len(failing) > 6 else "")
             self.emit("bounce", f"{names} failed; {', '.join(self.title(o) for o in owners)} say the tests themselves are wrong, sent back to {self.title(writer)}",
@@ -975,7 +1005,7 @@ class TeamRun:
         lane.update(status="done", done_at=self.d.now())
         summary = att.get("summary") or ""
         self.emit("review", f"Review: {summary or 'no verdict given'}", role=key)
-        if summary.startswith("要改"):  # protocol token: kept in Chinese (the reviewer's verdict)
+        if changes_needed(summary):  # the reviewer's verdict
             rounds = int(s.get("review_rounds") or 0)
             limit = int(self.team.get("defaults", {}).get("max_review_rounds", 0) or 0)
             if rounds < limit and not self.ended and await self._review_bounce(key, att.get("reply") or ""):
@@ -995,7 +1025,7 @@ class TeamRun:
                 lane["gate"] = "pending"  # a person signs this review off before anything after it starts
                 label = self.roles[key].get("gate_label") or self.title(key)
                 self.emit("gate", f"Waiting for approval: {label}", role=key, frm=key, to="person")
-            first = re.split(r"[。；;\n]", summary, maxsplit=1)[0].strip() if summary else ""
+            first = re.split(r"[。；;\n]|\.\s", summary, maxsplit=1)[0].strip() if summary else ""
             s["verdict"] = f"Review says {first[:30]}" if first else "The review gave no verdict"
             if lane.get("gate") == "pending" or any(self.lane(k)["status"] not in ("merged", "done", "skipped") for k in self._after(key)):
                 return  # a person's gate, or a deployment after the review: _settle ends the run once they are done
@@ -1003,7 +1033,7 @@ class TeamRun:
             if red:  # done, but not green: said as it is, the person decides
                 self._end("done", f"Run ended: the review says {summary[:20] or 'nothing'}, but {red} test(s) still fail, left to a person")
             else:
-                self._end("done", "Run complete: the review says it can be delivered" if summary.startswith("可以交付") else "Run complete")
+                self._end("done", "Run complete: the review says it can be delivered" if ready_to_deliver(summary) else "Run complete")
 
     async def _resolve_ownership(self) -> None:
         """Once the role that writes the ownership file is merged: every role whose directories come from it gets
@@ -1059,7 +1089,7 @@ class TeamRun:
                 return True
             if decision == "approve":
                 if lane.get("overrule") and not note.strip():
-                    return False  # overruling a review that still says 要改 (changes needed) takes a reason
+                    return False  # overruling a review that still says "changes needed" takes a reason
                 lane.update(gate="approved", gate_note=note or None)
                 if note:
                     self.s.setdefault("gate_notes", {})[key] = note
@@ -1094,7 +1124,7 @@ class TeamRun:
                     await self._remember(key)
             elif not role["writable"] and lane.get("overrule") and (review_targets(note, self.team["roles"])
                                                                      or review_targets(self.overrule_review(key), self.team["roles"])):
-                # the review still says 要改 (changes needed): one more round as it says, with what the person adds (the person's note wins)
+                # the review still says "changes needed": one more round as it says, with what the person adds (the person's note wins)
                 review = self.overrule_review(key)
                 lane.update(gate=None, overrule=False)
                 if note:
@@ -1106,7 +1136,7 @@ class TeamRun:
             elif not role["writable"]:  # a review gate: the person sends work back to the members the note names
                 targets = review_targets(note, self.team["roles"])
                 if not targets:
-                    return False  # a send-back has to say to whom (打回：Web #2 …)
+                    return False  # a send-back has to say to whom (Send back: Web #2 ...)
                 lane.update(gate=None, passed=False)
                 self.s["human_review"] = note
                 caught = self._keep_risk(key, label, clean_risk(risk), note)
@@ -1120,8 +1150,7 @@ class TeamRun:
                 lane["gate"] = None
                 caught = self._keep_risk(key, label, clean_risk(risk), note)
                 self.emit("bounce", f"A person sent back {label}: {note or 'no reason given'}", role=key, frm="person", to=key, data=caught)
-                # agent-facing text below: stays in Chinese
-                await self._start(key, "revise", self.d.manager(), review=f"人在关卡上没有批准，意见：{note or '没写原因'}")
+                await self._start(key, "revise", self.d.manager(), review=f"The person did not approve at the gate. Their words: {note or 'no reason given'}")
             self._settle()
             await self.save()
             return True
@@ -1330,13 +1359,13 @@ class TeamRun:
         return delivery_mod.clean(got, self._delivery_defaults()) if isinstance(got, dict) else self._delivery_defaults()
 
     def issue(self) -> dict[str, Any]:
-        """The run's Issue: the requirement as the organisation tracks it — its number, requirement (需求) or defect (缺陷), who raised it and
+        """The run's Issue: the requirement as the organisation tracks it — its number, requirement or defect, who raised it and
         when. A run's record may carry its own (``issue``: an imported run brings its reporter); else they follow from
         its id and its delivery tag."""
         got = self.s.get("issue") if isinstance(self.s.get("issue"), dict) else {}
         d = self.delivery()
         return {"id": str(got.get("id") or delivery_mod.issue_id(self.rid)),
-                # protocol token: kept in Chinese (UI type of the Issue kind)
+                # data enum: the UI's type of the Issue kind (shown there as requirement / defect)
                 "kind": str(got.get("kind") or ("缺陷" if d["kind"] == "修复" else "需求")),
                 "reporter": str(got.get("reporter") or delivery_mod.REPORTERS[d["line"]]),
                 "created_at": float(got.get("created_at") or self.s.get("started_at") or 0)}
@@ -1376,7 +1405,7 @@ class TeamRun:
             return ""
 
     def overrule_review(self, key: str) -> str:
-        """The review a person is deciding over at its gate (it still says 要改 (changes needed) with its rounds used up), else ""."""
+        """The review a person is deciding over at its gate (it still says "changes needed" with its rounds used up), else ""."""
         lane = self.lane(key)
         return str(lane["attempts"][-1].get("reply") or "") if lane.get("overrule") and lane["attempts"] else ""
 
@@ -1431,7 +1460,7 @@ class TeamRun:
         return ""
 
     def _planner(self) -> str:
-        return next((self.title(k) for k in self.order if self.roles[k].get("plan")), "上游")  # agent-facing text: stays in Chinese
+        return next((self.title(k) for k in self.order if self.roles[k].get("plan")), "upstream")
 
     def assignment(self, key: str) -> str:
         """What this member is assigned this run: the approved proposal's line, else the team file's."""
@@ -1439,17 +1468,18 @@ class TeamRun:
         return str((self.s.get("plan") or {}).get(key) or role.get("assignment") or role.get("mission") or "")
 
     # The task builders from here to the end of the class (_revise_task ... _conflict_task, _writable, _tag) write the agent-facing
-    # prompt layer. It stays in Chinese in this iteration: the agents' replies (DONE:, 打回：, 要改, F-n, AC-n) are parsed.
+    # prompt layer, in English. The agents' replies (DONE:, Send back:, changes needed, F-n, AC-n) are parsed.
     def _revise_task(self, key: str, n: int, why: str, caught_up: bool) -> str:
         lane = self.lane(key)
-        lines = [self._tag(key, n), "", f"你是开发团队里的「{self.title(key)}」。你上一轮的产出要改：", "", why.strip()[:REVIEW_KEEP]]
+        lines = [self._tag(key, n), "", f"You are the \"{self.title(key)}\" on a development team. Your output from the last round needs changes:", "",
+                 why.strip()[:REVIEW_KEEP]]
         if caught_up:
-            lines += ["", "app 已经把你的分支快进到运行分支的最新提交。"]
-        lines += ["", f"在你的工作目录 {lane['worktree']}（分支 {lane['branch']}）里改。你只能改：{self._writable(key)}。"]
+            lines += ["", "The app has fast-forwarded your branch to the latest commit of the run branch."]
+        lines += ["", f"Work in your working directory {lane['worktree']} (branch {lane['branch']}). You may change only: {self._writable(key)}."]
         return "\n".join(lines + self._closing(key))
 
     async def _review_bounce(self, key: str, review: str, only: list[str] | None = None) -> list[str]:
-        """A 要改 (changes needed) review goes back to the roles it names (or *only*, those a person named); the reviewer looks again
+        """A "changes needed" review goes back to the roles it names (or *only*, those a person named); the reviewer looks again
         once their fixes are in."""
         targets = [k for k in (only or review_targets(review, self.team["roles"])) if self.lane(k).get("worktree")]
         if not targets:
@@ -1466,42 +1496,51 @@ class TeamRun:
     def _discuss_task(self, key: str, n: int, said: str, caught_up: bool) -> str:
         lane, role = self.lane(key), self.roles[key]
         label = role.get("gate_label") or self.title(key)
-        lines = [self._tag(key, n), "", f"你是开发团队里的「{self.title(key)}」。你的产出停在「{label}」关卡等负责人批准，负责人想先和你讨论：",
+        lines = [self._tag(key, n), "", f"You are the \"{self.title(key)}\" on a development team. Your output is stopped at the \"{label}\" gate, "
+                 "waiting for the owner's approval, and the owner wants to discuss it with you first:",
                  "", said.strip()[:REVIEW_KEEP], "",
-                 "先回答负责人：说清楚、短，有依据就写依据（文件、规范编号）。负责人还没批准，不要往下做别的角色的活。"]
+                 "Answer the owner first: be clear and brief, and give your evidence where you have it (a file, a standard's ID). "
+                 "The owner has not approved yet, so do not start any other role's work."]
         if role["writable"]:
             if caught_up:
-                lines += ["", "app 已经把你的分支快进到运行分支的最新提交。"]
-            lines += ["", f"讨论改变了你的产出时才改文件：在你的工作目录 {lane['worktree']}（分支 {lane['branch']}）里改，你只能改："
-                      f"{self._writable(key)}；要人决定的事有变化，同步改问题文件。只是回答，就不改文件。",
-                      "", "做完以后：", f"1. 改了文件就 `git add`、提交到 {lane['branch']}，提交说明以 `[{key}]` 开头；没改就不提交。",
-                      "2. 最后一条回复的第一行写 `DONE: ` 加一句话总结，下面写给负责人的回答。", "3. 不要 push，不要动别的分支，不要改 git 配置。"]
+                lines += ["", "The app has fast-forwarded your branch to the latest commit of the run branch."]
+            lines += ["", f"Change files only if the discussion changes your output: work in your working directory {lane['worktree']} "
+                      f"(branch {lane['branch']}); you may change only: {self._writable(key)}. If what a person has to decide has changed, "
+                      "update the questions file too. If you are only answering, change no files.",
+                      "", "When you are done:", f"1. If you changed files, `git add` and commit to {lane['branch']}; start the commit message with `[{key}]`. "
+                      "If you changed nothing, do not commit.",
+                      "2. Write `DONE: ` and a one-sentence summary on the first line of your last reply, and your answer to the owner below it.",
+                      "3. Do not push, do not touch other branches, do not change git config."]
         else:
-            lines += ["", "你是只读的：不改任何文件，也不提交。", "",
-                      "最后一条回复的第一行写 `DONE: ` 加一句话总结，下面写给负责人的回答。"]
+            lines += ["", "You are read-only: change no files and commit nothing.", "",
+                      "Write `DONE: ` and a one-sentence summary on the first line of your last reply, and your answer to the owner below it."]
         return "\n".join(lines)
 
     def _review_task(self, key: str, n: int, review: str, caught_up: bool) -> str:
         s, lane, title = self.s, self.lane(key), self.title(key)
-        if review.startswith(HUMAN_MARK):
-            lines = [self._tag(key, n), "", f"你是开发团队里的「{title}」。所有检查都通过了，独立审查也放行了，但负责人在关卡上把它退回来，"
-                     "意见原文如下：写明打回你（{title}）的部分由你改，别的看一眼就行。", "", "---", review[len(HUMAN_MARK):].strip()[:REVIEW_KEEP], "---"]
-            lines[2] = lines[2].replace("{title}", title)
+        mark = human_mark_of(review)
+        if mark:
+            lines = [self._tag(key, n), "", f"You are the \"{title}\" on a development team. All checks passed and the independent review let it through, "
+                     f"but the owner sent it back at the gate. The owner's words follow: the parts that send it back to you ({title}) are yours to change; "
+                     "just glance at the rest.", "", "---", review[len(mark):].strip()[:REVIEW_KEEP], "---"]
             if caught_up:
-                lines += ["", "app 已经把你的分支快进到运行分支的最新提交：别的角色的代码都在你的工作目录里了。"]
-            lines += ["", f"在你的工作目录 {lane['worktree']}（分支 {lane['branch']}）里改，只改需要改的那一处。你只能改：{self._writable(key)}。"
-                      "改完自己跑 `node tests/enterprise/_run.cjs`，确认检查仍然全绿。"]
+                lines += ["", "The app has fast-forwarded your branch to the latest commit of the run branch: the other roles' code is in your working directory now."]
+            lines += ["", f"Work in your working directory {lane['worktree']} (branch {lane['branch']}) and change only what needs changing. "
+                      f"You may change only: {self._writable(key)}. When you are done, run `node tests/enterprise/_run.cjs` yourself "
+                      "and confirm the checks are still all green."]
             return "\n".join(lines + self._closing(key))
-        lines = [self._tag(key, n), "", f"你是开发团队里的「{title}」。所有检查都通过了，但独立评审读完全部改动后说「要改」"
-                 f"（第 {s.get('review_rounds') or 1} 轮评审）。下面是评审意见原文：写明归你（{title}）的条目由你修；"
-                 "归别人的看一眼就行，不用改。", "", "---", review.strip()[:REVIEW_KEEP], "---"]
+        lines = [self._tag(key, n), "", f"You are the \"{title}\" on a development team. All checks passed, but the independent review, after reading every change, "
+                 f"said \"changes needed\" (review round {s.get('review_rounds') or 1}). The review's own words follow: fix the items that send it back "
+                 f"to you ({title}); glance at the ones that name others, you need not change them.", "", "---", review.strip()[:REVIEW_KEEP], "---"]
         if s.get("review_note"):
-            lines += ["", "评审里留给人决定的事，人已经定了，按这个做（和评审意见冲突时以这里为准）：", "", s["review_note"]]
+            lines += ["", "The owner has already decided what the review left to a person; follow this (where it conflicts with the review, this wins):", "",
+                      s["review_note"]]
         if caught_up:
-            lines += ["", "app 已经把你的分支快进到运行分支的最新提交：别的角色的代码都在你的工作目录里了。"]
-        lines += ["", f"在你的工作目录 {lane['worktree']}（分支 {lane['branch']}）里改。你只能改：{self._writable(key)}；"
-                  "别的目录不归你，看可以，改不行。改完自己跑 `node tests/enterprise/_run.cjs`，确认检查仍然全绿。",
-                  "某一条你认为不该改或改不了，不要硬改，在总结里写清理由，交给人决定。"]
+            lines += ["", "The app has fast-forwarded your branch to the latest commit of the run branch: the other roles' code is in your working directory now."]
+        lines += ["", f"Work in your working directory {lane['worktree']} (branch {lane['branch']}). You may change only: {self._writable(key)}; "
+                  "other directories are not yours: you may read them, not change them. When you are done, run `node tests/enterprise/_run.cjs` "
+                  "yourself and confirm the checks are still all green.",
+                  "If you think an item should not be changed, or cannot be, do not force it: say why in your summary and leave it to the person."]
         return "\n".join(lines + self._closing(key))
 
     def _settle(self) -> None:
@@ -1602,104 +1641,108 @@ class TeamRun:
         return list(dict.fromkeys(p for k in self.order if k in seen for p in self.roles[k]["outputs"]))
 
     def _writable(self, key: str) -> str:
-        return "、".join(f"`{g}`" for g in self.roles[key]["writable"]) or "无（只读，不改任何文件）"
+        return ", ".join(f"`{g}`" for g in self.roles[key]["writable"]) or "none (read-only: change no files)"
 
     def _work_task(self, key: str, n: int = 1) -> str:
         s, lane, role = self.s, self.lane(key), self.roles[key]
         brief = role.get("brief", "")
         if (s.get("plan") or {}).get(key):  # the split a person approved at the gate
-            brief = f"这次分给你的任务（{self._planner()}提议、人在关卡上批准的分工）：{s['plan'][key]}。\n\n" + brief
+            brief = f"Your assignment this run (the split {self._planner()} proposed and a person approved at the gate): {s['plan'][key]}.\n\n" + brief
         if not role["writable"] and s.get("base"):
-            brief += f"（需求提交是 {s['base'][:12]}，`git diff {s['base'][:12]} HEAD` 就是全部改动。）"
+            brief += f" (The requirement commit is {s['base'][:12]}; `git diff {s['base'][:12]} HEAD` is the whole change.)"
             t = s.get("tests") or {}
             if t.get("total"):
                 red = [c["name"] for c in t.get("cases", []) if c.get("status") == "fail"]
-                brief += (f"app 刚跑的测试：{t.get('passed')}/{t.get('total')} 通过" +
-                          (f"，没过的：{'；'.join(red[:8])}。没过的测试要算进结论。" if red else "，全绿。"))
+                brief += (f" The tests the app just ran: {t.get('passed')}/{t.get('total')} passed" +
+                          (f"; failing: {'; '.join(red[:8])}. Count the failing tests in your verdict." if red else ", all green."))
         values = {"run": self.rid, "role": key, "title": role["title"], "branch": lane["branch"],
                   "worktree": lane["worktree"], "writable": self._writable(key), "brief": brief,
-                  "inputs": "、".join(f"`{p}`" for p in self._inputs(key)) or "无", "repo": s["repo"],
+                  "inputs": ", ".join(f"`{p}`" for p in self._inputs(key)) or "none", "repo": s["repo"],
                   "standards": standards_mod.task_lines(s.get("standards") or [], (self.team.get("knowledge") or {}).get("source") or "",
                                                         s.get("knowledge_source_id") or ""),
                   "lessons": lessons_mod.task_lines(s.get("lessons_in") or [])}
         text = s["task_template"].format_map(_Keep(values))
         notes = s.get("gate_notes") or {}
         if notes:  # what a person said when approving an earlier stage holds for everyone after it
-            text += "\n\n人在关卡上批准时的意见（以此为准）：\n" + "\n".join(
-                f"- {self.roles[k].get('gate_label') or self.title(k)}：{v}" for k, v in notes.items() if k in self.roles)
+            text += "\n\nWhat the owner said when approving earlier gates (this holds):\n" + "\n".join(
+                f"- {self.roles[k].get('gate_label') or self.title(k)}: {v}" for k, v in notes.items() if k in self.roles)
         answers = s.get("answers") or {}
         if answers:  # …and what they decided, question by question
-            text += f"\n\n人在关卡上逐条做的决定（以此为准，也记在运行分支的 `{DECISIONS_FILE}`）：\n" + "\n".join(
-                f"- {self.roles[k].get('gate_label') or self.title(k)} · 决定 {a['id']}「{a['q']}」："
-                + ("；".join(a["options"]) or "一条也没选" if a.get("multi") else
-                   f"其他：{a['text']}" if a["choice"] == "other" else f"{a['choice']}（{a['option']}）" + (f"，补充：{a['text']}" if a["text"] else ""))
+            text += f"\n\nWhat the owner decided at the gates, question by question (this holds; also recorded in `{DECISIONS_FILE}` on the run branch):\n" + "\n".join(
+                f"- {self.roles[k].get('gate_label') or self.title(k)} · decision {a['id']} \"{a['q']}\": "
+                + ("; ".join(a["options"]) or "none picked" if a.get("multi") else
+                   f"other: {a['text']}" if a["choice"] == "other" else f"{a['choice']} ({a['option']})" + (f", added: {a['text']}" if a["text"] else ""))
                 for k, rows in answers.items() if k in self.roles for a in rows)
         out = [k for k in self.order if k != key and self.lane(k)["status"] == "skipped" and self.lane(k).get("summary")]
         if out:  # an optional member that sits this run out: nobody writes its part or plans work for it
-            text += ("\n\n这次不参加的成员：" + "；".join(f"{self.title(k)}（{self.lane(k)['summary']}）" for k in out)
-                     + "。它们负责的部分保持模板原样，不要替它们写，也不要给它们分工。")
+            text += ("\n\nMembers sitting this run out: " + "; ".join(f"{self.title(k)} ({self.lane(k)['summary']})" for k in out)
+                     + ". Their parts stay as in the template: do not write them and do not assign work to them.")
         if not role["writable"]:
-            text = "\n".join("1. 你是只读的：不改任何文件，也不提交。" if "git add" in ln else ln for ln in text.splitlines())
+            text = "\n".join("1. You are read-only: change no files and commit nothing." if "git add" in ln else ln for ln in text.splitlines())
         tag = self._tag(key, n)
         prev = self.lane(key)["attempts"][-1] if n > 1 and self.lane(key)["attempts"] else {}
-        if n > 1 and not role["writable"] and (prev.get("summary") or "").startswith("要改") and s.get("review_rounds"):
-            text += (f"\n\n这是第 {int(s['review_rounds']) + 1} 轮评审。上一轮评审说「要改」，相关角色已经按意见改过并重新合入，"
-                     "测试结果见测试墙。先按上一轮的问题编号（F-1、F-2……）逐条核对改好了没有（没改的，看它在提交说明或总结里给的理由是否成立），编号不变，"
-                     "再看这一轮的新改动有没有引入新问题。上一轮的意见：\n\n---\n"
+        if n > 1 and not role["writable"] and changes_needed(prev.get("summary")) and s.get("review_rounds"):
+            text += (f"\n\nThis is review round {int(s['review_rounds']) + 1}. The last review said \"changes needed\"; the roles it named have changed their work "
+                     "as it said and merged again; the test results are on the test wall. First go through the last review's issue numbers (F-1, F-2, ...) "
+                     "one by one and check each is fixed (for one that was not, see whether the reason given in the commit message or the summary holds); "
+                     "keep the numbers unchanged; then check whether this round's new changes introduced new problems. The last review:\n\n---\n"
                      + (prev.get("reply") or prev.get("summary") or "").strip()[:REVIEW_KEEP] + "\n---")
             if s.get("review_note"):
-                text += f"\n\n上一轮之后，人对评审留给人决定的事做了决定（以此为准，不算问题）：\n\n{s['review_note']}"
+                text += f"\n\nSince the last round the owner has decided what the review left to a person (this holds; it is not an issue):\n\n{s['review_note']}"
         elif n > 1 and not role["writable"] and s.get("human_review"):
-            text += ("\n\n上一轮你放行了，但负责人在关卡上退回，意见：\n\n---\n" + s["human_review"].strip()[:REVIEW_KEEP] +
-                     "\n---\n\n相关成员已经按意见改完并重新合入。先核对这条改好了没有，再看这次的新改动有没有引入新问题；"
-                     "上一轮的问题编号保持不变。")
+            text += ("\n\nLast round you let it through, but the owner sent it back at the gate. The owner's words:\n\n---\n" + s["human_review"].strip()[:REVIEW_KEEP] +
+                     "\n---\n\nThe members concerned have changed their work as said and merged again. First check that this is fixed, then check whether "
+                     "the new changes introduced new problems; keep the last round's issue numbers unchanged.")
         elif n > 1:  # a retry: say what happened to the round before
-            text += (f"\n\n这是第 {n} 次开工：上一次没做完（{prev.get('error') or '没有结果'}）。工作目录里可能有上一次留下的半成品，"
-                     "先 `git status`、`git log` 看一眼，能用的接着用。")
+            text += (f"\n\nThis is attempt {n}: the last one did not finish ({prev.get('error') or 'no result'}). There may be half-finished work from last time "
+                     "in your working directory: run `git status` and `git log` first, and carry on from whatever is usable.")
         return text if first_line(text) == tag else f"{tag}\n\n{text}"
 
     def _closing(self, key: str) -> list[str]:
         lane = self.lane(key)
-        return ["", "做完以后：", f"1. 在 {lane['worktree']} 里 `git add` 你改过的文件，提交到 {lane['branch']}，提交说明以 `[{key}]` 开头。",
-                "2. 最后一条回复的第一行写 `DONE: ` 加一句话总结。", "3. 不要 push，不要动别的分支，不要改 git 配置。"]
+        return ["", "When you are done:", f"1. In {lane['worktree']}, `git add` the files you changed and commit to {lane['branch']}; start the commit message with `[{key}]`.",
+                "2. Write `DONE: ` and a one-sentence summary on the first line of your last reply.", "3. Do not push, do not touch other branches, do not change git config."]
 
     def _fix_task(self, key: str, n: int, failing: list[dict[str, Any]], caught_up: bool = False, said: str = "") -> str:
         s, lane = self.s, self.lane(key)
         files = " ".join(sorted({c["file"] for c in failing}))
         if said:  # the test writer: the implementers say these tests are wrong themselves
-            lines = [self._tag(key, n), "", f"你是开发团队里的「{self.title(key)}」，这些测试是你写的。app 在运行分支 `{s['branch']}` 上"
-                     f"跑了测试，下面这些没过，负责实现的角色改不动了，它们是这么说的：", said, "", "没过的测试："]
-            lines += [f"- {c['name']}（{c['file']}）：{c.get('message') or '失败'}" for c in failing[:15]]
-            lines += ["", "对照需求和契约核一遍：测试写错了（比如几个用例共用一个服务、前面的下单改了库存、断言和契约不一致），"
-                      "就改测试；测试没错，就不改，并在回复里说清楚是实现的哪里不对。"]
+            lines = [self._tag(key, n), "", f"You are the \"{self.title(key)}\" on a development team, and you wrote these tests. The app ran the tests on "
+                     f"the run branch `{s['branch']}` and the ones below failed; the roles that implement cannot make them pass, and this is what they say:",
+                     said, "", "Failing tests:"]
+            lines += [f"- {c['name']} ({c['file']}): {c.get('message') or 'failed'}" for c in failing[:15]]
+            lines += ["", "Check them against the requirement and the contract. If a test is wrong (for example several cases share one server, an earlier "
+                      "order changed the stock, or an assertion disagrees with the contract), change the test. If the test is right, do not change it, "
+                      "and say in your reply what is wrong in the implementation."]
             if caught_up:
-                lines += ["", "app 已经把你的分支快进到运行分支的最新提交：实现的代码都在你的工作目录里了。"]
-            lines += ["", f"在你的工作目录 {lane['worktree']}（分支 {lane['branch']}）里改。你只能改：{self._writable(key)}。",
-                      f"可以自己跑 `node --test {files}` 看结果。"]
+                lines += ["", "The app has fast-forwarded your branch to the latest commit of the run branch: the implementation's code is in your working directory now."]
+            lines += ["", f"Work in your working directory {lane['worktree']} (branch {lane['branch']}). You may change only: {self._writable(key)}.",
+                      f"You can run `node --test {files}` yourself to see the result."]
             return "\n".join(lines + self._closing(key))
-        lines = [self._tag(key, n), "", f"你是开发团队里的「{self.title(key)}」。app 在运行分支 `{s['branch']}` 上跑了测试"
-                 f"（`{s['tests'].get('command') or 'npm test'}`），归你负责的这些没过："]
-        lines += [f"- {c['name']}（{c['file']}）：{c.get('message') or '失败'}" for c in failing[:15]]
+        lines = [self._tag(key, n), "", f"You are the \"{self.title(key)}\" on a development team. The app ran the tests on the run branch `{s['branch']}` "
+                 f"(`{s['tests'].get('command') or 'npm test'}`), and these, which are yours, failed:"]
+        lines += [f"- {c['name']} ({c['file']}): {c.get('message') or 'failed'}" for c in failing[:15]]
         if caught_up:
-            lines += ["", "app 已经把你的分支快进到运行分支的最新提交：测试和别的角色的代码都在你的工作目录里了。"]
-        lines += ["", f"在你的工作目录 {lane['worktree']}（分支 {lane['branch']}）里把它们修好。你只能改：{self._writable(key)}；"
-                  "测试和别的目录不归你，看可以，改不行。", f"可以自己跑 `node --test {files}` 看结果。"]
+            lines += ["", "The app has fast-forwarded your branch to the latest commit of the run branch: the tests and the other roles' code are in your working directory now."]
+        lines += ["", f"Work in your working directory {lane['worktree']} (branch {lane['branch']}) and fix them. You may change only: {self._writable(key)}; "
+                  "the tests and other directories are not yours: you may read them, not change them.", f"You can run `node --test {files}` yourself to see the result."]
         return "\n".join(lines + self._closing(key))
 
     def _with_context(self, key: str, task: str) -> str:
         """A fix or conflict task for a fresh agent: it has not seen the role's earlier rounds, so they are summed up."""
         lane = self.lane(key)
-        files = "、".join(f["path"] for f in lane.get("files", [])[:12]) or "还没有"
-        story = ["", f"背景：这个角色之前几轮的对话接不上了，你接着做。上一轮的总结：{lane.get('summary') or '没有'}；"
-                 f"相对开工时改过的文件：{files}。先看 `git log --oneline {lane['fork'][:12]}..HEAD` 了解做过什么。"]
+        files = ", ".join(f["path"] for f in lane.get("files", [])[:12]) or "none yet"
+        story = ["", f"Background: the earlier rounds of this role's conversation can no longer be reached, so you carry on from them. The last round's summary: "
+                 f"{lane.get('summary') or 'none'}; files changed since the start: {files}. Start with `git log --oneline {lane['fork'][:12]}..HEAD` "
+                 "to see what was done."]
         head, _, rest = task.partition("\n")
         return "\n".join([head, *story, rest.lstrip("\n")]) if rest else "\n".join([head, *story])
 
     def _conflict_task(self, key: str, n: int, conflicts: list[str]) -> str:
         s, lane = self.s, self.lane(key)
-        lines = [self._tag(key, n), "", f"你是开发团队里的「{self.title(key)}」。你的分支 `{lane['branch']}` 合入运行分支 "
-                 f"`{s['branch']}` 时冲突了，冲突的文件：{'、'.join(conflicts[:12])}。它们在运行分支上已经被别的角色改过。",
-                 f"- 不在你可写范围（{self._writable(key)}）里的：本来就不该改。恢复成你开工时的样子："
-                 f"`git checkout {lane['fork'][:12]} -- <文件>`；你开工时还没有的文件，`git rm` 掉。",
-                 f"- 在你可写范围里的：先 `git checkout {s['branch']} -- <文件>` 拿到运行分支上的版本，再在它上面把你的改动重新做好。"]
+        lines = [self._tag(key, n), "", f"You are the \"{self.title(key)}\" on a development team. Merging your branch `{lane['branch']}` into the run branch "
+                 f"`{s['branch']}` conflicted. Conflicting files: {', '.join(conflicts[:12])}. Other roles have changed them on the run branch.",
+                 f"- Files outside your writable scope ({self._writable(key)}): you should not have changed them. Restore them to how they were when you started: "
+                 f"`git checkout {lane['fork'][:12]} -- <file>`; for files that did not exist when you started, `git rm` them.",
+                 f"- Files inside your writable scope: first `git checkout {s['branch']} -- <file>` to take the run branch's version, then redo your change on top of it."]
         return "\n".join(lines + self._closing(key))

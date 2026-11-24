@@ -1,0 +1,10 @@
+/* Reference implementation */
+[data-ok="false"] {
+  color: var(--brand-danger);
+}
+[data-ok="true"] {
+  color: var(--brand-text);
+}
+[data-blockers] {
+  color: var(--brand-warn);
+}

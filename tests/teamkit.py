@@ -148,8 +148,8 @@ def act(a: SimpleNamespace, files: dict[str, str | None], commit: bool = True, m
                        capture_output=True, env=gitwork._ENV)  # nothing to commit is fine
 
 
-def finish(a: SimpleNamespace, summary: str | None = "做完了", error: str = "") -> None:
-    a.result = f"我改了几个文件。\n\nDONE: {summary}" if summary else "没写总结"
+def finish(a: SimpleNamespace, summary: str | None = "done", error: str = "") -> None:
+    a.result = f"I changed a few files.\n\nDONE: {summary}" if summary else "no summary"
     a.error, a.done = error, True
 
 
@@ -167,7 +167,7 @@ class FakeTests:
                 continue
             good = ok(Path(wt))
             file, ac = cid.split("#")
-            cases.append({"id": cid, "ac": ac, "name": f"{ac}: 用例", "file": f"tests/{file}", "status": "pass" if good else "fail",
+            cases.append({"id": cid, "ac": ac, "name": f"{ac}: case", "file": f"tests/{file}", "status": "pass" if good else "fail",
                           "owner": owner, "ms": 3, "message": None if good else "expected 409, got 201"})
         passed = sum(c["status"] == "pass" for c in cases)
         return {"at": time.time(), "command": "node --test tests/", "cases": cases, "passed": passed,
@@ -243,23 +243,23 @@ def richest(items: list[dict[str, Any]]) -> dict[str, Any]:
 def mini_team() -> dict[str, Any]:
     """Four roles, for flows that only need a reviewer at the end of a fix loop."""
     role = lambda key, title, deps, writable: {"key": key, "title": title, "emoji": "", "depends_on": deps,  # noqa: E731
-                                               "writable": writable, "outputs": [], "brief": f"{title}的活"}
+                                               "writable": writable, "outputs": [], "brief": f"{title}'s work"}
     return team_mod.check_team({
         "version": 1, "test_command": ["node", "--test", "tests/"],
-        "roles": [role("pm", "产品经理", [], ["docs/product/**"]), role("backend", "后端", ["pm"], ["backend/**"]),
-                  role("frontend", "前端", ["pm"], ["frontend/**"]), role("reviewer", "评审", ["backend", "frontend"], [])],
+        "roles": [role("pm", "Product manager", [], ["docs/product/**"]), role("backend", "Backend", ["pm"], ["backend/**"]),
+                  role("frontend", "Frontend", ["pm"], ["frontend/**"]), role("reviewer", "Review", ["backend", "frontend"], [])],
         "defaults": {"model": "claude-opus-5.5", "effort": "high", "max_fix_rounds": 2},
         "test_owners": [{"glob": "tests/api-*", "role": "backend"}, {"glob": "tests/web-*", "role": "frontend"}],
     })
 
 
 OUTPUTS = {
-    "pm": {"docs/product/acceptance.md": "AC-1: 首页\nAC-6: 名额\n"},
-    "architect": {"contracts/api.md": "# API\n", "docs/architecture/layout.md": "# 布局\n"},
-    "designer": {"docs/design/pages.md": "# 页面\n", "frontend/styles/main.css": "body {}\n"},
+    "pm": {"docs/product/acceptance.md": "AC-1: home page\nAC-6: seats\n"},
+    "architect": {"contracts/api.md": "# API\n", "docs/architecture/layout.md": "# Layout\n"},
+    "designer": {"docs/design/pages.md": "# Pages\n", "frontend/styles/main.css": "body {}\n"},
     "tester": {"tests/api-signup.test.js": "// AC-6\n", "tests/web-render.test.js": "// AC-1\n"},
     "backend": {"backend/server.js": "// v2\n"},
-    "frontend": {"frontend/index.html": "<h1>活动</h1>\n"},
+    "frontend": {"frontend/index.html": "<h1>Events</h1>\n"},
     "ops": {"ops/start.sh": "node backend/server.js\n", "Dockerfile": "FROM node:22\n"},
 }
 
@@ -276,7 +276,7 @@ async def drive(run: Any, mgr: FakeManager, behave: Callable[[SimpleNamespace, s
             if behave is not None:
                 behave(a, role)
             elif role == "reviewer":
-                finish(a, "可以交付")
+                finish(a, "ready to deliver")
             else:
                 act(a, OUTPUTS[role])
                 finish(a)

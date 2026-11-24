@@ -1,71 +1,71 @@
-# 桃源科技 · 内部网页
+# Larkspur Outfitters · Internal web pages
 
-桃源科技给自己的部门做的内部网页。这个项目从公司的网页模板开工：服务器骨架、页面外壳和路由、品牌样式和组件、字体、小桃子都已经有了，需求只在模板约定的位置上开发。
+Internal web pages that Larkspur Outfitters' departments build for themselves. This project starts from the company's web template: the server skeleton, the page shell and routing, the brand styles and components, the fonts and Pip are already there, and the requirement is built only in the places the template conventions name.
 
-## 怎么跑
+## How to run it
 
 ```bash
-npm start          # http://127.0.0.1:3000 （PORT、HOST 环境变量可改）
-npm test           # 跑 tests/ 下的全部检查，等于 node tests/enterprise/_run.cjs
+npm start          # http://127.0.0.1:3000 (change it with the PORT and HOST environment variables)
+npm test           # runs every check under tests/, the same as node tests/enterprise/_run.cjs
 ```
 
-只需要 Node 22 或更新版本，不装任何 npm 包。
+All you need is Node 22 or newer. No npm packages are installed.
 
-## 公司模板约定
+## Company template conventions
 
-### 目录
+### Layout
 
-| 路径 | 内容 | 谁改 |
+| Path | What it holds | Who changes it |
 |---|---|---|
-| `server/app.js`、`server/server.js`、`server/lib/` | 服务器骨架、HTTP 小工具、读数据 | 模板自带，不改 |
-| `server/data/` | 数据：从知识库取来的 JSON，原样放 | 按分工 |
-| `server/routes/` | 接口 | 按分工 |
-| `web/index.html`、`web/app.js`、`web/lib/`、`web/styles/tokens.css`、`base.css`、`shell.css` | 页面外壳、路由、调接口、拼 HTML、品牌变量和全站组件 | 模板自带，不改 |
-| `web/pages/`、`web/styles/<页面名>.css` | 页面和它们的样式；`web/pages/index.js` 登记页面 | 按分工 |
-| `web/motion/` | 品牌动效 | 按分工 |
-| `deploy/` | 部署配置 | 按分工 |
-| `tests/enterprise/` | 公司下发的检查 | 谁都不能改 |
-| `docs/aidlc/` | 各阶段的产出 | |
+| `server/app.js`, `server/server.js`, `server/lib/` | The server skeleton, HTTP helpers, reading data | Comes with the template; do not change |
+| `server/data/` | Data: JSON from the knowledge base, copied as it is | As the work is split |
+| `server/routes/` | The API | As the work is split |
+| `web/index.html`, `web/app.js`, `web/lib/`, `web/styles/tokens.css`, `base.css`, `shell.css` | The page shell, routing, calling the API, building HTML, the brand variables and the site-wide components | Comes with the template; do not change |
+| `web/pages/`, `web/styles/<page>.css` | The pages and their styles; `web/pages/index.js` registers the pages | As the work is split |
+| `web/motion/` | Brand motion | As the work is split |
+| `deploy/` | Deployment configuration | As the work is split |
+| `tests/enterprise/` | The checks the company issues | Nobody may change them |
+| `docs/aidlc/` | What each stage produces | |
 
-### 数据
+### Data
 
-数据在 Kiro Crew 知识库「桃源科技」里：知识库的说明文档写了完整数据文件的路径。要用就原样复制到 `server/data/`（不手抄、不改内容），`server/lib/data.js` 按文件名读：`server/data/employees.json` 在接口里是 `ctx.data.employees`。
+The data is in the Kiro Crew knowledge source "Larkspur Outfitters": the explanatory documents in the knowledge base give the paths of the full data files. Copy what you need into `server/data/` as it is (do not retype it or change it); `server/lib/data.js` reads by file name: `server/data/employees.json` is `ctx.data.employees` in the API.
 
-### 接口约定（公司统一）
+### API conventions (the same across the company)
 
-- 路径以 `/api/` 开头，收发 JSON。路由写在 `server/routes/`，格式见 `server/routes/index.js` 开头的说明。
-- 出错返回 4xx 和 `{ "error": { "code": "<英文短码>", "message": "<给用户看的中文>" } }`；输入不对是 400，不会是 500。
-- 列表接口返回 `{ "<复数名>": [...] }`，单个对象返回 `{ "<单数名>": {...} }`。
-- 只返回页面要用的字段；个人信息怎么展示见知识库《个人信息展示规范》。
-- 导出文件（CSV）`text/csv; charset=utf-8`，第一行是中文表头。
+- Paths start with `/api/` and use JSON both ways. Routes are written in `server/routes/`; the format is explained at the top of `server/routes/index.js`.
+- An error returns 4xx and `{ "error": { "code": "<short code>", "message": "<plain English for the user>" } }`; bad input is 400, never 500.
+- A list endpoint returns `{ "<plural name>": [...] }` and a single object returns `{ "<singular name>": {...} }`.
+- Return only the fields the page uses; how personal data is shown is in the knowledge base's Personal Data Display Standard.
+- An export file (CSV) is `text/csv; charset=utf-8`, and the first row is a header row in English.
 
-### 页面约定
+### Page conventions
 
-每个页面模块 `web/pages/<页面名>.js` 导出两个函数，并在 `web/pages/index.js` 里登记（`{ title, load }`，第一个是首页）：
+Each page module `web/pages/<page>.js` exports two functions and is registered in `web/pages/index.js` (`{ title, load }`; the first is the home page):
 
-- **`render(state)`**：纯函数，返回 HTML **字符串**。不碰 `document`、`window`、`fetch`，Node 测试里能直接调用。用 `web/lib/format.js` 的 `` html`…` `` 拼（插进去的值自动转义），最后 `String(html`…`)` 返回。
-- **`mount(root, ctx)`**：浏览器里调用，`ctx` 是 `{ api, motion, fx, navigate }`：`api.get/post/put/del` 调接口，`motion` 是 `web/motion/motion.js`，`fx` 是全屏的 `<canvas>`。取数据、调 `render` 写进 `root`、绑事件（事件委托：在 `root` 上监听，靠 `data-*` 认出点的是什么）。可以返回一个清理函数，切页面时调用。
+- **`render(state)`**: a pure function that returns an HTML **string**. It does not touch `document`, `window` or `fetch`, so a Node test can call it directly. Build it with `` html`…` `` from `web/lib/format.js` (values put in are escaped) and return `String(html`…`)`.
+- **`mount(root, ctx)`**: called in the browser; `ctx` is `{ api, motion, fx, navigate }`: `api.get/post/put/del` call the API, `motion` is `web/motion/motion.js`, and `fx` is the full-screen `<canvas>`. Fetch the data, call `render` and write it into `root`, bind events (event delegation: listen on `root` and tell what was clicked from its `data-*`). It may return a cleanup function, called when the page changes.
 
-`state` 的形状、页面上测试要用的 `data-*`，由架构写在 `docs/aidlc/2-inception/interfaces.md`。
+The shape of `state` and the `data-*` the tests use on the page are written by the architect in `docs/aidlc/2-inception/interfaces.md`.
 
-不要写 `onclick="…"` 这类内联事件属性，不要写内联 `<script>`：服务器的内容安全策略只允许本站的脚本文件。
+Do not write inline event attributes such as `onclick="…"` and do not write an inline `<script>`: the server's content security policy only allows script files from this site.
 
-### 动效接口（`web/motion/motion.js`，页面只通过它用动效）
+### Motion interface (`web/motion/motion.js`; pages use motion only through it)
 
-| 函数 | 做什么 |
+| Function | What it does |
 |---|---|
-| `prefersReduced()` | 系统是不是要求减少动态效果 |
-| `flip(el, text)` | 把 `el` 的文字换成 `text`（数字跳动） |
-| `reveal(items)` | 卡片、列表项依次出现（给每个加 `is-in`） |
-| `bump(el)` | 点按反馈：让 `el` 跳一下 |
-| `celebrate(canvas)` | 在全屏 canvas 上放一次庆祝 |
+| `prefersReduced()` | Whether the system asks for reduced motion |
+| `flip(el, text)` | Changes the text of `el` to `text` (changing digits) |
+| `reveal(items)` | Cards and list items appear one after another (adds `is-in` to each) |
+| `bump(el)` | Tap feedback: `el` bounces |
+| `celebrate(canvas)` | Plays a celebration on the full-screen canvas |
 
-模板里是不带动画的占位，页面照样能用。
+In the template these are placeholders with no animation; pages work without them.
 
-### 全站组件（`web/styles/base.css`，页面直接用）
+### Site-wide components (`web/styles/base.css`; pages use them directly)
 
-`.glass` 玻璃卡片、`.panel` 内边距、`.hero` 居中大标题区、`.eyebrow` 小标题、`.display` 渐变大字、`.title`、`.big` 大数字、`.muted`；`.btn`、`.btn--primary`（渐变发光的主按钮）、`.btn--ghost`；`.chip`、`.chip--active`、`.chip--done`；`.stat`；`.table`；`.state`、`.state--error`；`.mascot`。
+`.glass` a glass card, `.panel` padding, `.hero` a centred big-title area, `.eyebrow` a small heading, `.display` big gradient type, `.title`, `.big` a big number, `.muted`; `.btn`, `.btn--primary` (the glowing gradient main button), `.btn--ghost`; `.chip`, `.chip--active`, `.chip--done`; `.stat`; `.table`; `.state`, `.state--error`; `.mascot`.
 
-## 需求
+## Requirement
 
-（开工时写入）
+(Written when the work starts.)

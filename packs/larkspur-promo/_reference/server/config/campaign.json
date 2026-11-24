@@ -1,0 +1,133 @@
+{
+ "name": "Larkspur Outfitters Official Store · Black Friday to Cyber Monday",
+ "start": "2026-11-27T00:00:00-05:00",
+ "end": "2026-11-30T23:59:59-05:00",
+ "fullReduction": {
+  "every": 300,
+  "off": 30,
+  "withDiscount": true,
+  "withCoupon": false
+ },
+ "items": [
+  {
+   "sku": "TENT4",
+   "pct": 80,
+   "fullReduction": true,
+   "linePriceInput": 599
+  },
+  {
+   "sku": "TENT2",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 379
+  },
+  {
+   "sku": "TENT6",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 999
+  },
+  {
+   "sku": "BAG20",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 349
+  },
+  {
+   "sku": "BAG0",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 529
+  },
+  {
+   "sku": "PACK65",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 289
+  },
+  {
+   "sku": "PACK40",
+   "pct": 90,
+   "fullReduction": true,
+   "linePriceInput": 159
+  },
+  {
+   "sku": "BOOT",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 169
+  },
+  {
+   "sku": "MBOOT",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 429
+  },
+  {
+   "sku": "STOVE",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 189
+  },
+  {
+   "sku": "COOK",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 179
+  },
+  {
+   "sku": "JACKET",
+   "pct": 70,
+   "fullReduction": true,
+   "linePriceInput": 399
+  },
+  {
+   "sku": "RAIN",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 199
+  },
+  {
+   "sku": "BASE",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 119
+  },
+  {
+   "sku": "GPS",
+   "pct": 95,
+   "fullReduction": false,
+   "linePriceInput": 449
+  },
+  {
+   "sku": "MSG",
+   "pct": 90,
+   "fullReduction": false,
+   "linePriceInput": 299
+  },
+  {
+   "sku": "LAMP",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 79
+  },
+  {
+   "sku": "SOLAR",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 149
+  },
+  {
+   "sku": "BTL",
+   "pct": 80,
+   "fullReduction": true,
+   "linePriceInput": 59
+  },
+  {
+   "sku": "FILT",
+   "pct": 85,
+   "fullReduction": true,
+   "linePriceInput": 129
+  }
+ ]
+}

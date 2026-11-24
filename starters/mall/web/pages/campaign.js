@@ -1,11 +1,11 @@
-// 双十一活动页（顾客看的）：由前端开发按 README「页面约定」实现（render 纯函数 + mount 绑事件）。模板里只是占位。
+// The Black Friday campaign page (what shoppers see): frontend developers implement it from the README, "Page conventions" (render is a pure function, mount binds events). Here it is a placeholder.
 import { html } from '../lib/format.js'
 
 export function render(state) {
   return html`<section class="hero glass">
-    <p class="eyebrow">桃源科技官方商城</p>
-    <h1 class="display">双十一</h1>
-    <p class="muted">${state.status === 'error' ? state.error : '页面还没开发'}</p>
+    <p class="eyebrow">Larkspur Outfitters Official Store</p>
+    <h1 class="display">Black Friday</h1>
+    <p class="muted">${state.status === 'error' ? state.error : 'This page has not been built yet'}</p>
   </section>`.toString()
 }
 
