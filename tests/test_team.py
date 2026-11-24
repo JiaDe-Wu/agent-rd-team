@@ -35,29 +35,29 @@ def check_board(run, mgr):
 def test_full_run_parallel_stages_merges_bounce_conflict_and_review(tmp_path):
     async def go():
         mgr, tests = FakeManager(), default_tests()
-        run = make_run(tmp_path, mgr, tests, requirement="活动报名小站\n\n1. 首页列出所有活动。")
+        run = make_run(tmp_path, mgr, tests, requirement="Event sign-up site\n\n1. The home page lists all events.")
         await run.tick()
         assert run.s["status"] == "running" and run.s["base"]
         repo = Path(run.s["repo"])
-        assert "1. 首页列出所有活动。" in read(repo, "README.md")
-        assert sh(repo, "log", "-1", "--format=%s").strip() == "Requirement: 活动报名小站"
+        assert "1. The home page lists all events." in read(repo, "README.md")
+        assert sh(repo, "log", "-1", "--format=%s").strip() == "Requirement: Event sign-up site"
         [(pm_id, pm_task, kw)] = mgr.spawned
         assert pm_task.startswith(TAG + "pm branch=team/r1006test/pm worktree=")
         assert kw["cwd"].endswith("/wt/pm") and kw["parent_session_key"] == "agent-rd-team:r1006test"
         assert kw["model"] == "claude-opus-5.5" and kw["folder"].endswith(" · r1006test") and kw["title"].endswith(" agent")
-        assert "docs/product/**" in pm_task and "把 README 里的需求" in pm_task
+        assert "docs/product/**" in pm_task and "Write the requirement in the README" in pm_task
 
         act(mgr.get(pm_id), {"docs/product/acceptance.md": "AC-1\nAC-6\n"})
-        finish(mgr.get(pm_id), "2 条验收标准")
+        finish(mgr.get(pm_id), "2 acceptance criteria")
         await run.tick()  # pm merged; architect and designer start together
         assert [mgr.role_of(a) for a in mgr.live()] == ["architect", "designer"]
         assert [(e["from"], e["to"]) for e in kinds(run, "handoff")] == [("pm", "architect"), ("pm", "designer")]
-        assert run.lane("pm")["status"] == "merged" and run.lane("pm")["summary"] == "2 条验收标准"
+        assert run.lane("pm")["status"] == "merged" and run.lane("pm")["summary"] == "2 acceptance criteria"
         assert "docs/product/acceptance.md" in mgr.by_role("architect").task  # upstream outputs are its inputs
 
         act(mgr.by_role("architect"), {"contracts/api.md": "# API\n"})
         finish(mgr.by_role("architect"))
-        act(mgr.by_role("designer"), {"docs/design/pages.md": "# 页面\n", "frontend/styles/main.css": "a{}\n"}, commit=False)
+        act(mgr.by_role("designer"), {"docs/design/pages.md": "# Pages\n", "frontend/styles/main.css": "a{}\n"}, commit=False)
         await run.tick()  # architect merged: tester and ops start; designer still works
         assert sorted(mgr.role_of(a) for a in mgr.live()) == ["designer", "ops", "tester"]
         assert run.lane("designer")["lines"]["added"] == 2  # uncommitted work shows up live
@@ -69,7 +69,7 @@ def test_full_run_parallel_stages_merges_bounce_conflict_and_review(tmp_path):
         assert tests.calls == 0  # nothing to test yet
 
         act(mgr.by_role("tester"), {"tests/api-signup.test.js": "//\n", "tests/web-render.test.js": "//\n"})
-        finish(mgr.by_role("tester"), "2 个测试，全红")
+        finish(mgr.by_role("tester"), "2 tests, all red")
         await run.tick()  # tester merged: backend and frontend start, ops still works; the app tests the run branch
         assert sorted(mgr.role_of(a) for a in mgr.live()) == ["backend", "frontend", "ops"]
         assert tests.calls == 1 and kinds(run, "tests")[-1]["text"] == "Tests 0/2: nothing implemented yet, all red"
@@ -78,7 +78,7 @@ def test_full_run_parallel_stages_merges_bounce_conflict_and_review(tmp_path):
         backend1, frontend1 = mgr.by_role("backend"), mgr.by_role("frontend")
         act(backend1, {"backend/server.js": "// v1\n"})
         finish(backend1)
-        act(frontend1, {"frontend/index.html": "<h1/>\n", "backend/server.js": "// 前端顺手改的\n"})
+        act(frontend1, {"frontend/index.html": "<h1/>\n", "backend/server.js": "// changed by the frontend in passing\n"})
         act(mgr.by_role("ops"), {"ops/start.sh": "x\n", "Dockerfile": "FROM node\n"})
         finish(mgr.by_role("ops"))
         await run.tick()  # backend and ops merged, AC-6 red; nobody is sent back while the frontend is not in
@@ -99,10 +99,10 @@ def test_full_run_parallel_stages_merges_bounce_conflict_and_review(tmp_path):
         assert not sh(run.s["run_wt"], "status", "--porcelain")  # the merge was aborted cleanly
         [(conv, frontend2_id, conflict_task, ckw)] = mgr.continued
         assert conv == frontend1.id and ckw["cwd"] == frontend1.cwd
-        assert "冲突的文件：backend/server.js" in conflict_task and "git rm" in conflict_task
+        assert "Conflicting files: backend/server.js" in conflict_task and "git rm" in conflict_task
         assert tests.calls == 2 and run.s["status"] == "fixing"
 
-        act(mgr.get(frontend2_id), {"backend/server.js": None}, msg="[frontend] 不改后端的文件")
+        act(mgr.get(frontend2_id), {"backend/server.js": None}, msg="[frontend] leave the backend file alone")
         finish(mgr.get(frontend2_id))
         await run.tick()  # frontend merged, every implementation is in: AC-6 goes back into the backend's conversation
         assert run.lane("frontend")["status"] == "merged" and run.s["tests"]["failed"] == 1
@@ -113,28 +113,28 @@ def test_full_run_parallel_stages_merges_bounce_conflict_and_review(tmp_path):
         conv, backend2_id, fix_task, ckw = mgr.continued[-1]
         assert conv == backend1.id and ckw["cwd"] == backend1.cwd
         assert fix_task.startswith(TAG + "backend ") and fix_task.split("\n", 1)[0].endswith(" attempt=2]")
-        assert "AC-6: 用例（tests/api-signup.test.js）：expected 409, got 201" in fix_task
-        assert "快进到运行分支的最新提交" in fix_task  # its branch caught up: the tests and the frontend are in its worktree
+        assert "AC-6: case (tests/api-signup.test.js): expected 409, got 201" in fix_task
+        assert "fast-forwarded your branch to the latest commit of the run branch" in fix_task  # its branch caught up: the tests and the frontend are in its worktree
         assert read(Path(backend1.cwd), "frontend/index.html") and read(Path(backend1.cwd), "tests/api-signup.test.js")
         lanes = {ln["key"]: ln for ln in check_board(run, mgr)["run"]["roles"]}
         assert lanes["backend"]["status"] == "fixing" and lanes["backend"]["agent"]["id"] == backend2_id
 
         backend2 = mgr.get(backend2_id)
         act(backend2, {"backend/server.js": "// v2\n"})
-        finish(backend2, "名额判断改成 >=")
+        finish(backend2, "capacity check changed to >=")
         await run.tick()  # backend merged, all green; the reviewer waits for the next tick
         assert kinds(run, "tests")[-1]["text"] == "Tests 2/2: all green"
         assert run.lane("reviewer")["status"] == "waiting"
         await run.tick()
         reviewer = mgr.by_role("reviewer")
         # a snapshot of the run branch of its own: merges going on meanwhile do not change what it reads
-        assert reviewer.cwd.endswith("/wt/reviewer") and "你是只读的" in reviewer.task and "git add" not in reviewer.task
+        assert reviewer.cwd.endswith("/wt/reviewer") and "You are read-only" in reviewer.task and "git add" not in reviewer.task
         assert sh(Path(reviewer.cwd), "rev-parse", "HEAD") == sh(Path(run.s["run_wt"]), "rev-parse", "HEAD")
         assert run.s["status"] == "reviewing"
-        finish(reviewer, "可以交付")
+        finish(reviewer, "ready to deliver")
         await run.tick()
         assert run.s["status"] == "done" and run.ended
-        assert kinds(run, "review")[0]["text"] == "Review: 可以交付"
+        assert kinds(run, "review")[0]["text"] == "Review: ready to deliver"
         assert kinds(run, "run")[-1]["text"] == "Run complete: the review says it can be delivered"
         assert [m["role"] + ":" + m["status"] for m in run.s["merges"]] == [
             "pm:merged", "architect:merged", "designer:merged", "tester:merged", "backend:merged", "ops:merged",
@@ -146,7 +146,7 @@ def test_full_run_parallel_stages_merges_bounce_conflict_and_review(tmp_path):
         assert end["merges"][6]["status"] == "conflict" and end["roles"][-1]["agent"]["id"] == reviewer.id
         assert read(Path(run.s["run_wt"]), "backend/server.js") == "// v2\n"
         lane = run.lane("backend")
-        assert [a["kind"] for a in lane["attempts"]] == ["work", "fix"] and lane["summary"] == "名额判断改成 >="
+        assert [a["kind"] for a in lane["attempts"]] == ["work", "fix"] and lane["summary"] == "capacity check changed to >="
         assert {c["subject"] for c in lane["commits"]} == {"[agent] work"} and len(lane["commits"]) == 2
         assert lane["files"] == [{"path": "backend/server.js", "added": 2, "removed": 1, "status": "A"}]  # both rounds
         assert lane["violations"] == [] and lane["lines"] == {"added": 2, "removed": 1}
@@ -176,14 +176,14 @@ def test_restart_mid_run_then_the_reviewer_saying_needs_changes_fails_the_run(tm
 
         def behave(a, role):
             if role == "reviewer":
-                finish(a, "要改：后端没校验邮箱（后端）")
+                finish(a, "changes needed: the backend does not validate the email (Backend)")
             else:
                 act(a, {"frontend/index.html": "<h1/>\n"})
                 finish(a)
 
         await drive(again, mgr, behave)
         assert again.s["status"] == "failed" and again.lane("reviewer")["status"] == "done"
-        assert again.lane("reviewer")["summary"] == "要改：后端没校验邮箱（后端）"
+        assert again.lane("reviewer")["summary"] == "changes needed: the backend does not validate the email (Backend)"
         assert kinds(again, "run")[-1]["text"] == "Run ended: the review asks for changes"
 
     asyncio.run(go())
@@ -240,7 +240,7 @@ def test_fix_rounds_run_out_in_fresh_agents_when_continuing_is_impossible(tmp_pa
                 act(a, {"backend/server.js": f"// v1 {a.id}\n"})  # never fixes AC-6
             elif role == "frontend":
                 act(a, {"frontend/index.html": "<h1/>\n"})
-            finish(a, "可以交付" if role == "reviewer" else "做了")
+            finish(a, "ready to deliver" if role == "reviewer" else "did it")
 
         await drive(run, mgr, behave)
         lane = run.lane("backend")
@@ -257,7 +257,7 @@ def test_fix_rounds_run_out_in_fresh_agents_when_continuing_is_impossible(tmp_pa
 def test_tests_that_cannot_run_stop_the_run_instead_of_bouncing(tmp_path):
     async def go():
         async def no_node(wt, team):
-            raise mod("checks").TestsUnavailable("跑不了 node（/nope）：No such file")
+            raise mod("checks").TestsUnavailable("Cannot run node (/nope): No such file")
 
         mgr = FakeManager()
         run = make_run(tmp_path, mgr, no_node, team=mini_team())
@@ -334,10 +334,10 @@ def test_live_status_follows_kirocrew_and_tool_events_are_throttled(tmp_path):
 
 
 def test_parse_done_and_title():
-    assert team_mod.parse_done("想了想\n**DONE: 可以交付**\n") == "可以交付"
-    assert team_mod.parse_done("DONE: 第一\n...\nDONE：第二") == "第二"
-    assert team_mod.parse_done("没有总结") is None
-    assert team_mod.title_of("\n# 读书会报名\n更多", Path("/nonexistent")) == "读书会报名"
+    assert team_mod.parse_done("Thinking.\n**DONE: ready to deliver**\n") == "ready to deliver"
+    assert team_mod.parse_done("DONE: first\n...\nDONE：second") == "second"
+    assert team_mod.parse_done("no summary") is None
+    assert team_mod.title_of("\n# Book club sign-up\nmore", Path("/nonexistent")) == "Book club sign-up"
 
 
 
@@ -349,26 +349,26 @@ def test_a_fix_round_that_changes_nothing_is_not_merged_or_sent_back_again(tmp_p
         def behave(a, role):
             if role == "backend":
                 if " attempt=" in a.task.split("\n", 1)[0]:
-                    finish(a, "AC-6 要改的文件不归我")  # changes nothing
+                    finish(a, "AC-6 the file to change is not mine")  # changes nothing
                     return
                 act(a, {"backend/server.js": "// v1\n"})
             elif role == "frontend":
                 act(a, {"frontend/index.html": "<h1/>\n"})
-            finish(a, "要改：AC-6 没过" if role == "reviewer" else "做了")
+            finish(a, "changes needed: AC-6 failed" if role == "reviewer" else "did it")
 
         await drive(run, mgr, behave)
         lane = run.lane("backend")
         assert [a["kind"] for a in lane["attempts"]] == ["work", "fix"] and lane["stuck"] is True
         assert [m["role"] for m in run.s["merges"]].count("backend") == 1
         assert len([e for e in kinds(run, "bounce") if e["to"] == "backend"]) == 1
-        assert "后端, round 2, changed nothing: AC-6 要改的文件不归我" in [e["text"] for e in kinds(run, "failed")]
-        assert run.lane("reviewer")["status"] == "done" and run.s["status"] == "failed"  # the reviewer said 要改
+        assert "Backend, round 2, changed nothing: AC-6 the file to change is not mine" in [e["text"] for e in kinds(run, "failed")]
+        assert run.lane("reviewer")["status"] == "done" and run.s["status"] == "failed"  # the reviewer said changes needed
 
     asyncio.run(go())
 
 
 def test_a_reply_without_done_still_gets_a_summary():
-    assert team_mod.gist("## 结果\n\n**后端做完了**：接口都通了\n- 细节") == "后端做完了：接口都通了"
+    assert team_mod.gist("## Result\n\n**Backend is done**: the API works\n- details") == "Backend is done: the API works"
     assert team_mod.gist("```\n|a|b|\n```\n") is None and team_mod.gist("") is None
     assert team_mod.gist("x" * 130).endswith("…")
 
@@ -387,11 +387,11 @@ def test_the_team_routes_project_checks_to_ops_and_the_demo_test_script_takes_a_
 def qa_team() -> dict:
     """pm → tester ∥ backend → reviewer: the tester writes tests/api-*, the backend makes them pass."""
     role = lambda key, title, deps, writable: {"key": key, "title": title, "emoji": "", "depends_on": deps,  # noqa: E731
-                                               "writable": writable, "outputs": [], "brief": f"{title}的活"}
+                                               "writable": writable, "outputs": [], "brief": f"{title}'s work"}
     return team_mod.check_team({
         "version": 1, "test_command": ["node", "--test", "tests/"],
-        "roles": [role("pm", "产品经理", [], ["docs/product/**"]), role("tester", "测试", ["pm"], ["tests/api-*"]),
-                  role("backend", "后端", ["pm"], ["backend/**"]), role("reviewer", "评审", ["tester", "backend"], [])],
+        "roles": [role("pm", "Product manager", [], ["docs/product/**"]), role("tester", "Testing", ["pm"], ["tests/api-*"]),
+                  role("backend", "Backend", ["pm"], ["backend/**"]), role("reviewer", "Review", ["tester", "backend"], [])],
         "defaults": {"model": "claude-opus-5.5", "effort": "high", "max_fix_rounds": 2},
         "test_owners": [{"glob": "tests/api-*", "role": "backend"}],
     })
@@ -412,7 +412,7 @@ def test_a_test_the_implementer_says_is_wrong_goes_back_to_its_author_and_the_en
             head = a.task.split("\n", 1)[0]
             if role == "backend":
                 if " attempt=" in head:
-                    finish(a, "没有改动：AC-10 失败是测试自身的问题，用例共用了一个服务")
+                    finish(a, "No change: AC-10 fails because of the test itself, the cases share one server")
                     return
                 act(a, {"backend/server.js": "// v1\n"})
             elif role == "tester":
@@ -423,12 +423,12 @@ def test_a_test_the_implementer_says_is_wrong_goes_back_to_its_author_and_the_en
                     act(a, {"tests/api-orders.test.js": "// AC-10 shared server\n"})
             elif role == "pm":
                 act(a, {"docs/product/acceptance.md": "AC-10\n"})
-            finish(a, "可以交付" if role == "reviewer" else "做了")
+            finish(a, "ready to deliver" if role == "reviewer" else "did it")
 
         await drive(run, mgr, behave)
         bounces = [e["text"] for e in kinds(run, "bounce")]
-        assert any("say the tests themselves are wrong, sent back to 测试" in t for t in bounces), bounces
-        assert seen and "这些测试是你写的" in seen[0] and "测试自身的问题，用例共用了一个服务" in seen[0]
+        assert any("say the tests themselves are wrong, sent back to Testing" in t for t in bounces), bounces
+        assert seen and "you wrote these tests" in seen[0] and "because of the test itself, the cases share one server" in seen[0]
         assert run.s["tests"]["failed"] == 0 and run.s["status"] == "done"
         assert kinds(run, "run")[-1]["text"] == "Run complete: the review says it can be delivered"
 
@@ -449,13 +449,13 @@ def test_a_run_that_ends_red_says_so(tmp_path):
                 act(a, {"backend/server.js" if role == "backend" else "tests/api-orders.test.js": f"// {a.id}\n"})
             elif role == "pm":
                 act(a, {"docs/product/acceptance.md": "AC-10\n"})
-            finish(a, "可以交付" if role == "reviewer" else "做了")
+            finish(a, "ready to deliver" if role == "reviewer" else "did it")
 
         await drive(run, mgr, behave, ticks=80)
         assert run.s["status"] == "done"
-        assert kinds(run, "run")[-1]["text"] == "Run ended: the review says 可以交付, but 1 test(s) still fail, left to a person"
+        assert kinds(run, "run")[-1]["text"] == "Run ended: the review says ready to deliver, but 1 test(s) still fail, left to a person"
         reviewer_task = run.lane("reviewer")["attempts"][-1]["task"]
-        assert "app 刚跑的测试：0/1 通过，没过的：AC-10: 用例" in reviewer_task
+        assert "The tests the app just ran: 0/1 passed; failing: AC-10: case" in reviewer_task
 
     asyncio.run(go())
 
@@ -463,12 +463,12 @@ def test_a_run_that_ends_red_says_so(tmp_path):
 def deploy_team() -> dict:
     """pm → backend → reviewer → deploy: the deployment comes after the review lets the work through."""
     role = lambda key, title, deps, writable, **kw: {"key": key, "title": title, "emoji": "", "depends_on": deps,  # noqa: E731
-                                                     "writable": writable, "outputs": [], "brief": f"{title}的活", **kw}
+                                                     "writable": writable, "outputs": [], "brief": f"{title}'s work", **kw}
     return team_mod.check_team({
         "version": 1, "test_command": ["node", "--test", "tests/"],
-        "roles": [role("pm", "产品经理", [], ["docs/product/**"]), role("backend", "后端", ["pm"], ["backend/**"]),
-                  role("reviewer", "评审", ["backend"], []),
-                  role("deploy", "部署", ["reviewer"], ["deploy/**"], deploy={"mode": "local", "port": 8080})],
+        "roles": [role("pm", "Product manager", [], ["docs/product/**"]), role("backend", "Backend", ["pm"], ["backend/**"]),
+                  role("reviewer", "Review", ["backend"], []),
+                  role("deploy", "Deploy", ["reviewer"], ["deploy/**"], deploy={"mode": "local", "port": 8080})],
         "defaults": {"model": "claude-opus-5.5", "effort": "high", "max_fix_rounds": 2},
         "test_owners": [{"glob": "tests/api-*", "role": "backend"}],
     })
@@ -487,7 +487,7 @@ def test_the_deploy_role_runs_after_the_review_and_the_app_deploys_what_it_confi
         async def deploy(rid, wt, spec):
             calls.append((rid, read(wt, "deploy/local.json"), spec["port"]))
             if len(calls) == 1:
-                return {"ok": False, "error": "健康检查 GET /api/products 返回 404，不是 200"}
+                return {"ok": False, "error": "health check GET /api/products returned 404, not 200"}
             return {"ok": True, "url": "http://127.0.0.1:8080/", "note": ""}
 
         run.d.deploy = deploy
@@ -501,15 +501,15 @@ def test_the_deploy_role_runs_after_the_review_and_the_app_deploys_what_it_confi
                 act(a, {"docs/product/acceptance.md": "AC-1\n"})
             elif role == "deploy":
                 act(a, {"deploy/local.json": '{"port": 8080, "health": "/api/products"}\n' if " attempt=" in a.task.split("\n", 1)[0] else '{"port": 8080}\n'})
-            finish(a, "可以交付" if role == "reviewer" else "做了")
+            finish(a, "ready to deliver" if role == "reviewer" else "did it")
 
         await drive(run, mgr, behave)
         assert order.index("reviewer") < order.index("deploy")  # the review first, and it did not end the run
         assert len(calls) == 2 and '"health"' in calls[1][1]  # the first deployment failed and went back to the role
-        assert any("Deploy failed, sent back to 部署" in e["text"] for e in kinds(run, "bounce"))
+        assert any("Deploy failed, sent back to Deploy" in e["text"] for e in kinds(run, "bounce"))
         assert run.lane("deploy")["deployed"]["url"] == "http://127.0.0.1:8080/"
-        assert [e["text"] for e in kinds(run, "deployed")] == ["Deployed locally: http://127.0.0.1:8080/ (the orchestrator started the service from the configuration 部署 wrote; health check passed)"]
-        assert run.s["status"] == "done" and kinds(run, "run")[-1]["text"] == "Run complete: Review says 可以交付, deployed locally at http://127.0.0.1:8080/"
+        assert [e["text"] for e in kinds(run, "deployed")] == ["Deployed locally: http://127.0.0.1:8080/ (the orchestrator started the service from the configuration Deploy wrote; health check passed)"]
+        assert run.s["status"] == "done" and kinds(run, "run")[-1]["text"] == "Run complete: Review says ready to deliver, deployed locally at http://127.0.0.1:8080/"
 
     asyncio.run(go())
 
@@ -529,11 +529,11 @@ def test_nothing_red_is_deployed(tmp_path):
                 act(a, {"backend/server.js": f"// {a.id}\n"})
             elif role == "pm":
                 act(a, {"docs/product/acceptance.md": "AC-1\n"})
-            finish(a, "可以交付" if role == "reviewer" else "做了")
+            finish(a, "ready to deliver" if role == "reviewer" else "did it")
 
         await drive(run, mgr, behave, ticks=80)
         assert run.lane("deploy")["status"] == "waiting" and run.s["status"] == "done"
-        assert kinds(run, "run")[-1]["text"] == "Run ended: Review says 可以交付, but 1 test(s) still fail, not deployed, left to a person"
+        assert kinds(run, "run")[-1]["text"] == "Run ended: Review says ready to deliver, but 1 test(s) still fail, not deployed, left to a person"
 
     asyncio.run(go())
 
@@ -544,7 +544,7 @@ def test_a_person_signs_a_review_off_at_its_gate_and_can_send_work_back_to_a_nam
     tests = FakeTests([("api-x.test.js#AC-1", "backend", lambda wt: "v1" in read(wt, "backend/server.js"))])
     team = deploy_team()
     reviewer = next(r for r in team["roles"] if r["key"] == "reviewer")
-    reviewer.update(gate="human", gate_label="合规")
+    reviewer.update(gate="human", gate_label="Compliance")
 
     async def go():
         mgr = FakeManager()
@@ -567,43 +567,43 @@ def test_a_person_signs_a_review_off_at_its_gate_and_can_send_work_back_to_a_nam
                     role = mgr.role_of(a)
                     tasks.append((role, a.task))
                     if role == "backend":
-                        act(a, {"backend/server.js": "// v1\n" if "负责人" not in a.task else "// v1\n// 仅限行政部使用\n"})
+                        act(a, {"backend/server.js": "// v1\n" if "the owner sent it back" not in a.task else "// v1\n// for Administration use only\n"})
                     elif role == "pm":
                         act(a, {"docs/product/acceptance.md": "AC-1\n"})
                     elif role == "deploy":
                         act(a, {"deploy/local.json": '{"port": 8080, "health": "/"}\n'})
-                    finish(a, "可以交付" if role == "reviewer" else "做了")
+                    finish(a, "ready to deliver" if role == "reviewer" else "did it")
             raise AssertionError(run.s["status"])
 
         await until(lambda: run.lane("reviewer").get("gate") == "pending")
         assert run.lane("deploy")["status"] == "waiting" and not run.ended  # nothing goes out before the person signs
-        assert not await run.gate("reviewer", "revise", "按风险提示退回。")  # 退回 has to name whom
-        assert await run.gate("reviewer", "revise", "按风险提示 2 退回。\n打回：后端。加一行使用范围说明。")
-        assert any(e["text"] == "As the person said, sent back to 后端" for e in kinds(run, "bounce"))
+        assert not await run.gate("reviewer", "revise", "Sent back on the risk note.")  # sending back has to name whom
+        assert await run.gate("reviewer", "revise", "Sent back on risk note 2.\nSend back: Backend. Add one line on who may use it.")
+        assert any(e["text"] == "As the person said, sent back to Backend" for e in kinds(run, "bounce"))
         await until(lambda: run.lane("reviewer").get("gate") == "pending" and run.lane("reviewer")["attempt"] == 2)
-        fix = next(t for r, t in tasks if r == "backend" and "负责人" in t)
-        assert "加一行使用范围说明" in fix and "打回你（后端）" in fix
+        fix = next(t for r, t in tasks if r == "backend" and "the owner sent it back" in t)
+        assert "Add one line on who may use it" in fix and "send it back to you (Backend)" in fix
         again = [t for r, t in tasks if r == "reviewer"][-1]
-        assert "负责人在关卡上退回" in again and "加一行使用范围说明" in again
-        assert await run.gate("reviewer", "approve", "批准上线。导出名单只发给行政部。")
+        assert "the owner sent it back at the gate" in again and "Add one line on who may use it" in again
+        assert await run.gate("reviewer", "approve", "Approved for release. The export list goes to Administration only.")
         await until(lambda: run.ended)
-        assert deployed and "仅限行政部使用" in deployed[-1]  # what went out is what the person sent back for
-        assert run.s["status"] == "done" and run.s["gate_notes"]["reviewer"] == "批准上线。导出名单只发给行政部。"
+        assert deployed and "for Administration use only" in deployed[-1]  # what went out is what the person sent back for
+        assert run.s["status"] == "done" and run.s["gate_notes"]["reviewer"] == "Approved for release. The export list goes to Administration only."
 
     asyncio.run(go())
 
 
 def optional_team() -> dict:
-    """pm (gated, writes the 分工提案) → backend ∥ motion (an optional post) → reviewer."""
+    """pm (gated, writes the assignment proposal) → backend ∥ motion (an optional post) → reviewer."""
     role = lambda key, title, deps, writable, **kw: {"key": key, "title": title, "emoji": "", "depends_on": deps,  # noqa: E731
-                                                     "writable": writable, "outputs": [], "brief": f"{title}的活", **kw}
+                                                     "writable": writable, "outputs": [], "brief": f"{title}'s work", **kw}
     return team_mod.check_team({
         "version": 1, "test_command": ["node", "--test", "tests/"],
-        "roles": [role("pm", "产品经理", [], ["docs/product/**"], gate="human", gate_label="需求", plan="docs/product/plan.json",
+        "roles": [role("pm", "Product manager", [], ["docs/product/**"], gate="human", gate_label="Requirements", plan="docs/product/plan.json",
                        member="aidlc-product-agent"),
-                  role("backend", "后端", ["pm"], ["backend/**"], member="aidlc-developer-agent"),
-                  role("motion", "动效", ["pm"], ["web/motion/**"], optional=True, member="taoyuan-motion-agent"),
-                  role("reviewer", "评审", ["backend", "motion"], [])],
+                  role("backend", "Backend", ["pm"], ["backend/**"], member="aidlc-developer-agent"),
+                  role("motion", "Motion", ["pm"], ["web/motion/**"], optional=True, member="taoyuan-motion-agent"),
+                  role("reviewer", "Review", ["backend", "motion"], [])],
         "defaults": {"model": "claude-opus-5.5", "effort": "high", "max_fix_rounds": 2},
         "test_owners": [{"glob": "tests/api-*", "role": "backend"}, {"glob": "tests/ux-motion*", "role": "motion"}],
     })
@@ -632,10 +632,10 @@ def test_an_optional_member_not_on_crew_sits_the_run_out_and_its_checks_are_not_
     def behave(a, role):
         tasks.append((role, a.task))
         if role == "pm":
-            act(a, {"docs/product/plan.json": '{"backend": "接口", "motion": "倒计时翻页"}\n'})
+            act(a, {"docs/product/plan.json": '{"backend": "the API", "motion": "countdown flip"}\n'})
         elif role == "backend":
             act(a, {"backend/server.js": "// v1\n"})
-        finish(a, "可以交付" if role == "reviewer" else "做了")
+        finish(a, "ready to deliver" if role == "reviewer" else "did it")
 
     async def go():
         mgr = FakeManager()
@@ -643,7 +643,7 @@ def test_an_optional_member_not_on_crew_sits_the_run_out_and_its_checks_are_not_
         assert run.leave_out_unhired(None) == []  # Crew not read: everyone stays in
         assert run.leave_out_unhired({"aidlc-product-agent", "aidlc-developer-agent"}) == ["motion"]
         assert run.lane("motion")["status"] == "skipped" and run.lane("motion")["summary"] == "not on Crew"
-        assert kinds(run, "skipped")[-1]["text"] == ("动效: The Crew Agents page does not have taoyuan-motion-agent (not on Crew); it sits this run out; "
+        assert kinds(run, "skipped")[-1]["text"] == ("Motion: The Crew Agents page does not have taoyuan-motion-agent (not on Crew); it sits this run out; "
                                                     "the checks it owns (tests/ux-motion*) are not run this time")
         await until(run, mgr, behave, lambda: run.lane("pm").get("gate") == "pending")
         assert await run.gate("pm", "approve")
@@ -651,7 +651,7 @@ def test_an_optional_member_not_on_crew_sits_the_run_out_and_its_checks_are_not_
         assert run.s["status"] == "done" and (run.s["tests"]["passed"], run.s["tests"]["total"]) == (1, 1)  # UX-1 not run
         assert "motion" not in {r for r, _ in tasks}
         backend = next(t for r, t in tasks if r == "backend")
-        assert "这次不参加的成员：动效（not on Crew）。它们负责的部分保持模板原样" in backend
+        assert "Members sitting this run out: Motion (not on Crew). Their parts stay as in the template" in backend
         assert run.lane("motion")["status"] == "skipped"
         out = check_board(run, mgr)
         assert next(ln for ln in out["run"]["roles"] if ln["key"] == "motion")["optional"] is True
@@ -661,7 +661,7 @@ def test_an_optional_member_not_on_crew_sits_the_run_out_and_its_checks_are_not_
 
 def test_the_planner_leaves_an_optional_member_out_and_it_sits_out_once_the_person_approves(tmp_path):
     tasks = []
-    plan = '{"backend": "接口", "motion": "不用", "skip": {"motion": "这次只改价格，页面不动", "backend": "也不要"}}\n'
+    plan = '{"backend": "the API", "motion": "not needed", "skip": {"motion": "only the price changes this time, the page stays", "backend": "not needed either"}}\n'
 
     def behave(a, role):
         tasks.append(role)
@@ -669,7 +669,7 @@ def test_the_planner_leaves_an_optional_member_out_and_it_sits_out_once_the_pers
             act(a, {"docs/product/plan.json": plan})
         elif role == "backend":
             act(a, {"backend/server.js": "// v1\n"})
-        finish(a, "可以交付" if role == "reviewer" else "做了")
+        finish(a, "ready to deliver" if role == "reviewer" else "did it")
 
     async def go():
         mgr = FakeManager()
@@ -677,12 +677,12 @@ def test_the_planner_leaves_an_optional_member_out_and_it_sits_out_once_the_pers
         assert run.leave_out_unhired({"aidlc-product-agent", "aidlc-developer-agent", "taoyuan-motion-agent"}) == []
         await until(run, mgr, behave, lambda: run.lane("pm").get("gate") == "pending")
         # a required member cannot be left out; the optional one is proposed, not yet out (the person has not approved)
-        assert run.s["plan_skip"] == {"motion": "这次只改价格，页面不动"} and run.s["plan"] == {"backend": "接口"}
-        assert kinds(run, "plan")[-1]["text"] == "产品经理 proposed the assignment: 后端 · 接口; not needed this time: 动效 (这次只改价格，页面不动)"
+        assert run.s["plan_skip"] == {"motion": "only the price changes this time, the page stays"} and run.s["plan"] == {"backend": "the API"}
+        assert kinds(run, "plan")[-1]["text"] == "Product manager proposed the assignment: Backend · the API; not needed this time: Motion (only the price changes this time, the page stays)"
         assert run.lane("motion")["status"] == "waiting"
-        assert await run.gate("pm", "approve", "就这样")
-        assert run.lane("motion")["status"] == "skipped" and run.lane("motion")["summary"] == "Not needed this time: 这次只改价格，页面不动"
-        assert kinds(run, "skipped")[-1]["text"] == ("动效: Not needed this time (proposed by 产品经理, approved by a person at the 需求 gate): 这次只改价格，页面不动; "
+        assert await run.gate("pm", "approve", "Go ahead")
+        assert run.lane("motion")["status"] == "skipped" and run.lane("motion")["summary"] == "Not needed this time: only the price changes this time, the page stays"
+        assert kinds(run, "skipped")[-1]["text"] == ("Motion: Not needed this time (proposed by Product manager, approved by a person at the Requirements gate): only the price changes this time, the page stays; "
                                                     "the checks it owns (tests/ux-motion*) are not run this time")
         await until(run, mgr, behave, lambda: run.ended)
         assert run.s["status"] == "done" and run.s["tests"]["total"] == 1 and "motion" not in tasks
@@ -696,7 +696,7 @@ def test_a_gated_review_that_still_says_needs_changes_waits_for_the_person_who_s
     tests = FakeTests([("api-x.test.js#AC-1", "backend", lambda wt: "v1" in read(wt, "backend/server.js"))])
     team = deploy_team()
     team["defaults"]["max_review_rounds"] = 1
-    next(r for r in team["roles"] if r["key"] == "reviewer").update(gate="human", gate_label="上线")
+    next(r for r in team["roles"] if r["key"] == "reviewer").update(gate="human", gate_label="Release")
     tasks = []
 
     def behave(a, role):
@@ -708,9 +708,9 @@ def test_a_gated_review_that_still_says_needs_changes_waits_for_the_person_who_s
         elif role == "deploy":
             act(a, {"deploy/local.json": '{"port": 8080, "health": "/"}\n'})
         if role == "reviewer":
-            finish(a, "要改：F-1 价保退差超过 30 万\n打回：后端")
+            finish(a, "changes needed: F-1 price-adjustment refunds above 300,000\nSend back: Backend")
         else:
-            finish(a, "做了")
+            finish(a, "did it")
 
     async def go():
         mgr = FakeManager()
@@ -726,24 +726,24 @@ def test_a_gated_review_that_still_says_needs_changes_waits_for_the_person_who_s
         await until(run, mgr, behave, overruled)
         # one round as the review said, then the rounds are used up: the person decides, the run does not end
         assert run.s["review_rounds"] == 1 and not run.ended and run.s["status"] == "gating"
-        assert kinds(run, "gate")[-1]["text"] == "Waiting for a person to decide 上线: Review sent back 1 rounds and still asks for changes; the person can send it back for another round, or give a reason, overrule the review and release"
+        assert kinds(run, "gate")[-1]["text"] == "Waiting for a person to decide Release: Review sent back 1 rounds and still asks for changes; the person can send it back for another round, or give a reason, overrule the review and release"
         assert run.lane("deploy")["status"] == "waiting" and run.sign_block() == "A run can be signed off only after it has ended"
         assert not await run.gate("reviewer", "approve", "  ")  # overruling the review takes a reason
-        assert await run.gate("reviewer", "revise", "价保按 28 万预留")  # names nobody: back to whom the review named
-        assert kinds(run, "bounce")[-2]["text"] == "A person sent it back at the 上线 gate: change once more as the review says: 价保按 28 万预留"
-        assert run.s["review_rounds"] == 2 and run.s["review_note"] == "价保按 28 万预留"
+        assert await run.gate("reviewer", "revise", "reserve 280,000 for price adjustments")  # names nobody: back to whom the review named
+        assert kinds(run, "bounce")[-2]["text"] == "A person sent it back at the Release gate: change once more as the review says: reserve 280,000 for price adjustments"
+        assert run.s["review_rounds"] == 2 and run.s["review_note"] == "reserve 280,000 for price adjustments"
         await until(run, mgr, behave, lambda: overruled() and run.lane("reviewer")["attempt"] == 3)
         fix = [t for r, t in tasks if r == "backend"][-1]
-        assert "F-1 价保退差超过 30 万" in fix and "价保按 28 万预留" in fix
-        assert await run.gate("reviewer", "approve", "风险我担：价保按 28 万预留，活动后财务复核")
+        assert "F-1 price-adjustment refunds above 300,000" in fix and "reserve 280,000 for price adjustments" in fix
+        assert await run.gate("reviewer", "approve", "I take the risk: reserve 280,000 for price adjustments, Finance reviews after the campaign")
         await until(run, mgr, behave, lambda: run.ended)
         assert deployed and run.s["status"] == "done" and run.sign_block() == ""
-        assert run.s["overruled"] == {"role": "reviewer", "note": "风险我担：价保按 28 万预留，活动后财务复核",
-                                      "review": "要改：F-1 价保退差超过 30 万"}
-        assert kinds(run, "approved")[-1]["text"] == "A person overruled the review and approved 上线: 风险我担：价保按 28 万预留，活动后财务复核"
+        assert run.s["overruled"] == {"role": "reviewer", "note": "I take the risk: reserve 280,000 for price adjustments, Finance reviews after the campaign",
+                                      "review": "changes needed: F-1 price-adjustment refunds above 300,000"}
+        assert kinds(run, "approved")[-1]["text"] == "A person overruled the review and approved Release: I take the risk: reserve 280,000 for price adjustments, Finance reviews after the campaign"
         assert kinds(run, "run")[-1]["text"] == "Run complete: A person overruled the review and released, deployed locally at http://127.0.0.1:8080/"
         board = mod("board").detail(run, mgr=mgr, scrub=str, now=1.0)
-        assert board["overruled"]["note"].startswith("风险我担") and board["sign_block"] == ""
+        assert board["overruled"]["note"].startswith("I take the risk") and board["sign_block"] == ""
 
     asyncio.run(go())
 
@@ -765,7 +765,7 @@ def test_only_a_run_that_delivered_can_be_signed_off(tmp_path):
 
 
 def test_a_role_whose_crew_member_is_missing_waits_and_starts_once_it_is_added(tmp_path):
-    """A role names a Crew member 「代理」 does not have: it is held with one event instead of silently booting the
+    """A role names a Crew member "Agents" does not have: it is held with one event instead of silently booting the
     template of that name; adding the member lets it start on the next tick."""
     team = mini_team()
     team["workspace"] = "taoyuan"
@@ -780,13 +780,13 @@ def test_a_role_whose_crew_member_is_missing_waits_and_starts_once_it_is_added(t
         await run.tick()
         assert run.lane("pm")["status"] == "waiting" and run.lane("pm")["awaiting_member"] == "aidlc-product-agent"
         held = kinds(run, "member")
-        assert len(held) == 1 and held[0]["text"] == "产品经理 has not started: the Crew Agents page has no member aidlc-product-agent; it starts automatically once added"
+        assert len(held) == 1 and held[0]["text"] == "Product manager has not started: the Crew Agents page has no member aidlc-product-agent; it starts automatically once added"
         await run.tick()  # still missing: no second event
         assert len(kinds(run, "member")) == 1 and not mgr.spawned
         members.add("aidlc-product-agent")
         await run.tick()
         assert run.lane("pm")["status"] == "running" and not run.lane("pm").get("awaiting_member")
-        assert kinds(run, "member")[-1]["text"] == "Member aidlc-product-agent was added; 产品经理 starts"
+        assert kinds(run, "member")[-1]["text"] == "Member aidlc-product-agent was added; Product manager starts"
 
     asyncio.run(go())
 

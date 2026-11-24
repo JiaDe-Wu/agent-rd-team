@@ -1,4 +1,4 @@
-"""重试: a start KiroCrew never ran is queued again by itself; a failed role is retried by the person, and an ended
+"""Retry: a start KiroCrew never ran is queued again by itself; a failed role is retried by the person, and an ended
 run carries on from where it stopped."""
 
 import asyncio
@@ -32,7 +32,7 @@ def test_retry_gives_failed_roles_another_round_and_the_run_carries_on(tmp_path)
                 gave_up(a)
                 return
             if role == "reviewer":
-                finish(a, "可以交付")
+                finish(a, "ready to deliver")
             else:
                 act(a, OUTPUTS[role])
                 finish(a)
@@ -49,7 +49,7 @@ def test_retry_gives_failed_roles_another_round_and_the_run_carries_on(tmp_path)
         assert tester["attempt"] == 2 and [a["kind"] for a in tester["attempts"]] == ["work", "work"]
         task = mgr.by_role("tester").task
         assert task.startswith(TAG + "tester ") and task.split("\n", 1)[0].endswith(" attempt=2]")
-        assert "这是第 2 次开工：上一次没做完（agent stopped" in task
+        assert "This is attempt 2: the last one did not finish (agent stopped" in task
         assert "Testing, round 2: Start again" in [e["text"] for e in kinds(run, "spawned")]
         await drive(run, mgr, behave)
         assert run.s["status"] == "done" and run.s["tests"]["failed"] == 0
@@ -72,7 +72,7 @@ def test_a_stopped_run_is_retried_and_a_merged_role_that_failed_later_is_sent_ba
 
         def behave(a, role):
             if role == "reviewer":
-                finish(a, "可以交付")
+                finish(a, "ready to deliver")
             else:
                 act(a, {"backend": {"backend/server.js": "// v2\n"}, "frontend": {"frontend/index.html": "<h1/>\n"}}[role])
                 finish(a)
@@ -112,9 +112,9 @@ def test_retry_route(tmp_path):
 
 
 def test_a_custom_requirement_gets_its_own_title_in_the_readme():
-    readme = "# 活动报名小站\n\n## 需求\n\n做一个小网站。\n\n## 约束\n\n- 零依赖\n"
-    out = gitwork.with_requirement(readme, "给 devlake 完善 kiro 插件", "给 devlake 完善 kiro 插件")
-    assert out.startswith("# 给 devlake 完善 kiro 插件\n") and "## 约束" in out and "做一个小网站" not in out
+    readme = "# Event sign-up site\n\n## Requirement\n\nBuild a small website.\n\n## Constraints\n\n- Zero dependencies\n"
+    out = gitwork.with_requirement(readme, "Improve the kiro plugin for devlake", "Improve the kiro plugin for devlake")
+    assert out.startswith("# Improve the kiro plugin for devlake\n") and "## Constraints" in out and "Build a small website" not in out
 
 
 def test_the_wall_clock_leaves_out_the_time_a_run_spent_ended_before_its_retry(tmp_path):
@@ -137,6 +137,7 @@ def test_the_wall_clock_leaves_out_the_time_a_run_spent_ended_before_its_retry(t
         assert view["run"]["wall_s"] == 190.0  # 1000→1090 and 5090→5190, not the hour in between
 
     asyncio.run(go())
+    # run events of an earlier version, written in Chinese: still read
     events = [{"kind": "run", "text": "运行开始：x", "at": 1000.0}, {"kind": "run", "text": "运行失败：测试没做完", "at": 1090.0},
               {"kind": "tests", "text": "测试 0/0", "at": 2000.0}, {"kind": "run", "text": "重试：测试", "at": 5090.0}]
     assert team_mod.paused_from(events) == 4000.0  # an older run, retried before paused_s was kept
