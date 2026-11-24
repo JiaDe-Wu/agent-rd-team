@@ -1,4 +1,4 @@
 {
-  "requirement": "Build the Black Friday promotion page for Larkspur Outfitters: a campaign landing page with the discounted products, the price shown with the reference price struck through, and a one-click coupon. Follow the company's pricing, margin and price-protection rules.",
+  "requirement": "Black Friday sale for the official store: pick 20 items and discount them with spend and save, the campaign page shows a countdown, reference prices and final prices, and Operations configures it in the back office and launches it in one click.",
   "team": "auto"
 }

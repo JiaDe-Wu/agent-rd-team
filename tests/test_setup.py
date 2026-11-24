@@ -83,6 +83,7 @@ def knowledge_dir(tmp_path, n=3):
     for i in range(n):
         (d / f"2{i}-rule.md").write_text(f"# Rule {i}\n", encoding="utf-8")
     (d / "data" / "products.md").write_text("# Products\n", encoding="utf-8")
+    (d / "data" / "products.json").write_text('[{"sku": "TENT-2"}]\n', encoding="utf-8")  # the data a document points at
     return d
 
 
@@ -244,19 +245,19 @@ def test_the_shipped_member_templates_are_the_shape_the_setup_needs():
 def test_the_rules_are_copied_next_to_the_workspace_added_as_a_folder_source_and_read(env):
     async def go():
         r = await call(env.routes, "POST", "/setup/knowledge")
-        assert r.status == 200 and r.body["added"] is True and r.body["documents"] == 4 and r.body["copied"] == 4
+        assert r.status == 200 and r.body["added"] is True and r.body["documents"] == 4 and r.body["copied"] == 5  # 4 documents + 1 data file
         return r.body
 
     body = run(go())
-    folder = env.home / "workplace" / "larkspur" / "knowledge"
+    folder = env.home / "workplace" / "knowledge" / "larkspur"  # where the documents say their data is
     assert body["folder"] == str(folder) and (folder / "20-rule.md").read_text(encoding="utf-8") == "# Rule 0\n"
-    assert (folder / "data" / "products.md").exists()
+    assert (folder / "data" / "products.md").exists() and (folder / "data" / "products.json").exists()
     assert env.gw.calls == [("add", "Larkspur Outfitters", str(folder)), ("confirm", "src-1")]  # held until confirmed, then read
 
 
 def test_running_the_knowledge_step_again_reads_again_without_a_second_source_or_losing_an_edit(env):
     run(env.svc.setup.add_knowledge())
-    folder = env.home / "workplace" / "larkspur" / "knowledge"
+    folder = env.home / "workplace" / "knowledge" / "larkspur"
     (folder / "20-rule.md").write_text("# My own rule\n", encoding="utf-8")
     env.gw.calls.clear()
     body = run(env.svc.setup.add_knowledge())

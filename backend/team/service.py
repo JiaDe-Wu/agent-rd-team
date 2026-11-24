@@ -331,8 +331,7 @@ class Service:
         if (decision == "revise" and pending and not spec.get("writable")
                 and not team_mod.review_targets(note, run.team["roles"])
                 and not team_mod.review_targets(run.overrule_review(role), run.team["roles"])):
-            # protocol token: kept in Chinese (the 打回： line the send-back is matched on)
-            raise AppError("To send back, say to whom, for example \"打回：Web #2\"", "no_target")
+            raise AppError("To send back, say to whom, for example \"Send back: Web #2\"", "no_target")
         if not await run.gate(role, decision, note, delivery, answers, risk if decision == "revise" else None):
             raise AppError("This role is not waiting for approval", "not_gated", 409)
         return {"ok": True, "run": run.rid, "role": role, "decision": decision, "status": run.s["status"]}

@@ -111,8 +111,9 @@ class Setup:
 
     @property
     def rules_dir(self) -> Path:
-        """The example company's rule documents, copied here so the person can read and edit them."""
-        return self.workspace_dir / "knowledge"
+        """The example company's knowledge (rule documents and the JSON data they point at), copied here so the person can
+        read and edit it. The documents name their data files under this folder: ``~/workplace/knowledge/larkspur/data/``."""
+        return self.home / "workplace" / "knowledge" / WORKSPACE
 
     @property
     def kiro_agents_dir(self) -> Path:
@@ -244,9 +245,9 @@ class Setup:
 
         def copy() -> int:
             n = 0
-            for d in docs:
-                target = self.rules_dir / d.relative_to(self.knowledge_dir)
-                n += _write_new(target, d.read_text(encoding="utf-8"))  # a file the person edited is kept
+            for f in sorted(p for p in self.knowledge_dir.rglob("*") if p.is_file()):
+                target = self.rules_dir / f.relative_to(self.knowledge_dir)
+                n += _write_new(target, f.read_text(encoding="utf-8"))  # a file the person edited is kept
             return n
 
         copied = await asyncio.to_thread(copy)
