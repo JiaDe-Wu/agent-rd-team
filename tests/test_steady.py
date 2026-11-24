@@ -14,7 +14,7 @@ REQ = "双十一官方商城大促：挑 20 款家电打折加满减，活动页
 
 
 def promo_run(tmp_path):
-    t = team_mod.load_team(constants.TEAM_DIR / "team-taoyuan-promo.json")
+    t = team_mod.load_team(constants.TEAM_DIR / "team-promo.json")
     state = team_mod.new_state("r1020bbbb", REQ, t, "{brief}", tmp_path / "work", constants.APP_ROOT / "starters" / "mall", NOW - 3600)
     return team_mod.TeamRun(state, make_deps(tmp_path, FakeManager(), None, now=lambda: NOW))
 
@@ -34,32 +34,32 @@ def test_a_send_back_keeps_its_risk_and_an_approval_does_not(tmp_path):
     async def no_session(*a, **k):  # sending work back starts the named members' sessions: not what this test is about
         return None
     run._start = no_session
-    risk = {"what": "价保退差超过 30 万审批线", "amount": 206000}
+    risk = {"what": "Price-adjustment payouts over the $20,000 approval line", "amount": 9000}
     run.lane("product")["gate"] = "pending"
     assert asyncio.run(run.gate("product", "approve", "批准。", risk=risk))
-    assert "risks" not in run.s  # 批准 keeps nothing from going live
+    assert "risks" not in run.s  # an approval keeps nothing from going live
 
     lane = run.lane("compliance")  # the release gate is a review gate: the note says whom to send back to
     lane.update(gate="pending", status="done")
-    assert not asyncio.run(run.gate("compliance", "revise", "价保超了", risk=risk))  # 退回 without 打回给谁 is refused…
+    assert not asyncio.run(run.gate("compliance", "revise", "Payouts are too high", risk=risk))  # sending back without saying whom to is refused…
     assert "risks" not in run.s  # …and notes nothing
 
-    note = "按上线前体检退回。\n打回：后端开发 #1。价保退差超过 30 万要 CFO 审批"
+    note = "Sent back per the pre-release check.\nSend back: Backend developer #1. Payouts above $20,000 need CFO approval"
     assert asyncio.run(run.gate("compliance", "revise", note, risk=risk))
     (r,) = run.s["risks"]
-    assert (r["what"], r["amount"], r["gate"], r["role"], r["at"]) == ("价保退差超过 30 万审批线", 206000.0, "Release", "compliance", NOW)
+    assert (r["what"], r["amount"], r["gate"], r["role"], r["at"]) == ("Price-adjustment payouts over the $20,000 approval line", 9000.0, "Release", "compliance", NOW)
     back = [e for e in run.events if e["kind"] == "bounce" and e["from"] == "person"][-1]
-    assert back["data"] == {"risk": {"what": "价保退差超过 30 万审批线", "amount": 206000.0, "gate": "Release"}}
+    assert back["data"] == {"risk": {"what": "Price-adjustment payouts over the $20,000 approval line", "amount": 9000.0, "gate": "Release"}}
 
     board = mod("board").detail(run, mgr=FakeManager(), scrub=str, now=NOW)
-    assert board["risks"] == [{"what": "价保退差超过 30 万审批线", "amount": 206000.0, "gate": "Release", "role": "compliance", "at": NOW}]
-    assert next(x for x in board["roles"] if x["key"] == "compliance")["gate_revise_risk"] == {"what": "Price-protection refunds exceed the 300k-yuan approval line", "amount": 206100.0}
+    assert board["risks"] == [{"what": "Price-adjustment payouts over the $20,000 approval line", "amount": 9000.0, "gate": "Release", "role": "compliance", "at": NOW}]
+    assert next(x for x in board["roles"] if x["key"] == "compliance")["gate_revise_risk"] == {"what": "Price-adjustment payouts exceed the $20,000 approval line", "amount": 9100.0}
 
 
 def test_the_promotion_team_presets_the_risk_of_sending_its_release_back():
-    t = team_mod.load_team(constants.TEAM_DIR / "team-taoyuan-promo.json")
+    t = team_mod.load_team(constants.TEAM_DIR / "team-promo.json")
     roles = {r["key"]: r for r in t["roles"]}
-    assert team_mod.clean_risk(roles["compliance"]["gate_revise_risk"]) == {"what": "Price-protection refunds exceed the 300k-yuan approval line", "amount": 206100.0}
+    assert team_mod.clean_risk(roles["compliance"]["gate_revise_risk"]) == {"what": "Price-adjustment payouts exceed the $20,000 approval line", "amount": 9100.0}
     bad = {**t, "roles": [{**r, "gate_revise_risk": {"what": "", "amount": "很多"}} if r["key"] == "compliance" else r for r in t["roles"]]}
     with pytest.raises(ValueError, match="gate_revise_risk"):
         team_mod.check_team(bad)

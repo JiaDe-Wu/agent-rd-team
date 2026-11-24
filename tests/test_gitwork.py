@@ -29,10 +29,11 @@ def test_globs():
 
 def test_the_requirement_replaces_only_its_section():
     readme = (constants.TARGET_TEMPLATE / "README.md").read_text(encoding="utf-8")
-    out = gitwork.with_requirement(readme, "做一个读书会报名小站。")
-    assert out.startswith("# 活动报名小站\n\n## 需求\n\n做一个读书会报名小站。\n\n## 约束\n")
-    assert "让主办方发布活动" not in out and out.endswith(readme[readme.index("## 约束"):])
-    assert gitwork.with_requirement("# x\n", "要求") == "# x\n\n## 需求\n\n要求\n"
+    out = gitwork.with_requirement(readme, "Build a book club sign-up site.")
+    assert out.startswith("# Event Sign-up Site\n\n## Requirement\n\nBuild a book club sign-up site.\n\n## Constraints\n")
+    assert "where organisers publish events" not in out and out.endswith(readme[readme.index("## Constraints"):])
+    assert gitwork.with_requirement("# x\n", "needs") == "# x\n\n## Requirement\n\nneeds\n"
+    assert gitwork.with_requirement("# x\n\n## 需求\n\nold\n", "new") == "# x\n\n## 需求\n\nnew\n"  # a README that still has the old heading
 
 
 def test_repo_worktrees_stats_leftovers_merge_and_conflict(tmp_path):

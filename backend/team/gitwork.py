@@ -92,10 +92,10 @@ def with_requirement(readme: str, requirement: str, title: str | None = None) ->
             lines[at] = f"# {title.strip()}\n"
             readme = "".join(lines)
     lines = readme.splitlines(keepends=True)
-    # protocol token: kept in Chinese (the starters' README templates carry this heading)
-    start = next((i for i, line in enumerate(lines) if line.strip() == "## 需求"), None)
+    # the starters' README templates carry this heading; "## 需求" is still read, for a README that was made before
+    start = next((i for i, line in enumerate(lines) if line.strip() in ("## Requirement", "## 需求")), None)
     if start is None:
-        return readme.rstrip("\n") + "\n\n## 需求\n\n" + requirement.strip() + "\n"
+        return readme.rstrip("\n") + "\n\n## Requirement\n\n" + requirement.strip() + "\n"
     end = next((j for j in range(start + 1, len(lines)) if lines[j].startswith("## ")), len(lines))
     tail = "".join(lines[end:])
     return "".join(lines[: start + 1]) + "\n" + requirement.strip() + "\n" + ("\n" + tail if tail else "")

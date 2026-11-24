@@ -30,7 +30,7 @@ def test_an_existing_project_keeps_its_title_and_is_committed_as_taken_over(tmp_
 
     repo, base = asyncio.run(go())
     readme = (repo / "README.md").read_text(encoding="utf-8")
-    assert readme.startswith("# 我们的 IM\n") and readme.rstrip().endswith("## 需求\n\n加上账号注销")
+    assert readme.startswith("# 我们的 IM\n") and readme.rstrip().endswith("## Requirement\n\n加上账号注销")
     assert (repo / "server" / "app.js").exists() and not (repo / "node_modules").exists()
     assert sh(repo, "log", "-1", "--format=%s").strip() == "Take over: 加上账号注销"
     assert len(base) == 40

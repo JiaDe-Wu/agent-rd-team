@@ -122,8 +122,8 @@ def test_a_role_session_is_opened_in_the_run_folder_sent_its_task_and_read_back(
 def test_a_role_boots_its_crew_member_or_the_template_of_that_name_and_its_knowledge_lookups_are_kept(tmp_path):
     async def go():
         gw, mgr = make(tmp_path)
-        gw.absent = ("taoyuan-motion-agent",)
-        gw.templates = {"aidlc-product-agent", "taoyuan-motion-agent"}  # Kiro Crew 0.8/0.9: templates named as members
+        gw.absent = ("larkspur-motion-agent",)
+        gw.templates = {"aidlc-product-agent", "larkspur-motion-agent"}  # Kiro Crew 0.8/0.9: templates named as members
         gw.script = [[{"role": "tool", "content": "🔧 Running: @kirocrew-core/local_knowledge_search",
                        "meta": {"tool_name": "local_knowledge_search", "mcp_server": "kirocrew-core",
                                 "input": '{"query": "年会抽奖规则 RULE-1"}'}},
@@ -131,13 +131,13 @@ def test_a_role_boots_its_crew_member_or_the_template_of_that_name_and_its_knowl
         product = mgr.spawn_session("t", parent_session_key="agent-rd-team:r9", cwd=str(tmp_path / "a" / "b" / "c"),
                                     title="产品 agent", agent="aidlc-product-agent")
         motion = mgr.spawn_session("t", parent_session_key="agent-rd-team:r9", cwd=str(tmp_path / "a" / "b" / "d"),
-                                   title="动效 agent", agent="taoyuan-motion-agent")
+                                   title="动效 agent", agent="larkspur-motion-agent")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         asked = [c[1:] for c in gw.calls if c[0] == "agent"]
-        assert ("aidlc-product-agent", "member") in asked and ("taoyuan-motion-agent", "template") in asked
+        assert ("aidlc-product-agent", "member") in asked and ("larkspur-motion-agent", "template") in asked
         assert (product.agent_kind, motion.agent_kind) == ("member", "template")
-        assert mgr.agent_of(motion.id) == {"name": "taoyuan-motion-agent", "kind": "template"}
+        assert mgr.agent_of(motion.id) == {"name": "larkspur-motion-agent", "kind": "template"}
         await settle(mgr, gw, product.slot)
         hits = mgr.knowledge_hits(product.id)
         assert [(h["tool"], h["detail"]) for h in hits] == [(sessions.KNOWLEDGE_CALL, "年会抽奖规则 RULE-1")]
@@ -217,11 +217,11 @@ def test_state_survives_a_reload_and_cleanup_keeps_a_running_run(tmp_path):
 
 
 def test_the_orchestrator_picks_the_team_by_keywords_and_says_why():
-    pick = routing.route("双十一官方商城大促：挑 20 款家电打折加满减")
-    assert pick["team"]["file"] == "team-taoyuan-promo.json" and pick["matched"] == ["双十一", "大促", "满减", "官方商城"]
+    pick = routing.route("Black Friday sale for the official store: pick 20 items and discount them with spend and save")
+    assert pick["team"]["file"] == "team-promo.json" and pick["matched"] == ["black friday", "sale", "spend and save", "official store"]
     assert "1.1 Intent capture" in pick["team"]["stages"]
-    fix = routing.route("大促活动页的到手价算错了，帮我修复")
-    assert fix["team"]["file"] == "team-bugfix.json" and [o["file"] for o in fix["others"]] == ["team-taoyuan-promo.json"]
+    fix = routing.route("The Black Friday campaign page shows the wrong final price, please fix it")
+    assert fix["team"]["file"] == "team-bugfix.json" and [o["file"] for o in fix["others"]] == ["team-promo.json"]
     assert routing.route("debug 一下这个 fixture")["team"]["file"] == "team-aidlc.json"  # word boundaries
     assert routing.route("")["team"]["scope"] == "feature"
 
