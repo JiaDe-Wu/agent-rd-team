@@ -58,6 +58,19 @@ describe('SetupPanel', () => {
     expect(apiCalls.find((c) => c.path === '/api/workspaces')?.body).toEqual({ id: 'workspace' })
   })
 
+  test('rules that Kiro Crew holds but has not read say that reading needs a signed-in Kiro, and the setup is not called ready', async () => {
+    const waiting = data({
+      workspace: { name: 'larkspur', dir: '/h', done: true }, templates: { total: 14, present: 14, done: true },
+      members: { total: 14, created: 14, missing: [], done: true },
+      knowledge: { source: 'Larkspur Outfitters', documents: 13, items: 0, state: 'scanning', registered: true, done: false },
+    }, [step('knowledge', 'Read the rules', '/api/apps/agent-rd-team/setup/knowledge')])
+    setApiRoutes({ [GET]: () => waiting })
+    render(<SetupPanel />)
+    expect(await screen.findByRole('heading', { name: 'Set up the example team' })).toBeInTheDocument()
+    expect(screen.getByTestId('kt-setup-reading')).toHaveTextContent(/needs Kiro to be signed in/)
+    expect(screen.queryByRole('heading', { name: 'The example team is ready' })).toBeNull()
+  })
+
   test('a step that exists already (409) is done, and the next one runs', async () => {
     setApiRoutes({
       [GET]: () => data({}, [step('workspace', 'Create the workspace', '/api/workspaces'), step('member:a', 'Add Product')]),

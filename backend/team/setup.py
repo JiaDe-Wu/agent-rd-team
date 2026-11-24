@@ -170,9 +170,11 @@ class Setup:
             "members": {"total": len(names), "created": None if created is None else len(created & set(names)),
                         "missing": None if created is None else [n for n in names if n not in created],
                         "done": None if created is None else (set(names) <= created and bool(names))},
-            # done: Kiro Crew holds the source and has been told to read it (reading takes a while: `items` counts what it has so far)
+            # done: Kiro Crew has read the rules (`items` counts what it has read). A source it holds but has read nothing of is not done:
+            # reading needs a signed-in Kiro, and the page says so instead of calling the setup ready.
             "knowledge": {"source": KNOWLEDGE_SOURCE, "documents": len(self.docs()), "items": items, "state": state,
-                          "done": (source is not None and state not in ("pending_confirmation", "error")) if sources is not None else None},
+                          "registered": source is not None and state not in ("pending_confirmation", "error"),
+                          "done": (source is not None and state not in ("pending_confirmation", "error") and items > 0) if sources is not None else None},
             "sample": {"id": sample, "done": bool(sample) and sample in self.svc.runs},
             "problems": problems,
         }

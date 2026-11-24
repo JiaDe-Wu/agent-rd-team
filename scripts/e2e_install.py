@@ -205,7 +205,11 @@ def run(a: argparse.Namespace, env: dict, kirocrew: list[str], home: Path, crew:
     items = until(read_items, 180, 3.0)
     log_text = (home.parent / "gateway.log").read_text(errors="replace") if (home.parent / "gateway.log").exists() else ""
     checkout = "ephemeral instance" in log_text  # Kiro Crew run from a source checkout: it will not write the agent specs the knowledge base needs
-    if items == 0 and checkout:
+    unsigned = "Kiro is not signed in" in log_text  # reading the rules runs on Kiro: without a sign-in nothing is read (pass --copy-kiro-login)
+    checkout = checkout or unsigned
+    if items == 0 and unsigned:
+        print("  SKIP  the knowledge base reads the rules: Kiro is not signed in on this gateway, and reading the rules needs it (pass --copy-kiro-login)")
+    elif items == 0 and checkout:
         print("  SKIP  the knowledge base reads the rules: this gateway runs from a source checkout, which Kiro Crew treats as a throwaway "
               "instance and will not let write the agent specs reading needs (use an installed `kirocrew` to check this)")
     else:

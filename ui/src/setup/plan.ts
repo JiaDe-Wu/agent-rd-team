@@ -10,7 +10,7 @@ export type SetupStatus = {
   workspace: { name: string; dir: string; done: boolean | null }
   templates: { total: number; present: number; done: boolean }
   members: { total: number; created: number | null; missing: string[] | null; done: boolean | null }
-  knowledge: { source: string; documents: number; items: number; state: string; done: boolean | null }
+  knowledge: { source: string; documents: number; items: number; state: string; registered?: boolean; done: boolean | null }
   sample: { id: string; done: boolean }
   problems: string[]
   ready: boolean

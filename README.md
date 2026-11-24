@@ -109,7 +109,7 @@ Then open the app from the sidebar. The first time, the page shows **Set up the 
 
 - creates the `larkspur` workspace and the 14 team members (the page runs this as you, the owner; the app's own backend is not allowed to);
 - writes the member templates, copies `knowledge/larkspur` to `~/workplace/knowledge/larkspur/` and attaches it as the knowledge source
-  **Larkspur Outfitters**, so the roles can look up the company rules and data;
+  **Larkspur Outfitters**, so the roles can look up the company rules and data (Kiro Crew reads the documents with Kiro, so Kiro has to be signed in, which the roles need anyway; until it has read them the panel says so);
 - fills in a first requirement. Press **Start**.
 
 Anything already there is kept, and the panel lists each step as done or missing. **Load a sample delivery** puts a finished run into the app, so

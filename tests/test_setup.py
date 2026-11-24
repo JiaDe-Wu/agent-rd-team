@@ -184,9 +184,14 @@ def test_a_knowledge_source_still_waiting_for_confirmation_is_not_done_but_one_b
     k = run(env.svc.setup.describe())["status"]["knowledge"]
     assert (k["done"], k["state"]) == (False, "pending_confirmation")
     env.gw.sources = [{"id": "s", "name": "Larkspur Outfitters", "item_count": 0, "sync_status": "scanning"}]
-    assert run(env.svc.setup.describe())["status"]["knowledge"]["done"] is True  # reading takes a while: items fill in
+    k = run(env.svc.setup.describe())["status"]["knowledge"]
+    assert (k["registered"], k["done"]) == (True, False)  # held and being read, nothing read yet: not done, and the page says why
+    env.gw.sources = [{"id": "s", "name": "Larkspur Outfitters", "item_count": 13, "sync_status": "synced"}]
+    k = run(env.svc.setup.describe())["status"]["knowledge"]
+    assert (k["registered"], k["done"]) == (True, True)  # the rules are read
     env.gw.sources = [{"id": "s", "name": "Larkspur Outfitters", "item_count": 0, "sync_status": "error"}]
-    assert run(env.svc.setup.describe())["status"]["knowledge"]["done"] is False
+    k = run(env.svc.setup.describe())["status"]["knowledge"]
+    assert (k["registered"], k["done"]) == (False, False)
 
 
 def test_what_cannot_be_read_is_reported_and_its_steps_stay_in_the_plan(env):

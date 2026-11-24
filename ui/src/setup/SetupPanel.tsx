@@ -173,6 +173,12 @@ export function SetupPanel({ onOpenRun }: Props) {
             Kiro Crew could not read the rule documents. Open Knowledge base, then Sources, for the reason (it needs a signed-in Kiro), then press the button again.
           </p>
         )}
+        {s.knowledge.registered === true && s.knowledge.items === 0 && s.knowledge.state !== 'error' && !failure && (
+          <p data-testid="kt-setup-reading" role="status">
+            The rule documents are with Kiro Crew, but none is read yet. Reading them takes a minute and needs Kiro to be signed in (Settings, then Kiro account).
+            If this stays empty, sign in and press the button again.
+          </p>
+        )}
         {s.problems.length > 0 && !failure && <p>Could not read: {s.problems.join('; ')}. The button still works.</p>}
         <details>
           <summary>What this adds</summary>

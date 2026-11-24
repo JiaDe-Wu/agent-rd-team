@@ -10685,6 +10685,11 @@ function Sa({ onOpenRun: e }) {
 					role: "alert",
 					children: "Kiro Crew could not read the rule documents. Open Knowledge base, then Sources, for the reason (it needs a signed-in Kiro), then press the button again."
 				}),
+				D.knowledge.registered === !0 && D.knowledge.items === 0 && D.knowledge.state !== "error" && !h && /* @__PURE__ */ f("p", {
+					"data-testid": "kt-setup-reading",
+					role: "status",
+					children: "The rule documents are with Kiro Crew, but none is read yet. Reading them takes a minute and needs Kiro to be signed in (Settings, then Kiro account). If this stays empty, sign in and press the button again."
+				}),
 				D.problems.length > 0 && !h && /* @__PURE__ */ p("p", { children: [
 					"Could not read: ",
 					D.problems.join("; "),
