@@ -8,17 +8,17 @@
   "priority": 100,
   "fallback": true,
   "keywords": [],
-  "workspace": "taoyuan",
+  "workspace": "larkspur",
   "starter": "starters/web",
-  "spec_pack": "packs/taoyuan-web",
-  "standards": "packs/taoyuan/standards.json",
+  "spec_pack": "packs/larkspur-web",
+  "standards": "packs/larkspur/standards.json",
   "standards_always": [
     "FE",
     "BR"
   ],
   "knowledge": {
-    "source": "桃源科技",
-    "data_dir": "~/workplace/taoyuan/data"
+    "source": "Larkspur Outfitters",
+    "data_dir": "knowledge/larkspur"
   },
   "task_template": "task_template-aidlc.md",
   "test_command": [

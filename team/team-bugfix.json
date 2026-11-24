@@ -20,11 +20,11 @@
     "出错了"
   ],
   "needs_source": true,
-  "workspace": "taoyuan",
-  "standards": "packs/taoyuan/standards.json",
+  "workspace": "larkspur",
+  "standards": "packs/larkspur/standards.json",
   "knowledge": {
-    "source": "桃源科技",
-    "data_dir": "~/workplace/taoyuan/data"
+    "source": "Larkspur Outfitters",
+    "data_dir": "knowledge/larkspur"
   },
   "task_template": "task_template-bugfix.md",
   "test_command": [

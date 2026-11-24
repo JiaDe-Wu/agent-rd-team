@@ -55,7 +55,7 @@ KNOWLEDGE_FILE = "docs/aidlc/knowledge.md"  # what the person chose to keep at t
 MULTI_OPTIONS = 10  # options of a multiple-choice question: a person ticks any of them
 # A review names who fixes what: its own `打回：` line (role keys or titles), else every 归X it writes.
 # protocol token: kept in Chinese (what the reviewing agent writes is matched here)
-_BOUNCE_LINE_RE = re.compile(r"^\s*(?:[-*+]\s+|\d+[.)、]\s*)?[*_`]*打回[*_`]*\s*[:：]\s*(.+)$", re.M)  # a list item too
+_BOUNCE_LINE_RE = re.compile(r"^\s*(?:[-*+]\s+|\d+[.)、]\s*)?[*_`]*(?:打回|Send back)[*_`]*\s*[:：]\s*(.+)$", re.M)  # a list item too
 _OWNER_RE = re.compile(r"归([^）)，,；;。\n]{1,40})")
 _ROLE_ALIASES = {"后端": "backend", "服务端": "backend", "前端": "frontend", "网页": "frontend", "网页前端": "frontend",
                  "移动端": "mobile", "安卓": "mobile", "Android": "mobile", "运维": "ops", "合规": "compliance",

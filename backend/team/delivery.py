@@ -19,6 +19,14 @@ LINES = ("电商", "移动应用", "客户关系管理", "供应链", "内部系
 NAME_MAX = 20
 WHY_MAX = 60
 FIELDS = {"kind": KINDS, "size": SIZES, "line": LINES}
+# The team files and agents write the tags in English; they are kept under the tokens above, which the UI types and the CTO data match.
+ALIASES = {"new app": "新应用", "new feature": "新功能", "fix": "修复", "small": "小", "medium": "中", "large": "大",
+           "e-commerce": "电商", "mobile apps": "移动应用", "crm": "客户关系管理", "supply chain": "供应链", "internal systems": "内部系统"}
+
+
+def canon(value: Any) -> Any:
+    """A tag as it is kept: an English word becomes its token; anything else is left as it is."""
+    return ALIASES.get(value.strip().lower(), value) if isinstance(value, str) else value
 # who raises a business line's Issues when a run does not say (an imported run brings its own)
 # protocol token: kept in Chinese (department names written into the CTO data)
 REPORTERS = {"电商": "运营部", "移动应用": "用户体验组", "客户关系管理": "会员运营部", "供应链": "供应链管理部", "内部系统": "行政部"}
@@ -46,8 +54,8 @@ def clean(data: Any, base: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(data, dict):
         return out
     for key, allowed in FIELDS.items():
-        if data.get(key) in allowed:
-            out[key] = data[key]
+        if canon(data.get(key)) in allowed:
+            out[key] = canon(data[key])
     name = " ".join(str(data.get("name") or "").split())
     if name:
         out["name"] = name[:NAME_MAX]
@@ -93,7 +101,7 @@ def check(team: dict[str, Any]) -> None:
         if not isinstance(dd, dict):
             raise ValueError("team.json: delivery_defaults must be {kind, size, line}")
         for key, allowed in FIELDS.items():
-            if key in dd and dd[key] not in allowed:
+            if key in dd and canon(dd[key]) not in allowed:
                 raise ValueError(f"team.json: delivery_defaults.{key} must be one of {', '.join(allowed)}")
     for r in team.get("roles") or []:
         rel = r.get("delivery")
