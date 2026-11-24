@@ -2,22 +2,28 @@
   "name": "agent-rd-team",
   "version": "0.12.0",
   "displayName": "Agent R&D Team",
-  "description": "An agent R&D team on Kiro Crew, built on AI-DLC and your own standards: from a one-sentence requirement through human gates, company checks and an independent review to a local deployment, keeping the lessons you tick for later runs. With a live team board and a CTO view.",
+  "description": "An AI-DLC agent team for Kiro Crew that works from your company's rules. Give it a requirement: role sessions build it in parallel git worktrees, the app runs your company checks itself, a person decides at the gates, and it deploys locally. It comes with an English example company, a one-click setup, and a real sample delivery you can replay before you spend any model credits.",
   "author": "JiaDe-Wu",
   "license": "Apache-2.0",
-  "tags": ["agents", "orchestration", "workflows", "automation", "collaboration"],
+  "tags": [
+    "agents",
+    "orchestration",
+    "workflows",
+    "automation",
+    "collaboration"
+  ],
   "highlights": [
-    "Turns one sentence into a delivery: roles work in parallel, each in its own git worktree and branch",
-    "A person decides at the gates: scope, build start and release, with each open question put one by one",
-    "Company checks run by the app, not by the agents; failures go back to the role that owns them",
-    "An independent read-only reviewer reads the whole diff before the release gate",
-    "At the last gate you tick which lessons to keep; later runs read them",
-    "A live team board, a replay of finished runs and a CTO view of all deliveries"
+    "See it first: load a real Black Friday delivery (5.5 minutes, 9.7 credits, 38 of 38 company checks) and replay it without spending anything",
+    "One click sets up the example company: its workspace, 14 team members and its rule documents as a knowledge source",
+    "Company rules are plain files in English (pricing, margin, price-adjustment, privacy, security) and the checks that enforce them run in the app, not in the agents",
+    "Roles work in parallel, each in its own git worktree; a person decides at the gates; failed checks go back to the role that owns them",
+    "The checks, the site and git run under Kiro Crew's sandbox",
+    "A live team board, a replay of finished runs and a CTO view that says which numbers are simulated and which are measured"
   ],
   "useCases": [
-    "Taking a web feature from a requirement to a reviewed local deployment with people deciding at the gates",
-    "Trying AI-DLC on your own standards: the team, the checks and the knowledge are plain files you replace",
-    "Showing a team how much of a delivery can run without a person, and where a person must decide"
+    "Trying AI-DLC on your own standards: replace the rule documents, the checks and the team file, and keep the app",
+    "Showing a team what a delivery looks like with company rules enforced, and where a person must decide",
+    "Taking a web feature from a requirement to a reviewed local deployment with people at the gates"
   ],
   "iconPath": "assets/icon.png",
   "screenshots": [
@@ -30,18 +36,30 @@
   "heroImageDetail": "assets/hero-detail-light.png",
   "heroImageDetailDark": "assets/hero-detail-dark.png",
   "links": [
-    {"label": "Source and README", "url": "https://github.com/JiaDe-Wu/agent-rd-team"},
-    {"label": "AI-DLC Workflows", "url": "https://github.com/awslabs/aidlc-workflows"},
-    {"label": "Samples this app comes from", "url": "https://github.com/aws-samples/sample-ai-for-software-engineering-on-aws"}
+    {
+      "label": "Source and README",
+      "url": "https://github.com/JiaDe-Wu/agent-rd-team"
+    },
+    {
+      "label": "AI-DLC Workflows",
+      "url": "https://github.com/awslabs/aidlc-workflows"
+    },
+    {
+      "label": "Samples this app comes from",
+      "url": "https://github.com/aws-samples/sample-ai-for-software-engineering-on-aws"
+    }
   ],
   "minKiroCrewVersion": "0.13.0",
   "dependencies": {
-    "commands": ["git", "node"]
+    "commands": [
+      "git",
+      "node"
+    ]
   },
   "l10n": {
     "zh-CN": {
       "displayName": "Agent 研发团队",
-      "description": "基于 AI-DLC 和你自己的企业标准的 Agent 研发团队：从一句话需求出发，经过人的关卡、公司检查和独立评审，到本机部署，并把你勾选的经验留给之后的交付；带实时团队看板和 CTO 视图。",
+      "description": "基于 AI-DLC、按公司规则工作的 Kiro Crew Agent 团队：给一个需求，多个角色在各自的 git 工作树里并行开发，应用自己运行公司检查，人在关卡上做决定，最后本机部署。自带英文示例公司、一键设置和一份真实的示例交付，不花模型额度就能回放。",
       "pageLabel": "Agent 研发团队"
     }
   },
