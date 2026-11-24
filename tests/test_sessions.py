@@ -224,7 +224,7 @@ def test_the_orchestrator_picks_the_team_by_keywords_and_says_why(tmp_path):
         (teams / name).write_text((constants.TEAM_DIR / name).read_text(encoding="utf-8"), encoding="utf-8")
     (teams / "team-promo.json").write_text(json.dumps({
         "version": 1, "name": "Promotion team", "scope": "promo", "priority": 50, "keywords": ["black friday", "promo", "free shipping"],
-        "stages": ["1.1 Intent capture"], "roles": [{"key": "pm", "title": "PM", "depends_on": [], "writable": ["docs/**"], "outputs": []}]}), encoding="utf-8")
+        "roles": [{"key": "pm", "title": "PM", "stage": "1.1 Intent capture", "depends_on": [], "writable": ["docs/**"], "outputs": []}]}), encoding="utf-8")
     pick = routing.route("Black Friday promo: pick 20 appliances, discount them and add free shipping", teams)
     assert pick["team"]["file"] == "team-promo.json" and pick["matched"] == ["black friday", "promo", "free shipping"]
     assert "1.1 Intent capture" in pick["team"]["stages"]

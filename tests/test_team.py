@@ -661,7 +661,7 @@ def test_an_optional_member_not_on_crew_sits_the_run_out_and_its_checks_are_not_
 
 def test_the_planner_leaves_an_optional_member_out_and_it_sits_out_once_the_person_approves(tmp_path):
     tasks = []
-    plan = '{"backend": "the API", "motion": "not needed", "skip": {"motion": "only the price changes this time, the page stays", "backend": "not needed either"}}\n'
+    plan = '{"backend": "the API", "motion": "not needed", "skip": {"motion": "price change only", "backend": "not needed either"}}\n'
 
     def behave(a, role):
         tasks.append(role)
@@ -677,12 +677,12 @@ def test_the_planner_leaves_an_optional_member_out_and_it_sits_out_once_the_pers
         assert run.leave_out_unhired({"aidlc-product-agent", "aidlc-developer-agent", "taoyuan-motion-agent"}) == []
         await until(run, mgr, behave, lambda: run.lane("pm").get("gate") == "pending")
         # a required member cannot be left out; the optional one is proposed, not yet out (the person has not approved)
-        assert run.s["plan_skip"] == {"motion": "only the price changes this time, the page stays"} and run.s["plan"] == {"backend": "the API"}
-        assert kinds(run, "plan")[-1]["text"] == "Product manager proposed the assignment: Backend · the API; not needed this time: Motion (only the price changes this time, the page stays)"
+        assert run.s["plan_skip"] == {"motion": "price change only"} and run.s["plan"] == {"backend": "the API"}
+        assert kinds(run, "plan")[-1]["text"] == "Product manager proposed the assignment: Backend · the API; not needed this time: Motion (price change only)"
         assert run.lane("motion")["status"] == "waiting"
         assert await run.gate("pm", "approve", "Go ahead")
-        assert run.lane("motion")["status"] == "skipped" and run.lane("motion")["summary"] == "Not needed this time: only the price changes this time, the page stays"
-        assert kinds(run, "skipped")[-1]["text"] == ("Motion: Not needed this time (proposed by Product manager, approved by a person at the Requirements gate): only the price changes this time, the page stays; "
+        assert run.lane("motion")["status"] == "skipped" and run.lane("motion")["summary"] == "Not needed this time: price change only"
+        assert kinds(run, "skipped")[-1]["text"] == ("Motion: Not needed this time (proposed by Product manager, approved by a person at the Requirements gate): price change only; "
                                                     "the checks it owns (tests/ux-motion*) are not run this time")
         await until(run, mgr, behave, lambda: run.ended)
         assert run.s["status"] == "done" and run.s["tests"]["total"] == 1 and "motion" not in tasks
