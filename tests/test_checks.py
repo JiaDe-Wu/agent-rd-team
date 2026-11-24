@@ -14,14 +14,14 @@ TEAM = {"test_command": ["node", "--test", "tests/"],
 
 # node v25.2.1 --test --test-reporter=tap, captured (stack lines trimmed)
 SIGNUP = """TAP version 13
-# Subtest: AC-4: 姓名不能为空
-ok 1 - AC-4: 姓名不能为空
+# Subtest: AC-4: name is required
+ok 1 - AC-4: name is required
   ---
   duration_ms: 0.368625
   type: 'test'
   ...
-# Subtest: AC-6: 名额满了不能报名
-not ok 2 - AC-6: 名额满了不能报名
+# Subtest: AC-6: a full event cannot be joined
+not ok 2 - AC-6: a full event cannot be joined
   ---
   duration_ms: 7.405583
   type: 'test'
@@ -40,7 +40,7 @@ not ok 2 - AC-6: 名额满了不能报名
   stack: |-
     TestContext.<anonymous> (file:///private/tmp/kctap/tests/api-signup.test.js:5:39)
   ...
-# Subtest: AC-7: 同一邮箱不能重复报名
+# Subtest: AC-7: the same email cannot sign up twice
     # Subtest: first signup ok
     ok 1 - first signup ok
       ---
@@ -63,7 +63,7 @@ not ok 2 - AC-6: 名额满了不能报名
         a: 1
       ...
     1..2
-not ok 3 - AC-7: 同一邮箱不能重复报名
+not ok 3 - AC-7: the same email cannot sign up twice
   ---
   duration_ms: 1.223875
   type: 'suite'
@@ -100,15 +100,15 @@ not ok 6 - no ac name here
 
 EVENTS = """TAP version 13
 # ok 99 - fake line from a test
-# Subtest: 活动接口
-    # Subtest: AC-2: 活动有名称、时间、地点、剩余名额
-    ok 1 - AC-2: 活动有名称、时间、地点、剩余名额
+# Subtest: event API
+    # Subtest: AC-2: an event has a name, time, place and remaining seats
+    ok 1 - AC-2: an event has a name, time, place and remaining seats
       ---
       duration_ms: 0.532166
       type: 'test'
       ...
-    # Subtest: AC-10: 名单按报名时间排序
-    not ok 2 - AC-10: 名单按报名时间排序
+    # Subtest: AC-10: the list is sorted by sign-up time
+    not ok 2 - AC-10: the list is sorted by sign-up time
       ---
       duration_ms: 0.794166
       failureType: 'testCodeFailure'
@@ -117,21 +117,21 @@ EVENTS = """TAP version 13
         + actual - expected
       ...
     1..2
-not ok 1 - 活动接口
+not ok 1 - event API
   ---
   duration_ms: 1.744291
   type: 'suite'
   failureType: 'subtestsFailed'
   error: '1 subtest failed'
   ...
-# Subtest: AC-3: 活动详情
-    # Subtest: 详情 200
-    ok 1 - 详情 200
+# Subtest: AC-3: event detail
+    # Subtest: detail 200
+    ok 1 - detail 200
       ---
       duration_ms: 0.05975
       ...
-    # Subtest: 不存在 404
-    not ok 2 - 不存在 404
+    # Subtest: missing 404
+    not ok 2 - missing 404
       ---
       duration_ms: 0.130208
       error: |-
@@ -140,7 +140,7 @@ not ok 1 - 活动接口
         200 !== 404
       ...
     1..2
-not ok 2 - AC-3: 活动详情
+not ok 2 - AC-3: event detail
   ---
   duration_ms: 0.854125
   failureType: 'subtestsFailed'
@@ -180,12 +180,12 @@ def by_name(cases):
 def test_tap_cases_statuses_durations_and_first_message_lines():
     results, comments = checks.parse_tap(SIGNUP)
     cases = by_name(checks.to_cases(results, "tests/api-signup.test.js", "backend"))
-    assert list(cases) == ["AC-4: 姓名不能为空", "AC-6: 名额满了不能报名", "AC-7: 同一邮箱不能重复报名", "AC-8: skipped one",
+    assert list(cases) == ["AC-4: name is required", "AC-6: a full event cannot be joined", "AC-7: the same email cannot sign up twice", "AC-8: skipped one",
                            "AC-9: todo one", "no ac name here"]
-    assert cases["AC-4: 姓名不能为空"]["status"] == "pass" and cases["AC-4: 姓名不能为空"]["ms"] == 0
-    six = cases["AC-6: 名额满了不能报名"]
+    assert cases["AC-4: name is required"]["status"] == "pass" and cases["AC-4: name is required"]["ms"] == 0
+    six = cases["AC-6: a full event cannot be joined"]
     assert (six["status"], six["ac"], six["ms"], six["message"], six["owner"]) == ("fail", "AC-6", 7, "expected 409, got 201", "backend")
-    assert cases["AC-7: 同一邮箱不能重复报名"]["message"] == "second signup 409: Expected values to be strictly deep-equal:"
+    assert cases["AC-7: the same email cannot sign up twice"]["message"] == "second signup 409: Expected values to be strictly deep-equal:"
     assert cases["AC-8: skipped one"]["status"] == "skip" and cases["AC-9: todo one"]["status"] == "skip"
     other = cases["no ac name here"]
     assert other["ac"] is None and other["message"] == "Cannot read properties of undefined (reading 'x')"
@@ -195,9 +195,9 @@ def test_tap_cases_statuses_durations_and_first_message_lines():
 def test_tap_nesting_picks_the_ac_level_and_ignores_test_output():
     results, comments = checks.parse_tap(EVENTS)
     cases = by_name(checks.to_cases(results, "tests/api-events.test.js", None))
-    assert list(cases) == ["AC-2: 活动有名称、时间、地点、剩余名额", "AC-10: 名单按报名时间排序", "AC-3: 活动详情"]
-    assert cases["AC-10: 名单按报名时间排序"]["message"] == "order mismatch at index 0"
-    assert cases["AC-3: 活动详情"]["message"] == "不存在 404: Expected values to be strictly equal:"
+    assert list(cases) == ["AC-2: an event has a name, time, place and remaining seats", "AC-10: the list is sorted by sign-up time", "AC-3: event detail"]
+    assert cases["AC-10: the list is sorted by sign-up time"]["message"] == "order mismatch at index 0"
+    assert cases["AC-3: event detail"]["message"] == "missing 404: Expected values to be strictly equal:"
     assert comments[0] == "ok 99 - fake line from a test"
 
 
@@ -232,12 +232,12 @@ def test_real_node_run_one_file_at_a_time_with_ids_owners_and_a_timeout(tmp_path
     tests.mkdir()
     (tests / "api-signup.test.js").write_text(
         "import { test } from 'node:test';\nimport assert from 'node:assert/strict';\n"
-        "test('AC-6: 名额满了不能报名', () => { assert.equal(201, 409, 'expected 409, got 201'); });\n"
-        "test('AC-4: 姓名不能为空', () => {});\n"
-        "test('AC-4: 姓名不能为空（空格）', () => {});\n"
+        "test('AC-6: a full event cannot be joined', () => { assert.equal(201, 409, 'expected 409, got 201'); });\n"
+        "test('AC-4: name is required', () => {});\n"
+        "test('AC-4: name is required (spaces)', () => {});\n"
         "setInterval(() => {}, 1000);  // an open handle: --test-force-exit still ends the file\n")
     (tests / "web-render.test.js").write_text(
-        "import { test } from 'node:test';\ntest('AC-1: 首页', async () => { await new Promise(r => setTimeout(r, 20000)); });\n")
+        "import { test } from 'node:test';\ntest('AC-1: home page', async () => { await new Promise(r => setTimeout(r, 20000)); });\n")
     wall = asyncio.run(checks.run_tests(tmp_path, TEAM, timeout=1))
     ids = [c["id"] for c in wall["cases"]]
     assert ids == ["api-signup.test.js#AC-4", "api-signup.test.js#AC-4#2", "api-signup.test.js#AC-6", "web-render.test.js#web-render.test.js timed out"]
@@ -252,9 +252,9 @@ def test_the_files_of_a_role_that_sits_the_run_out_are_not_run(tmp_path):
     (tmp_path / "package.json").write_text('{"type": "module"}\n')
     tests = tmp_path / "tests"
     tests.mkdir()
-    (tests / "api-signup.test.js").write_text("import { test } from 'node:test';\ntest('AC-4: 姓名不能为空', () => {});\n")
+    (tests / "api-signup.test.js").write_text("import { test } from 'node:test';\ntest('AC-4: name is required', () => {});\n")
     (tests / "web-render.test.js").write_text(
-        "import { test } from 'node:test';\nimport assert from 'node:assert/strict';\ntest('AC-1: 首页', () => { assert.fail('没有动效'); });\n")
+        "import { test } from 'node:test';\nimport assert from 'node:assert/strict';\ntest('AC-1: home page', () => { assert.fail('no motion'); });\n")
     wall = asyncio.run(checks.run_tests(tmp_path, {**TEAM, "skip_owners": ["frontend"]}))
     assert [c["id"] for c in wall["cases"]] == ["api-signup.test.js#AC-4"] and (wall["passed"], wall["total"]) == (1, 1)
 

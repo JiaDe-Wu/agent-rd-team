@@ -2,11 +2,12 @@
 
 import asyncio
 import itertools
+import json
 import logging
 
 from teamkit import mod
 
-sessions, routing, gateway_mod = mod("sessions"), mod("routing"), mod("gateway")
+sessions, routing, gateway_mod, constants = mod("sessions"), mod("routing"), mod("gateway"), mod("constants")
 GatewayError = gateway_mod.GatewayError
 
 
@@ -59,7 +60,7 @@ class FakeGateway:
     async def send(self, key, message, send_id):
         self.calls.append(("send", key, send_id))
         self.msgs[key].append({"role": "user", "content": message, "meta": {"sendId": send_id}})
-        rows = self.script.pop(0) if self.script else [{"role": "assistant", "content": "DONE: 好了", "meta": {}}]
+        rows = self.script.pop(0) if self.script else [{"role": "assistant", "content": "DONE: done", "meta": {}}]
         self.slot_rows[key]["running"] = True
         self.slot_rows[key]["_pending"] = rows
         return {"ok": True}
@@ -99,19 +100,19 @@ def test_a_role_session_is_opened_in_the_run_folder_sent_its_task_and_read_back(
     async def go():
         gw, mgr = make(tmp_path)
         gw.script = [[{"role": "tool", "content": "🔧 pwd", "meta": {"tool_name": "shell", "input": '{"command": "pwd"}'}},
-                      {"role": "assistant", "content": "改好了\nDONE: 商品列表页写完", "meta": {"turn_stats": {"credits": 1.25}}}]]
-        info = mgr.spawn_session("[agent-rd-team run=r1 role=catalog]\n写页面", parent_session_key="agent-rd-team:r1",
+                      {"role": "assistant", "content": "Fixed.\nDONE: product list page written", "meta": {"turn_stats": {"credits": 1.25}}}]]
+        info = mgr.spawn_session("[agent-rd-team run=r1 role=catalog]\nWrite the page", parent_session_key="agent-rd-team:r1",
                                  cwd=str(tmp_path / "runs" / "r1" / "wt" / "catalog"), model="claude-sonnet-5.5",
-                                 title="前端·商品列表 agent", folder="网上小店 · r1")
+                                 title="Frontend · product list agent", folder="Online shop · r1")
         assert sessions.agent_fields(info)["queued"] is True
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         key = info.slot
         assert gw.slot_rows[key]["trust"] and gw.slot_rows[key]["project"].endswith("/wt/catalog")
-        assert [c[1] for c in gw.calls if c[0] == "folder"] == ["AI-DLC 团队", "网上小店 · r1"]
+        assert [c[1] for c in gw.calls if c[0] == "folder"] == ["AI-DLC Team", "Online shop · r1"]
         await settle(mgr, gw, key)
         f = sessions.agent_fields(mgr.get(info.id))
-        assert f["done"] and f["outcome"] == "completed" and "DONE: 商品列表页写完" in f["result"]
+        assert f["done"] and f["outcome"] == "completed" and "DONE: product list page written" in f["result"]
         assert (f["tool_count"], f["last_tool"]) == (1, "Running pwd")
         assert mgr.credits_of(info.id) == 1.25 and mgr.recent(info.id)[0]["tool"] == "Running"
         assert (tmp_path / "sessions.json").exists()
@@ -126,12 +127,12 @@ def test_a_role_boots_its_crew_member_or_the_template_of_that_name_and_its_knowl
         gw.templates = {"aidlc-product-agent", "taoyuan-motion-agent"}  # Kiro Crew 0.8/0.9: templates named as members
         gw.script = [[{"role": "tool", "content": "🔧 Running: @kirocrew-core/local_knowledge_search",
                        "meta": {"tool_name": "local_knowledge_search", "mcp_server": "kirocrew-core",
-                                "input": '{"query": "年会抽奖规则 RULE-1"}'}},
-                      {"role": "assistant", "content": "DONE: 写好了需求", "meta": {}}]] * 2
+                                "input": '{"query": "Company party raffle rules RULE-1"}'}},
+                      {"role": "assistant", "content": "DONE: requirements written", "meta": {}}]] * 2
         product = mgr.spawn_session("t", parent_session_key="agent-rd-team:r9", cwd=str(tmp_path / "a" / "b" / "c"),
-                                    title="产品 agent", agent="aidlc-product-agent")
+                                    title="Product agent", agent="aidlc-product-agent")
         motion = mgr.spawn_session("t", parent_session_key="agent-rd-team:r9", cwd=str(tmp_path / "a" / "b" / "d"),
-                                   title="动效 agent", agent="taoyuan-motion-agent")
+                                   title="Motion agent", agent="taoyuan-motion-agent")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         asked = [c[1:] for c in gw.calls if c[0] == "agent"]
@@ -140,7 +141,7 @@ def test_a_role_boots_its_crew_member_or_the_template_of_that_name_and_its_knowl
         assert mgr.agent_of(motion.id) == {"name": "taoyuan-motion-agent", "kind": "template"}
         await settle(mgr, gw, product.slot)
         hits = mgr.knowledge_hits(product.id)
-        assert [(h["tool"], h["detail"]) for h in hits] == [(sessions.KNOWLEDGE_CALL, "年会抽奖规则 RULE-1")]
+        assert [(h["tool"], h["detail"]) for h in hits] == [(sessions.KNOWLEDGE_CALL, "Company party raffle rules RULE-1")]
 
     asyncio.run(go())
 
@@ -151,7 +152,7 @@ def test_on_kiro_crew_0_11_a_role_boots_its_member_template(tmp_path):
         gw.templates = {"aidlc-product-agent-template"}  # scripts/install-example.sh: <member>-template
         gw.script = [[{"role": "assistant", "content": "DONE: ok", "meta": {}}]]
         info = mgr.spawn_session("t", parent_session_key="agent-rd-team:r9", cwd=str(tmp_path / "a" / "b" / "c"),
-                                 title="产品 agent", agent="aidlc-product-agent")
+                                 title="Product agent", agent="aidlc-product-agent")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         assert [c[1:] for c in gw.calls if c[0] == "agent"] == [("aidlc-product-agent-template", "template")]
@@ -180,11 +181,11 @@ def test_a_turn_kiro_crew_refused_to_start_is_sent_again(tmp_path):
 def test_a_fix_round_continues_the_same_session_and_a_deleted_session_fails_the_turn(tmp_path):
     async def go():
         gw, mgr = make(tmp_path)
-        first = mgr.spawn_session("t", parent_session_key="agent-rd-team:r3", cwd=str(tmp_path / "a" / "b" / "c"), title="后端 agent")
+        first = mgr.spawn_session("t", parent_session_key="agent-rd-team:r3", cwd=str(tmp_path / "a" / "b" / "c"), title="Backend agent")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         await settle(mgr, gw, first.slot)
-        fix = await mgr.continue_conversation_async(first.id, "修 SEC-1", parent_session_key="agent-rd-team:r3", cwd="", model=None)
+        fix = await mgr.continue_conversation_async(first.id, "Fix SEC-1", parent_session_key="agent-rd-team:r3", cwd="", model=None)
         assert fix.slot == first.slot and fix.id != first.id and not fix.done
         assert sessions.find_agent(mgr, fix.id) is fix and mgr.slot_of(fix.id) == first.slot
         gw.slot_rows.pop(first.slot)
@@ -216,14 +217,21 @@ def test_state_survives_a_reload_and_cleanup_keeps_a_running_run(tmp_path):
     asyncio.run(go())
 
 
-def test_the_orchestrator_picks_the_team_by_keywords_and_says_why():
-    pick = routing.route("双十一官方商城大促：挑 20 款家电打折加满减")
-    assert pick["team"]["file"] == "team-taoyuan-promo.json" and pick["matched"] == ["双十一", "大促", "满减", "官方商城"]
+def test_the_orchestrator_picks_the_team_by_keywords_and_says_why(tmp_path):
+    teams = tmp_path / "teams"  # the shipped bugfix and AI-DLC teams, and a promotion team of this test's own
+    teams.mkdir()
+    for name in ("team-bugfix.json", "team-aidlc.json"):
+        (teams / name).write_text((constants.TEAM_DIR / name).read_text(encoding="utf-8"), encoding="utf-8")
+    (teams / "team-promo.json").write_text(json.dumps({
+        "version": 1, "name": "Promotion team", "scope": "promo", "priority": 50, "keywords": ["black friday", "promo", "free shipping"],
+        "roles": [{"key": "pm", "title": "PM", "stage": "1.1 Intent capture", "depends_on": [], "writable": ["docs/**"], "outputs": []}]}), encoding="utf-8")
+    pick = routing.route("Black Friday promo: pick 20 appliances, discount them and add free shipping", teams)
+    assert pick["team"]["file"] == "team-promo.json" and pick["matched"] == ["black friday", "promo", "free shipping"]
     assert "1.1 Intent capture" in pick["team"]["stages"]
-    fix = routing.route("大促活动页的到手价算错了，帮我修复")
-    assert fix["team"]["file"] == "team-bugfix.json" and [o["file"] for o in fix["others"]] == ["team-taoyuan-promo.json"]
-    assert routing.route("debug 一下这个 fixture")["team"]["file"] == "team-aidlc.json"  # word boundaries
-    assert routing.route("")["team"]["scope"] == "feature"
+    fix = routing.route("The final price on the promo page is wrong, please fix it", teams)
+    assert fix["team"]["file"] == "team-bugfix.json" and [o["file"] for o in fix["others"]] == ["team-promo.json"]
+    assert routing.route("debug this fixture", teams)["team"]["file"] == "team-aidlc.json"  # word boundaries
+    assert routing.route("", teams)["team"]["scope"] == "feature"
 
 
 def test_a_turn_cut_short_by_a_transient_model_error_or_a_hang_is_continued_in_the_same_session(tmp_path):
@@ -234,20 +242,20 @@ def test_a_turn_cut_short_by_a_transient_model_error_or_a_hang_is_continued_in_t
                                       log=logging.getLogger("t"), now=lambda: clock[0])
         tool = {"role": "tool", "content": "🔧 cat a.js", "meta": {"tool_name": "shell", "input": '{"command": "cat a.js"}'}}
         gw.script = [[tool, {"role": "error", "content": "❌ The model backend hit a transient error (HTTP 5xx).", "meta": {}}],
-                     [tool, {"role": "assistant", "content": "DONE: 测试写完", "meta": {}}]]
-        info = mgr.spawn_session("写测试", parent_session_key="agent-rd-team:r7", cwd=str(tmp_path / "a" / "b" / "c"), title="测试 agent")
+                     [tool, {"role": "assistant", "content": "DONE: tests written", "meta": {}}]]
+        info = mgr.spawn_session("Write the tests", parent_session_key="agent-rd-team:r7", cwd=str(tmp_path / "a" / "b" / "c"), title="Testing agent")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         gw.finish(info.slot)
         await mgr.poll()  # worked a while, then the backend failed: told to carry on, not failed
         assert info.nudges == 1 and not info.done and "carry on" in info.last_tool
-        assert "你上一轮被中断了" in gw.msgs[info.slot][-1]["content"]
+        assert "Your last round was interrupted" in gw.msgs[info.slot][-1]["content"]
         await settle(mgr, gw, info.slot)
-        assert info.done and info.error is None and "DONE: 测试写完" in info.result
+        assert info.done and info.error is None and "DONE: tests written" in info.result
 
         # a hang: busy and nothing new for STUCK_S: stopped, then continued
-        gw.script = [[tool], [{"role": "assistant", "content": "DONE: 好了", "meta": {}}]]
-        hung = mgr.spawn_session("写页面", parent_session_key="agent-rd-team:r7", cwd=str(tmp_path / "a" / "b" / "d"), title="前端 agent")
+        gw.script = [[tool], [{"role": "assistant", "content": "DONE: done", "meta": {}}]]
+        hung = mgr.spawn_session("Write the page", parent_session_key="agent-rd-team:r7", cwd=str(tmp_path / "a" / "b" / "d"), title="Frontend agent")
         await asyncio.sleep(0)
         await asyncio.gather(*mgr._tasks)
         await mgr.poll()
@@ -255,6 +263,6 @@ def test_a_turn_cut_short_by_a_transient_model_error_or_a_hang_is_continued_in_t
         await mgr.poll()
         assert ("stop", hung.slot) in gw.calls and hung.nudges == 1 and not hung.done
         await settle(mgr, gw, hung.slot)
-        assert hung.done and "DONE: 好了" in hung.result
+        assert hung.done and "DONE: done" in hung.result
 
     asyncio.run(go())

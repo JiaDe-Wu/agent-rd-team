@@ -28,19 +28,25 @@ def test_globs():
 
 
 def test_the_requirement_replaces_only_its_section():
-    readme = (constants.TARGET_TEMPLATE / "README.md").read_text(encoding="utf-8")
-    out = gitwork.with_requirement(readme, "做一个读书会报名小站。")
-    assert out.startswith("# 活动报名小站\n\n## 需求\n\n做一个读书会报名小站。\n\n## 约束\n")
-    assert "让主办方发布活动" not in out and out.endswith(readme[readme.index("## 约束"):])
-    assert gitwork.with_requirement("# x\n", "要求") == "# x\n\n## 需求\n\n要求\n"
+    readme = "# Event sign-up site\n\n## Requirement\n\nLet organizers publish events.\n\n## Constraints\n\n- Zero dependencies\n"
+    out = gitwork.with_requirement(readme, "Build a book club sign-up site.")
+    assert out.startswith("# Event sign-up site\n\n## Requirement\n\nBuild a book club sign-up site.\n\n## Constraints\n")
+    assert "Let organizers publish events" not in out and out.endswith(readme[readme.index("## Constraints"):])
+    assert gitwork.with_requirement("# x\n", "A requirement") == "# x\n\n## Requirement\n\nA requirement\n"
+
+
+def test_a_template_of_an_earlier_version_keeps_its_chinese_heading():
+    # the heading older starters carried: still the section the requirement replaces
+    readme = "# x\n\n## 需求\n\nold\n\n## Constraints\n\n- none\n"
+    assert gitwork.with_requirement(readme, "new") == "# x\n\n## 需求\n\nnew\n\n## Constraints\n\n- none\n"
 
 
 def test_repo_worktrees_stats_leftovers_merge_and_conflict(tmp_path):
     async def go():
         root = tmp_path / "runs" / "r1"
         repo, run_wt, be, fe = root / "repo", root / "wt" / "_run", root / "wt" / "backend", root / "wt" / "frontend"
-        base = await gitwork.create_repo(constants.TARGET_TEMPLATE, repo, "做一个读书会报名小站", "读书会")
-        assert sh(repo, "log", "--format=%s").strip() == "Requirement: 读书会" and "读书会报名小站" in (repo / "README.md").read_text()
+        base = await gitwork.create_repo(constants.TARGET_TEMPLATE, repo, "Build a book club sign-up site", "Book club")
+        assert sh(repo, "log", "--format=%s").strip() == "Requirement: Book club" and "Build a book club sign-up site" in (repo / "README.md").read_text()
         assert sh(repo, "config", "commit.gpgsign").strip() == "false"  # the agents' own commits never prompt
         assert await gitwork.create_repo(constants.TARGET_TEMPLATE, repo, "x", "x") == base  # made already: kept
         assert await gitwork.add_worktree(repo, run_wt, "team/r1/run", base) is True
@@ -49,17 +55,17 @@ def test_repo_worktrees_stats_leftovers_merge_and_conflict(tmp_path):
             await gitwork.add_worktree(repo, wt, branch, base)
 
         write(be, "backend/server.js", "a\nb\nc\n")
-        commit(be, "[backend] 接口")
+        commit(be, "[backend] API")
         write(be, "backend/server.js", "a\nB\nc\nd\n")  # not committed
         write(be, "backend/store.js", "x\ny\n")  # untracked
-        write(be, "README.md", "改了别人的\n")  # outside its area
+        write(be, "README.md", "changed what is not mine\n")  # outside its area
         st = await gitwork.stats(be, base)
         files = {f["path"]: f for f in st["files"]}
         assert files["backend/server.js"] == {"path": "backend/server.js", "added": 4, "removed": 0, "status": "A"}
         assert files["backend/store.js"] == {"path": "backend/store.js", "added": 2, "removed": 0, "status": "A"}
         assert files["README.md"]["status"] == "M" and files["README.md"]["added"] == 1
         assert st["count"] == 3 and st["lines"]["added"] == 7 and st["paths"][0] == "README.md"  # biggest first
-        assert [c["subject"] for c in st["commits"]] == ["[backend] 接口"] and st["commits"][0]["at"] > 0
+        assert [c["subject"] for c in st["commits"]] == ["[backend] API"] and st["commits"][0]["at"] > 0
 
         paths, sha = await gitwork.commit_leftovers(be, ["backend/**"], "backend")
         assert sorted(paths) == ["backend/server.js", "backend/store.js"] and sh(be, "rev-parse", "--short", "HEAD").strip() == sha
@@ -68,14 +74,14 @@ def test_repo_worktrees_stats_leftovers_merge_and_conflict(tmp_path):
         assert await gitwork.commit_leftovers(be, ["backend/**"], "backend") == ([], None)
         assert await gitwork.committed_paths(be, base) == ["backend/server.js", "backend/store.js"]
 
-        write(fe, "backend/server.js", "前端顺手改的\n")
+        write(fe, "backend/server.js", "changed by the frontend in passing\n")
         write(fe, "frontend/index.html", "<h1/>\n")
-        commit(fe, "[frontend] 页面")
-        ok = await gitwork.merge(run_wt, "team/r1/backend", "[run] 合入后端")
+        commit(fe, "[frontend] page")
+        ok = await gitwork.merge(run_wt, "team/r1/backend", "[run] Merge Backend")
         assert ok == {"ok": True, "conflicts": [], "note": None}
         assert await gitwork.merge(run_wt, "team/r1/backend", "again") == ok  # merged already: nothing happens
-        assert sh(run_wt, "log", "-1", "--format=%s %P").startswith("[run] 合入后端 ")  # a real merge commit
-        bad = await gitwork.merge(run_wt, "team/r1/frontend", "[run] 合入前端")
+        assert sh(run_wt, "log", "-1", "--format=%s %P").startswith("[run] Merge Backend ")  # a real merge commit
+        bad = await gitwork.merge(run_wt, "team/r1/frontend", "[run] Merge Frontend")
         assert bad == {"ok": False, "conflicts": ["backend/server.js"], "note": "backend/server.js"}
         assert sh(run_wt, "status", "--porcelain") == "" and await gitwork.merge_base(run_wt, "team/r1/frontend", "HEAD") == base
 

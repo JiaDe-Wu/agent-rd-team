@@ -18,6 +18,7 @@ from . import sandbox
 from .constants import GIT_BIN
 
 AUTHOR = ("agent-rd-team", "team@localhost")
+REQUIREMENT_HEADINGS = ("## Requirement", "## 需求")  # the second is the older Chinese template's
 # Appended to each run repo's .git/config, so the role agents' own commits behave the same way: no hooks, no
 # signing prompt, no background gc while several worktrees commit at once.
 REPO_CONFIG = (f"[user]\n\tname = {AUTHOR[0]}\n\temail = {AUTHOR[1]}\n[commit]\n\tgpgsign = false\n[tag]\n\tgpgsign = false\n"
@@ -83,7 +84,7 @@ def matches(path: str, globs: list[str]) -> bool:
 
 
 def with_requirement(readme: str, requirement: str, title: str | None = None) -> str:
-    """README.md with its ``## 需求`` (Requirement) section replaced by *requirement* (appended when there is none), and its
+    """README.md with its ``## Requirement`` section (an older template's ``## 需求``) replaced by *requirement* (appended when there is none), and its
     first ``# `` heading by *title*: the demo's own name must not sit over somebody else's requirement."""
     if title:
         lines = readme.splitlines(keepends=True)
@@ -92,10 +93,9 @@ def with_requirement(readme: str, requirement: str, title: str | None = None) ->
             lines[at] = f"# {title.strip()}\n"
             readme = "".join(lines)
     lines = readme.splitlines(keepends=True)
-    # protocol token: kept in Chinese (the starters' README templates carry this heading)
-    start = next((i for i, line in enumerate(lines) if line.strip() == "## 需求"), None)
+    start = next((i for i, line in enumerate(lines) if line.strip() in REQUIREMENT_HEADINGS), None)  # the starters' README templates carry it
     if start is None:
-        return readme.rstrip("\n") + "\n\n## 需求\n\n" + requirement.strip() + "\n"
+        return readme.rstrip("\n") + "\n\n## Requirement\n\n" + requirement.strip() + "\n"
     end = next((j for j in range(start + 1, len(lines)) if lines[j].startswith("## ")), len(lines))
     tail = "".join(lines[end:])
     return "".join(lines[: start + 1]) + "\n" + requirement.strip() + "\n" + ("\n" + tail if tail else "")

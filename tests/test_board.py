@@ -12,16 +12,16 @@ NOW = 1_791_231_500.0
 def rich_run(tmp_path, mgr, tools, rid="r1006rich", started=NOW - 1500):
     """A run in the middle of things, filled in by hand: no git needed to check the shape."""
     team = team_mod.load_team(constants.TEAM_FILE)
-    state = team_mod.new_state(rid, "活动报名小站", team, "{run}", tmp_path / "work", constants.TARGET_TEMPLATE, started)
+    state = team_mod.new_state(rid, "Event sign-up site", team, "{run}", tmp_path / "work", constants.TARGET_TEMPLATE, started)
     state.update(status="fixing", base="5e1f0aa0c0ffee", seq=0)
     run = team_mod.TeamRun(state, make_deps(tmp_path, mgr, None, now=lambda: NOW))
     pm = run.lane("pm")
     pm.update(status="merged", attempt=1, worktree="/w/pm", branch=f"team/{rid}/pm", fork="5e1f0aa", started_at=started,
-              done_at=started + 180, summary="12 条验收标准", file_count=1, lines={"added": 64, "removed": 0},
+              done_at=started + 180, summary="12 acceptance criteria", file_count=1, lines={"added": 64, "removed": 0},
               files=[{"path": "docs/product/acceptance.md", "added": 64, "removed": 0, "status": "A"}],
-              commits=[{"sha": "a1c9e02", "subject": "[pm] 验收标准", "at": started + 176}])
+              commits=[{"sha": "a1c9e02", "subject": "[pm] acceptance criteria", "at": started + 176}])
     pm["attempts"] = [{"n": 1, "kind": "work", "agent": "s-pm", "conv": "s-pm", "requested_at": started,
-                       "started": started, "ended": started + 180, "error": None, "summary": "12 条验收标准",
+                       "started": started, "ended": started + 180, "error": None, "summary": "12 acceptance criteria",
                        "credits": 6.1, "snap": {"turns": 9, "tool_count": 9, "last_tool": "Writing docs/product/acceptance.md",
                                                 "last_activity": started + 175, "recent_tools": [], "text_tail": None}}]
     be = run.lane("backend")
@@ -31,23 +31,23 @@ def rich_run(tmp_path, mgr, tools, rid="r1006rich", started=NOW - 1500):
     be["attempts"] = [
         {"n": 1, "kind": "work", "agent": "s-be", "requested_at": started + 850, "started": started + 850,
          "ended": started + 1180, "credits": 9.3},
-        {"n": 2, "kind": "fix", "label": "修 AC-6", "agent": "s-be2", "requested_at": started + 1380,
+        {"n": 2, "kind": "fix", "label": "Fix AC-6", "agent": "s-be2", "requested_at": started + 1380,
          "started": started + 1380, "ended": None, "credits": None}]
     mgr.agents["s-be2"] = info("s-be2", "[agent-rd-team run=x role=backend]", started=started + 1380, turns=11,
-                               tool_count=14, last_tool="Editing backend/validate.js", streaming_text="AC-6 失败是因为……")
+                               tool_count=14, last_tool="Editing backend/validate.js", streaming_text="AC-6 fails because ...")
     mgr.add([("s-be2", {"at": NOW - 5, "tool": "Editing", "kind": "edit", "detail": "backend/validate.js"})])
     state["tests"].update(at=NOW - 30, passed=1, failed=1, total=2, history=[{"at": NOW - 30, "passed": 1, "failed": 1}],
-                          cases=[{"id": "api-signup.test.js#AC-6", "ac": "AC-6", "name": "AC-6: 名额满了不能报名",
+                          cases=[{"id": "api-signup.test.js#AC-6", "ac": "AC-6", "name": "AC-6: a full event cannot be joined",
                                   "file": "tests/api-signup.test.js", "status": "fail", "owner": "backend", "ms": 7,
                                   "message": "expected 409, got 201"},
-                                 {"id": "web-render.test.js#AC-1", "ac": "AC-1", "name": "AC-1: 首页", "file": "tests/web-render.test.js",
+                                 {"id": "web-render.test.js#AC-1", "ac": "AC-1", "name": "AC-1: home page", "file": "tests/web-render.test.js",
                                   "status": "pass", "owner": "frontend", "ms": 23, "message": None}])
     state["merges"] = [{"role": "pm", "sha": "a1c9e02", "at": started + 182, "status": "merged", "files": 1, "note": None},
                        {"role": "frontend", "sha": "f5c2d90", "at": started + 1305, "status": "conflict", "files": 4,
                         "note": "backend/server.js"}]
-    run.emit("run", "运行开始：活动报名小站")
-    run.emit("handoff", "产品经理把 acceptance.md 交给架构师", role="architect", frm="pm", to="architect")
-    run.emit("bounce", "AC-6 失败，打回后端", role="backend", frm="tests", to="backend")
+    run.emit("run", "Run started: Event sign-up site")
+    run.emit("handoff", "Product manager hands acceptance.md to the architect", role="architect", frm="pm", to="architect")
+    run.emit("bounce", "AC-6 failed, sent back to Backend", role="backend", frm="tests", to="backend")
     return run
 
 
@@ -88,7 +88,7 @@ def test_board_values_come_from_state_and_from_kirocrew_live(tmp_path):
     lanes = {ln["key"]: ln for ln in out["roles"]}
     be, pm = lanes["backend"], lanes["pm"]
     assert be["status"] == "fixing" and be["attempt"] == 2 and be["agent"]["id"] == "s-be2"
-    assert be["agent"]["last_tool"] == "Editing backend/validate.js" and be["agent"]["text_tail"] == "AC-6 失败是因为……"
+    assert be["agent"]["last_tool"] == "Editing backend/validate.js" and be["agent"]["text_tail"] == "AC-6 fails because ..."
     assert be["agent"]["recent_tools"][0]["detail"] == "backend/validate.js" and be["agent"]["elapsed_s"] == 120
     assert be["active_s"] == 330 + 120 and be["credits"] == 9.3 and be["owns_tests"] == ["api-signup.test.js#AC-6"]
     assert pm["agent"]["turns"] == 9 and pm["agent"]["credits"] == 6.1 and pm["active_s"] == 180  # kept when it ended
@@ -111,9 +111,9 @@ def test_which_run_the_board_shows_and_the_runs_order(tmp_path):
     assert build([old, new], mgr, tools, "r1001aaaa")["run"]["id"] == "r1001aaaa"
     assert build([], None, None) == {"at": NOW, "runs": [], "run": None}
     for i in range(250):
-        old.emit("tool", f"后端：{i}", role="backend")
+        old.emit("tool", f"Backend: {i}", role="backend")
     events = build([old], mgr, tools)["run"]["events"]
-    assert len(events) == 200 and events[-1]["text"] == "后端：249" and events[0]["seq"] < events[-1]["seq"]
+    assert len(events) == 200 and events[-1]["text"] == "Backend: 249" and events[0]["seq"] < events[-1]["seq"]
     card = build([old], mgr, tools)["runs"][0]
     assert card["roles_done"] == 1 and card["roles_total"] == 8 and card["tests"] == {"passed": 1, "failed": 1, "total": 2}
 
@@ -137,5 +137,5 @@ def test_tool_calls_read_like_what_the_agent_did():
 
 def test_done_is_found_even_glued_to_the_previous_sentence():
     team_mod = mod("team")
-    assert team_mod.parse_done("I left a stray line; fixing it.DONE: 已写好接口契约") == "已写好接口契约"
-    assert team_mod.parse_done("UNDONE: 不算") is None
+    assert team_mod.parse_done("I left a stray line; fixing it.DONE: API contract written") == "API contract written"
+    assert team_mod.parse_done("UNDONE: does not count") is None
