@@ -2,11 +2,12 @@
 
 import asyncio
 import itertools
+import json
 import logging
 
 from teamkit import mod
 
-sessions, routing, gateway_mod = mod("sessions"), mod("routing"), mod("gateway")
+sessions, routing, gateway_mod, constants = mod("sessions"), mod("routing"), mod("gateway"), mod("constants")
 GatewayError = gateway_mod.GatewayError
 
 

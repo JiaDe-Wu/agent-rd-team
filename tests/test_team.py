@@ -368,7 +368,7 @@ def test_a_fix_round_that_changes_nothing_is_not_merged_or_sent_back_again(tmp_p
 
 
 def test_a_reply_without_done_still_gets_a_summary():
-    assert team_mod.gist("## Result\n\n**Backend is done**: the API works\n- details") == "Backend is done: the API works"
+    assert team_mod.gist("## OK\n\n**Backend is done**: the API works\n- details") == "Backend is done: the API works"
     assert team_mod.gist("```\n|a|b|\n```\n") is None and team_mod.gist("") is None
     assert team_mod.gist("x" * 130).endswith("…")
 

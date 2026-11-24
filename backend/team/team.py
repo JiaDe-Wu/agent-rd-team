@@ -242,6 +242,8 @@ def review_targets(text: str, roles: list[dict[str, Any]]) -> list[str]:
     # a token is a whole title ("Web developer #2") or a key or a single word; a word list ("backend frontend") also counts word by word
     found = {names.get(t.strip(" `*_（）()").lower()) for chunk in chunks for tok in _ROLE_SPLIT_RE.split(chunk) for t in (tok, *tok.split())}
     found |= {r["key"] for r in roles if r.get("writable") and any(r["title"].lower() in chunk.lower() or (r.get("name_zh") and r["name_zh"] in chunk) for chunk in chunks)}
+    # a review written in Chinese (an earlier version): the Chinese role words may sit anywhere in the chunk, as in "后端（删掉…）"
+    found |= {k for chunk in chunks for word, k in _ROLE_ALIASES.items() if not word.isascii() and word in chunk and k in writers}
     return [k for k in writers if k in found]
 
 

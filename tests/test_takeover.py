@@ -39,7 +39,7 @@ def test_an_existing_project_keeps_its_title_and_is_committed_as_taken_over(tmp_
 def test_a_review_names_who_fixes_what():
     roles = mod("team").load_team(constants.TEAM_DIR / "team-aidlc.json")["roles"]
     targets = mod("team").review_targets
-    text = ("**1. The file check can be bypassed** (owner: Backend)\n**2. Deletion is not real deletion** (owner: Backend; copy owner: Web, Android and UI design)\n"
+    text = ("**1. The file check can be bypassed** (owner: Backend)\n**2. Deletion is not real deletion** (owner: Backend; copy owner: Web and Android and UI design)\n"
             "- The check has a hole too (owner: Compliance & security)\n**3. The camera entry is gone** (owner: Android)")
     assert targets(text, roles) == ["designer", "compliance", "backend", "frontend", "mobile"]
     assert targets("DONE: changes needed\nSend back: backend, Android\n(owner: Deploy)", roles) == ["backend", "mobile"]  # its own line wins
