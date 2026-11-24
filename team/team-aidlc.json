@@ -3,22 +3,22 @@
   "name": "AI-DLC expert team",
   "orchestrator": "kirocrew-team",
   "scope": "feature",
-  "delivery_defaults": {"kind": "新应用", "size": "中", "line": "内部系统"},
+  "delivery_defaults": {"kind": "new app", "size": "medium", "line": "internal systems"},
   "official_stages": 33,
   "priority": 100,
   "fallback": true,
   "keywords": [],
-  "workspace": "taoyuan",
+  "workspace": "larkspur",
   "starter": "starters/web",
-  "spec_pack": "packs/taoyuan-web",
-  "standards": "packs/taoyuan/standards.json",
+  "spec_pack": "packs/larkspur-web",
+  "standards": "packs/larkspur/standards.json",
   "standards_always": [
     "FE",
     "BR"
   ],
   "knowledge": {
-    "source": "桃源科技",
-    "data_dir": "~/workplace/taoyuan/data"
+    "source": "Larkspur Outfitters",
+    "data_dir": "knowledge/larkspur"
   },
   "task_template": "task_template-aidlc.md",
   "test_command": [
@@ -42,7 +42,6 @@
     {
       "key": "intent",
       "title": "Intent",
-      "name_zh": "意图",
       "icon": "intent",
       "member": "aidlc-product-agent",
       "aidlc_agent": "aidlc-product-agent",
@@ -56,12 +55,11 @@
       "outputs": [
         "docs/aidlc/1-ideation/intent.md"
       ],
-      "brief": "先在知识库「桃源科技」里查任务里列出的规范和数据，再读 README 末尾的「需求」和 `.kiro/steering/`（这是公司网页模板：服务器骨架、页面外壳、品牌样式已经有了）。写 `docs/aidlc/1-ideation/intent.md`：为谁、为什么、怎样算成功（每条都能验证）、这次不做什么；需求要用到的数据在知识库里是哪一份，写明。一页以内，不写代码。"
+      "brief": "First look up in the knowledge base \"Larkspur Outfitters\" the standards and data the task lists, then read the \"Requirement\" section at the end of the README and `.kiro/steering/` (this is the company web template: the server skeleton, page shell and brand styles already exist). Write `docs/aidlc/1-ideation/intent.md`: for whom, why, what success looks like (each point verifiable), and what is not in scope this time; say which knowledge base document holds the data the requirement needs. One page at most, no code."
     },
     {
       "key": "feasibility",
       "title": "Constraints",
-      "name_zh": "约束",
       "icon": "feasibility",
       "member": "aidlc-compliance-agent",
       "aidlc_agent": "aidlc-compliance-agent,aidlc-devsecops-agent",
@@ -75,12 +73,11 @@
       "outputs": [
         "docs/aidlc/1-ideation/constraints.md"
       ],
-      "brief": "在知识库「桃源科技」里逐份查任务里列出的公司规范，逐条看编号（PII-n、FE-n、BR-n、ACC-n 等）这次适不适用、为什么。写 `docs/aidlc/1-ideation/constraints.md`：适用的规则（编号 + 一句话怎么落实）；不适用的一行带过；最后单独一节「要人决定的」：需求原话和哪条规则冲突、两种做法各自的后果。冲突不要替人决定，也不要悄悄按一边做。一页以内，不写代码。"
+      "brief": "In the knowledge base \"Larkspur Outfitters\", look up each company standard the task lists, and go through its rule IDs (PII-n, FE-n, BR-n, ACC-n, ...): does the rule apply this time, and why. Write `docs/aidlc/1-ideation/constraints.md`: the rules that apply (ID + one sentence on how to meet it); one line for each that does not; and last a separate section \"For a person to decide\": where the requirement's own words conflict with a rule, and the consequences of each way out. Do not decide a conflict for the person, and do not quietly go one way. One page at most, no code."
     },
     {
       "key": "scope",
       "title": "Scope",
-      "name_zh": "范围",
       "icon": "scope",
       "member": "aidlc-product-agent",
       "aidlc_agent": "aidlc-product-agent",
@@ -102,13 +99,12 @@
       "outputs": [
         "docs/aidlc/1-ideation/scope.md"
       ],
-      "brief": "读 `docs/aidlc/1-ideation/intent.md` 和 `constraints.md`，写 `docs/aidlc/1-ideation/scope.md`：这次要做的条目清单，每条一个编号 AC-n，一句话说做什么，对应哪条公司规则（写编号）；明确不做的；`constraints.md` 里「要人决定的」原样列出来，写清你建议怎么定、为什么。清单要短而准，宁可少不要虚。再写交付标签 `docs/aidlc/1-ideation/delivery.json`：一个 JSON 对象，键 name（这次交付的名称，16 个字以内）、kind（新应用、新功能或修复）、size（小、中或大）、line（电商、移动应用、客户关系管理、供应链或内部系统）、why（一句理由），计入公司的交付统计。把「要人决定的」同时写成 `docs/aidlc/1-ideation/questions.json`：`{\"questions\": [{\"id\": \"1\", \"q\": \"一句话的问题\", \"options\": [{\"key\": \"A\", \"text\": \"选项和它的代价\"}, {\"key\": \"B\", \"text\": \"…\"}], \"recommend\": \"A\", \"why\": \"一句理由\"}]}`，id 和文档里的编号一致，每题 2 到 4 个选项，recommend 写你建议的选项；没有要人决定的就写 `{\"questions\": []}`。人会在关卡上逐条选，选的结果以人为准，会交给后面的每个角色。写完会停下来交给人批准，人可能删改或者定下冲突怎么处理，以人的意见为准。",
+      "brief": "Read `docs/aidlc/1-ideation/intent.md` and `constraints.md` and write `docs/aidlc/1-ideation/scope.md`: the list of items to build this time, each with an ID AC-n, one sentence on what to build, and which company rule it answers (give the ID); what is explicitly not built; and the items under \"For a person to decide\" in `constraints.md`, copied as they are, with how you suggest deciding each and why. Keep the list short and exact: fewer items is better than vague ones. Then write the delivery tag `docs/aidlc/1-ideation/delivery.json`: one JSON object with the keys name (the delivery's name, at most 16 characters), kind (new app, new feature or fix), size (small, medium or large), line (e-commerce, mobile apps, CRM, supply chain or internal systems) and why (one sentence); it counts in the company's delivery statistics. Also write what is for a person to decide as `docs/aidlc/1-ideation/questions.json`: `{\"questions\": [{\"id\": \"1\", \"q\": \"a one-sentence question\", \"options\": [{\"key\": \"A\", \"text\": \"the option and its cost\"}, {\"key\": \"B\", \"text\": \"...\"}], \"recommend\": \"A\", \"why\": \"one sentence of reasons\"}]}`, with ids matching the numbers in the document, 2 to 4 options per question, and recommend naming the option you suggest; if nothing is for a person to decide write `{\"questions\": []}`. The person chooses one by one at the gate; what they choose is final and is handed to every later role. When you are done the run stops for a person's approval; the person may delete or change items or settle how a conflict is handled, and the person's word wins.",
       "questions": "docs/aidlc/1-ideation/questions.json"
     },
     {
       "key": "architect",
       "title": "Architect",
-      "name_zh": "架构师",
       "icon": "architect",
       "member": "aidlc-architect-agent",
       "aidlc_agent": "aidlc-architect-agent",
@@ -127,12 +123,11 @@
         "docs/aidlc/2-inception/interfaces.md",
         "docs/aidlc/2-inception/ownership.json"
       ],
-      "brief": "读范围清单（人批准时写的意见以人为准）和 README「公司模板约定」。写 `docs/aidlc/2-inception/architecture.md`（要哪些页面、哪些接口、用哪份数据、数据从知识库复制到 `server/data/` 的哪个文件，范围清单的每一条落在哪里）和 `interfaces.md`（每个接口：方法、路径、请求、成功和出错的返回；每个页面：页面名、`render(state)` 的 state 形状、测试要用的 `data-*`）。再写分工文件 `docs/aidlc/2-inception/ownership.json`，格式：`{\"roles\": {\"backend\": [\"server/routes/**\", \"server/data/**\"], \"frontend\": [\"web/pages/**\", \"web/styles/**\", \"web/motion/**\"], \"mobile\": []}, \"test_areas\": {\"server\": \"backend\", \"web\": \"frontend\"}}`：roles 只能用 backend、frontend、mobile 这三个 key，值是它能改的目录；这个模板没有安卓端，mobile 给空列表（它会被跳过）；test_areas 一定写 server 和 web（公司检查和测试的文件名靠它们分给角色）。只写文档，不写代码。"
+      "brief": "Read the scope list (where a person's approval note differs, the person's wins) and the README's \"Company template conventions\" section. Write `docs/aidlc/2-inception/architecture.md` (which pages, which endpoints, which data, which file under `server/data/` the data is copied to from the knowledge base, and where each item of the scope list lands) and `interfaces.md` (for each endpoint: method, path, request, success and error responses; for each page: the page name, the shape of the `render(state)` state, and the `data-*` attributes the tests need). Then write the assignment file `docs/aidlc/2-inception/ownership.json` in this format: `{\"roles\": {\"backend\": [\"server/routes/**\", \"server/data/**\"], \"frontend\": [\"web/pages/**\", \"web/styles/**\", \"web/motion/**\"], \"mobile\": []}, \"test_areas\": {\"server\": \"backend\", \"web\": \"frontend\"}}`. In roles use only the keys backend, frontend and mobile, each with the directories it may change; this template has no Android app, so give mobile an empty list (it will be skipped); always write server and web in test_areas (the company checks and the test file names use them to assign work to roles). Write documents only, no code."
     },
     {
       "key": "designer",
       "title": "UI design",
-      "name_zh": "界面",
       "icon": "designer",
       "member": "aidlc-design-agent",
       "aidlc_agent": "aidlc-design-agent",
@@ -148,12 +143,11 @@
       "outputs": [
         "docs/aidlc/2-inception/design.md"
       ],
-      "brief": "先在知识库查《品牌规范》和《前端工程规范》。按范围清单和 `interfaces.md` 的页面写 `docs/aidlc/2-inception/design.md`：每个页面的布局、用 README 列的哪些全站组件、文案（按 BR-5 的语气）、加载中、空、出错三种状态；颜色只用 `tokens.css` 的品牌变量。一页以内，不写代码。"
+      "brief": "First look up the brand standard and the frontend engineering standard in the knowledge base. From the scope list and the pages in `interfaces.md`, write `docs/aidlc/2-inception/design.md`: for each page its layout, which of the site-wide components the README lists it uses, its copy (in the tone BR-5 asks for), and the three states loading, empty and error; use only the brand variables in `tokens.css` for colour. One page at most, no code."
     },
     {
       "key": "pm",
       "title": "Requirements",
-      "name_zh": "需求",
       "icon": "pm",
       "member": "aidlc-product-agent",
       "aidlc_agent": "aidlc-product-agent",
@@ -171,7 +165,7 @@
       "outputs": [
         "docs/aidlc/2-inception/acceptance.md"
       ],
-      "brief": "读范围清单、`architecture.md`、`interfaces.md`、`ownership.json` 和 `design.md`，写 `docs/aidlc/2-inception/acceptance.md`：范围里的每一条写成验收标准（沿用 AC-n 编号），写清怎么验（调哪个接口、看页面上的什么）、对应哪条公司规则；写明是机器检查还是人看。人在关卡上补的意见一定要有对应的验收标准。一页以内。 然后汇总启动阶段（架构、接口、分工、界面和你写的验收标准）里要人定的事：前面的文档写了「要人决定」「待确认」的，和你发现的冲突，写成 `docs/aidlc/2-inception/questions.json`：`{\"questions\": [{\"id\": \"1\", \"q\": \"一句话的问题\", \"options\": [{\"key\": \"A\", \"text\": \"选项和它的代价\"}, {\"key\": \"B\", \"text\": \"…\"}], \"recommend\": \"A\", \"why\": \"一句理由\"}]}`，id 和文档里的编号一致，每题 2 到 4 个选项，recommend 写你建议的选项；没有要人决定的就写 `{\"questions\": []}`。人会在关卡上逐条选，选的结果以人为准，会交给后面的每个角色。写完会停下来，人在「启动」关卡看这一阶段的全部文档后批准，然后才开始写代码和检查。",
+      "brief": "Read the scope list, `architecture.md`, `interfaces.md`, `ownership.json` and `design.md`, and write `docs/aidlc/2-inception/acceptance.md`: write each item of the scope as an acceptance criterion (keep the AC-n IDs), say how to verify it (which endpoint to call, what to look at on the page) and which company rule it answers; say whether a machine checks it or a person looks. Every note a person added at a gate must have an acceptance criterion. One page at most. Then collect what a person has to decide from the inception stage (architecture, interfaces, assignment, design and your acceptance criteria): the items earlier documents marked \"for a person to decide\" or \"to be confirmed\", and the conflicts you found, into `docs/aidlc/2-inception/questions.json`: `{\"questions\": [{\"id\": \"1\", \"q\": \"a one-sentence question\", \"options\": [{\"key\": \"A\", \"text\": \"the option and its cost\"}, {\"key\": \"B\", \"text\": \"...\"}], \"recommend\": \"A\", \"why\": \"one sentence of reasons\"}]}`, with ids matching the numbers in the document, 2 to 4 options per question, and recommend naming the option you suggest; if nothing is for a person to decide write `{\"questions\": []}`. The person chooses one by one at the gate; what they choose is final and is handed to every later role. When you are done the run stops: at the \"Build start\" gate the person reads all the documents of this stage and approves, and only then do the code and the checks start.",
       "gate": "human",
       "gate_label": "Build start",
       "questions": "docs/aidlc/2-inception/questions.json"
@@ -179,7 +173,6 @@
     {
       "key": "compliance",
       "title": "Compliance & security",
-      "name_zh": "合规与安全",
       "icon": "compliance",
       "member": "aidlc-devsecops-agent",
       "aidlc_agent": "aidlc-compliance-agent,aidlc-devsecops-agent",
@@ -198,12 +191,11 @@
       "outputs": [
         "docs/aidlc/3-construction/compliance.md"
       ],
-      "brief": "读 `constraints.md`、范围清单（人批准时的意见以人为准）和 `interfaces.md`，在知识库查适用的规范原文。`tests/enterprise/` 已经有公司下发的检查（看它的 README 和文件名：FE-1/2/4、UX-2、BR-1、PII-1 已经查了），不重复写。把剩下适用、又能机器判的规则写成检查 `tests/comp-<区域>-<主题>.test.js`（区域名用 ownership.json 的 test_areas：server 或 web；ES 模块、`node:test`；接口用 `tests/enterprise/_lib.js` 的 `startServer`，用完 `close()`；页面直接 import 调 `render`），测试名以规则编号开头，一共不超过 6 个。实现还没写，红是对的。再写一页 `docs/aidlc/3-construction/compliance.md`：每条适用规则由哪个检查管、哪些只能人看。写完跑 `node tests/enterprise/_run.cjs comp-` 确认能跑起来（红可以）。"
+      "brief": "Read `constraints.md`, the scope list (a person's approval note wins) and `interfaces.md`, and look up the original text of the standards that apply in the knowledge base. `tests/enterprise/` already holds the checks the company issues (see its README and file names: FE-1/2/4, UX-2, BR-1 and PII-1 are already covered), so do not write those again. Write the remaining applicable rules that a machine can judge as checks `tests/comp-<area>-<topic>.test.js` (take the area name from test_areas in ownership.json: server or web; ES modules, `node:test`; for endpoints use `startServer` from `tests/enterprise/_lib.js` and call `close()` when done; for pages import and call `render` directly), starting each test name with the rule ID, six tests at most. The implementation is not written yet, so red is correct. Then write one page `docs/aidlc/3-construction/compliance.md`: which check covers each applicable rule, and which rules only a person can judge. When you are done run `node tests/enterprise/_run.cjs comp-` to confirm they run (red is fine)."
     },
     {
       "key": "tester",
       "title": "Testing",
-      "name_zh": "测试",
       "icon": "tester",
       "member": "aidlc-quality-agent",
       "aidlc_agent": "aidlc-quality-agent",
@@ -219,12 +211,11 @@
       "outputs": [
         "tests/"
       ],
-      "brief": "按 `acceptance.md` 和 `interfaces.md` 写测试 `tests/ac-<区域>-<主题>.test.js`（区域名用 ownership.json 的 test_areas：server 或 web；ES 模块、`node:test`；接口用 `tests/enterprise/_lib.js` 的 `startServer`，每个用例自己起一个，`finally` 里 `close()`；页面直接 import `web/pages/<页面名>.js` 调 `render(state)`）。挑最要紧的 AC，每条一个测试，测试名以 AC 编号开头，一共不超过 12 个；人在关卡上补的意见一定要有。实现还没写，红是对的；不要为了验证测试去写实现。写完跑 `node tests/enterprise/_run.cjs ac-` 确认能跑起来，再提交。"
+      "brief": "Write tests from `acceptance.md` and `interfaces.md` as `tests/ac-<area>-<topic>.test.js` (take the area name from test_areas in ownership.json: server or web; ES modules, `node:test`; for endpoints use `startServer` from `tests/enterprise/_lib.js`, start one per case and call `close()` in `finally`; for pages import `web/pages/<page name>.js` and call `render(state)`). Pick the most important ACs, one test each, starting the test name with the AC number, twelve tests at most; every note a person added at a gate must be covered. The implementation is not written yet, so red is correct; do not write an implementation to check your tests. When you are done run `node tests/enterprise/_run.cjs ac-` to confirm they run, then commit."
     },
     {
       "key": "backend",
       "title": "Backend",
-      "name_zh": "后端",
       "icon": "backend",
       "member": "aidlc-developer-agent",
       "aidlc_agent": "aidlc-developer-agent",
@@ -237,12 +228,11 @@
       ],
       "writable_from": "ownership",
       "outputs": [],
-      "brief": "按 `interfaces.md` 在 `server/routes/` 实现接口（格式见 `server/routes/index.js` 开头的说明）；要用的数据从知识库取来，按知识库说明文档里写的路径原样复制进 `server/data/`（用 `cp`，不改内容）。在知识库查任务里列出的规范，规则编号写进代码注释和提交说明。修文件名里区域归你（server）的检查：`tests/enterprise/*-server-*`、`tests/comp-server-*`、`tests/ac-server-*`。写完跑 `node tests/enterprise/_run.cjs server-` 确认全绿。"
+      "brief": "Implement the endpoints in `server/routes/` as `interfaces.md` says (the format is in the note at the top of `server/routes/index.js`); take the data you need from the knowledge base and copy it unchanged into `server/data/`, at the path the knowledge base's description document gives (use `cp`, do not change the content). Look up the standards the task lists in the knowledge base, and put the rule IDs in code comments and commit messages. Fix the checks whose file names put them in your area (server): `tests/enterprise/*-server-*`, `tests/comp-server-*`, `tests/ac-server-*`. When you are done run `node tests/enterprise/_run.cjs server-` to confirm they are all green."
     },
     {
       "key": "frontend",
       "title": "Web",
-      "name_zh": "网页",
       "icon": "frontend",
       "member": "aidlc-developer-agent",
       "aidlc_agent": "aidlc-developer-agent",
@@ -256,12 +246,11 @@
       ],
       "writable_from": "ownership",
       "outputs": [],
-      "brief": "按 `interfaces.md` 和 `design.md` 写页面 `web/pages/<页面名>.js`（`render` / `mount`，README「页面约定」）和 `web/styles/<页面名>.css`，在 `web/pages/index.js` 里登记，模板的占位首页可以换掉。用 README 列的全站组件，颜色只用 `tokens.css` 的变量，个人信息按《个人信息展示规范》显示。修文件名里区域归你（web）的检查：`tests/enterprise/*-web-*`、`tests/comp-web-*`、`tests/ac-web-*`。写完跑 `node tests/enterprise/_run.cjs web-` 确认全绿。"
+      "brief": "Write the pages `web/pages/<page name>.js` (`render` / `mount`, see the README's \"Page conventions\") and `web/styles/<page name>.css` as `interfaces.md` and `design.md` say, and register them in `web/pages/index.js`; you may replace the template's placeholder home page. Use the site-wide components the README lists, use only the variables in `tokens.css` for colour, and show personal data as the personal data display standard says. Fix the checks whose file names put them in your area (web): `tests/enterprise/*-web-*`, `tests/comp-web-*`, `tests/ac-web-*`. When you are done run `node tests/enterprise/_run.cjs web-` to confirm they are all green."
     },
     {
       "key": "mobile",
       "title": "Android",
-      "name_zh": "安卓",
       "icon": "mobile",
       "member": "aidlc-developer-agent",
       "aidlc_agent": "aidlc-developer-agent",
@@ -275,12 +264,11 @@
       ],
       "writable_from": "ownership",
       "outputs": [],
-      "brief": "只做分工文件里分给你的目录；按 `interfaces.md` 调接口，个人信息按《个人信息展示规范》显示。修文件名里区域归你的检查。"
+      "brief": "Work only in the directories the assignment file gives you; call the endpoints as `interfaces.md` says, and show personal data as the personal data display standard says. Fix the checks whose file names put them in your area."
     },
     {
       "key": "reviewer",
       "title": "Review",
-      "name_zh": "评审",
       "icon": "reviewer",
       "member": "aidlc-architecture-reviewer-agent",
       "aidlc_agent": "aidlc-architecture-reviewer-agent,aidlc-product-lead-agent",
@@ -299,12 +287,11 @@
       "outputs": [],
       "gate": "human",
       "gate_label": "Release",
-      "brief": "你没有参与开发，只看结果：先在知识库查任务里列出的规范，再读范围清单（人批准时的意见以人为准）、`acceptance.md` 和 `git diff`（命令见下）。逐条核对：范围里的每一条做了没有，适用的公司规则落实了没有（个人信息、前端工程、品牌），测试墙上没过的算进结论。回复第一行写 `DONE: 可以交付` 或 `DONE: 要改：<一句话>`。下面每个要改的问题单独编号 F-1、F-2……：违反哪条、文件和行、证据（代码原文）、怎么改、归谁（写一行 `打回：后端` 这样的）；放行时也列 2～3 条「不阻塞的风险提示」。范围里人定过的事不算问题。负责人会在上线关卡上看你的报告，决定批准上线还是退回。"
+      "brief": "You took no part in the development; you look at the result only. First look up in the knowledge base the standards the task lists, then read the scope list (where a person's approval note differs, the person's wins), `acceptance.md` and `git diff` (the command is below). Check item by item: whether each item of the scope is done, whether the company rules that apply are met (personal data, frontend engineering, brand), and count the tests that fail on the test wall into your verdict. On the first line of your reply write `DONE: ready to deliver` or `DONE: changes needed: <one sentence>`. Below it, number each issue that needs a change separately as F-1, F-2, ...: which rule it breaks, the file and line, the evidence (the code itself), how to fix it, and who owns it (write a line such as `Send back: Backend`); when you let it through, also list 2 or 3 \"non-blocking risk notes\". What a person decided in the scope is not a problem. The owner will read your report at the release gate and decide whether to approve the release or send it back."
     },
     {
       "key": "ops",
       "title": "Deploy",
-      "name_zh": "部署",
       "icon": "deploy",
       "member": "aidlc-pipeline-deploy-agent",
       "aidlc_agent": "aidlc-pipeline-deploy-agent",
@@ -328,12 +315,11 @@
         "health": "/",
         "ttl_min": 240
       },
-      "brief": "写部署配置 `deploy/local.json`：`{ \"port\": 8085, \"health\": \"/\" }`（端口和健康检查路径；有接口的话健康检查可以换成一个不带参数的 GET 接口），再写一页部署记录 `docs/aidlc/4-operation/deploy.md`：怎么起、健康检查、回滚（停掉进程、退回上一个提交）。在空闲端口上冒一次烟：`PORT=18085 node server/server.js &`，`curl -s -o /dev/null -w '%{http_code}' 127.0.0.1:18085/` 返回 200 就停掉它。不要占用 8085：你提交以后，流水线（编排器）按你的配置部署到 127.0.0.1:8085，健康检查返回 200 才算部署成功，不成功会把原因发回给你。"
+      "brief": "Write the deployment config `deploy/local.json`: `{ \"port\": 8085, \"health\": \"/\" }` (the port and the health check path; if there are endpoints, the health check may be a GET endpoint that takes no parameters), and a one-page deployment record `docs/aidlc/4-operation/deploy.md`: how to start, the health check, and rollback (stop the process, go back to the previous commit). Smoke-test once on a free port: `PORT=18085 node server/server.js &`, and when `curl -s -o /dev/null -w '%{http_code}' 127.0.0.1:18085/` returns 200, stop it. Do not use 8085: after you commit, the pipeline (the orchestrator) deploys with your config to 127.0.0.1:8085, and the deployment counts as successful only when the health check returns 200; if it fails, the reason is sent back to you."
     },
     {
       "key": "knowledge",
       "title": "Lessons",
-      "name_zh": "沉淀",
       "icon": "knowledge",
       "member": "aidlc-product-agent",
       "aidlc_agent": "aidlc-product-agent",
@@ -353,7 +339,7 @@
       "gate_label": "Lessons",
       "questions": "docs/aidlc/5-knowledge/questions.json",
       "remember": true,
-      "brief": "读 `docs/aidlc/decisions.md`（人在各关卡上的意见和决定）、评审的报告里编号为 F-n 的问题，以及这次被打回过的原因（看 `git log` 里 `[run]` 和 `打回` 的提交说明）。挑出值得留给下一次交付的经验，每条一句话、能直接照着做；人说过的话尽量用他的原话，不要改写成套话。没有值得留的就一条都不列，不要凑数。写 `docs/aidlc/5-knowledge/questions.json`：`{\"questions\": [{\"id\": \"1\", \"q\": \"这次交付里，哪些经验要记住？勾上的会存下来，之后的运行都会读到；不勾就不记。\", \"multi\": true, \"options\": [{\"key\": \"A\", \"text\": \"一条经验\"}, ...], \"why\": \"不勾就不记\"}]}`，最多 10 条，每条不超过 200 字。没有候选时 `questions` 写空数组。不要改别的文件。"
+      "brief": "Read `docs/aidlc/decisions.md` (what the person said and decided at each gate), the issues numbered F-n in the review's report, and why work was sent back this time (see the `[run]` commits in `git log`). Pick the lessons worth passing on to the next delivery, each one sentence that can be followed directly; use the person's own words where you can, and do not rewrite them into stock phrases. If nothing is worth keeping, list none: do not pad. Write `docs/aidlc/5-knowledge/questions.json`: `{\"questions\": [{\"id\": \"1\", \"q\": \"Which lessons from this delivery should be remembered? Ticked ones are saved and read by every later run; unticked ones are not kept.\", \"multi\": true, \"options\": [{\"key\": \"A\", \"text\": \"one lesson\"}, ...], \"why\": \"unticked means not kept\"}]}`, at most 10 lessons, each at most 200 characters. When there are no candidates, write an empty array for `questions`. Do not change any other file."
     }
   ]
 }

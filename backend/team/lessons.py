@@ -80,7 +80,7 @@ def task_lines(cards: list[dict[str, Any]]) -> str:
     rows = [c for c in cards if isinstance(c, dict) and str(c.get("text") or "").strip()][-IN_TASK:]
     if not rows:
         return ""
-    # agent-facing task text: stays in Chinese
-    lines = ["团队以前的交付里，负责人留下的经验（原话；照着做，和这次范围里人定的事冲突时以这次为准）："]
-    lines += [f"- {_clean(c['text'])}" + (f"（{c['source']}）" if c.get("source") else "") for c in rows]
+    lines = ["Lessons the owner kept from the team's earlier deliveries (their own words; follow them, and where they conflict with "
+             "what a person decided in this run's scope, this run wins):"]
+    lines += [f"- {_clean(c['text'])}" + (f" ({c['source']})" if c.get("source") else "") for c in rows]
     return "\n".join(lines)

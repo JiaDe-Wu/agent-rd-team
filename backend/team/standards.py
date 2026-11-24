@@ -4,7 +4,7 @@ the roles look the originals up in the Crew knowledge base themselves.
 
 A team names its company's standards file (``standards``: a JSON file in the app, e.g. ``packs/taoyuan/standards.json``):
 a list of ``{id, title, kind: "standard" | "data", owner, doc, rules, keywords}``. ``standards_always`` lists the ids
-a team always works by (the lottery page always has the lottery rules (抽奖规则) and personal data (个人信息) in it, whatever the wording).
+a team always works by (the raffle page always has the raffle rules and the personal data standard in it, whatever the wording).
 """
 
 from __future__ import annotations
@@ -52,11 +52,12 @@ def match(requirement: str, team: dict[str, Any], app_root: Path = APP_ROOT) -> 
 def task_lines(found: list[dict[str, Any]], source: str = "", source_id: str = "") -> str:
     """The part of a role's task that names them: what to look up in the knowledge base (in *source_id* only, if given)."""
     if not found:
-        return "（这次需求不涉及公司规范）"  # agent-facing task text: stays in Chinese
-    where = f"知识库来源「{source}」" if source else "知识库"
-    scope = f"，带上 `source_id: \"{source_id}\"` 只查这一个来源" if source_id else ""
-    lines = [f"这次需求涉及的公司规范和数据（原文在 Kiro Crew {where}里，用 `local_knowledge_search` 按标题查{scope}，不要凭记忆写）："]
+        return "(This requirement touches no company standards.)"
+    where = f"the knowledge base source \"{source}\"" if source else "the knowledge base"
+    scope = f", with `source_id: \"{source_id}\"` to search only that source" if source_id else ""
+    lines = [f"The company standards and data this requirement touches (the originals are in Kiro Crew {where}: look them up by title with "
+             f"`local_knowledge_search`{scope}, and do not write from memory):"]
     for s in found:
-        rules = f"：{'、'.join(s['rules'])}" if s["rules"] else ""
-        lines.append(f"- {'数据' if s['kind'] == 'data' else '规范'}《{s['title']}》{rules}")
+        rules = f": {', '.join(s['rules'])}" if s["rules"] else ""
+        lines.append(f"- {'Data' if s['kind'] == 'data' else 'Standard'} \"{s['title']}\"{rules}")
     return "\n".join(lines)

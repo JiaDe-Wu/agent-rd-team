@@ -12,16 +12,32 @@ import zlib
 from pathlib import Path
 from typing import Any
 
-# protocol token: kept in Chinese (the UI types and the CTO data match these values)
+# Data enums: the stored values stay as they are, because the UI types and the CTO data match them (the UI shows them in English,
+# see ``DISPLAY``). A team file or a planner writes the English names (``ALIASES``); the stored value is the enum.
 KINDS = ("新应用", "新功能", "修复")  # new app, new feature, fix
 SIZES = ("小", "中", "大")  # small, medium, large
 LINES = ("电商", "移动应用", "客户关系管理", "供应链", "内部系统")  # e-commerce, mobile apps, CRM, supply chain, internal systems
+DISPLAY = {"新应用": "new app", "新功能": "new feature", "修复": "fix", "小": "small", "中": "medium", "大": "large",
+           "电商": "e-commerce", "移动应用": "mobile apps", "客户关系管理": "CRM", "供应链": "supply chain", "内部系统": "internal systems"}
+ALIASES = {**{v: k for k, v in DISPLAY.items()}, "customer relationship management": "客户关系管理", "mobile app": "移动应用",
+           "internal system": "内部系统", "ecommerce": "电商"}
 NAME_MAX = 20
 WHY_MAX = 60
 FIELDS = {"kind": KINDS, "size": SIZES, "line": LINES}
 # who raises a business line's Issues when a run does not say (an imported run brings its own)
-# protocol token: kept in Chinese (department names written into the CTO data)
-REPORTERS = {"电商": "运营部", "移动应用": "用户体验组", "客户关系管理": "会员运营部", "供应链": "供应链管理部", "内部系统": "行政部"}
+REPORTERS = {"电商": "Operations", "移动应用": "UX team", "客户关系管理": "Member operations", "供应链": "Supply chain management",
+             "内部系统": "Administration"}
+
+
+def canon(allowed: tuple[str, ...], value: Any) -> str | None:
+    """The enum value *value* names, written as the enum itself or by its English name (any case); None when it names none."""
+    if not isinstance(value, str):
+        return None
+    v = " ".join(value.split())
+    if v in allowed:
+        return v
+    got = ALIASES.get(v.lower())
+    return got if got in allowed else None
 
 
 def issue_id(rid: str) -> str:
@@ -46,8 +62,9 @@ def clean(data: Any, base: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(data, dict):
         return out
     for key, allowed in FIELDS.items():
-        if data.get(key) in allowed:
-            out[key] = data[key]
+        got = canon(allowed, data.get(key))
+        if got:
+            out[key] = got
     name = " ".join(str(data.get("name") or "").split())
     if name:
         out["name"] = name[:NAME_MAX]
@@ -59,7 +76,7 @@ def clean(data: Any, base: dict[str, Any]) -> dict[str, Any]:
 
 def defaults(team: dict[str, Any], title: str, *, on_source: bool = False, team_dir: Path | None = None) -> dict[str, Any]:
     """The team file's ``delivery_defaults``; a run that began before teams had them takes those of the team file of the
-    same name in *team_dir*; without any: a change to an existing project is a new feature (新功能), anything else a new app (新应用), medium (中), internal systems (内部系统)."""
+    same name in *team_dir*; without any: a change to an existing project is a new feature, anything else a new app; medium; internal systems."""
     base = {"name": short_name(title), "kind": "新功能" if on_source else "新应用", "size": "中", "line": "内部系统", "why": ""}
     dd = team.get("delivery_defaults")
     if not isinstance(dd, dict) and team_dir is not None and team.get("name"):
@@ -93,8 +110,8 @@ def check(team: dict[str, Any]) -> None:
         if not isinstance(dd, dict):
             raise ValueError("team.json: delivery_defaults must be {kind, size, line}")
         for key, allowed in FIELDS.items():
-            if key in dd and dd[key] not in allowed:
-                raise ValueError(f"team.json: delivery_defaults.{key} must be one of {', '.join(allowed)}")
+            if key in dd and canon(allowed, dd[key]) is None:
+                raise ValueError(f"team.json: delivery_defaults.{key} must be one of {', '.join(DISPLAY[a] for a in allowed)}")
     for r in team.get("roles") or []:
         rel = r.get("delivery")
         if rel is None:
@@ -106,5 +123,5 @@ def check(team: dict[str, Any]) -> None:
 
 
 def label(d: dict[str, Any]) -> str:
-    """One line for events and the gate: 新功能 · 中 · 电商 (双十一家电大促), i.e. kind · size · line (name)."""
-    return f"{d['kind']} · {d['size']} · {d['line']} ({d['name']})"
+    """One line for events and the gate: new feature · medium · e-commerce (Black Friday promo), i.e. kind · size · line (name)."""
+    return f"{DISPLAY.get(d['kind'], d['kind'])} · {DISPLAY.get(d['size'], d['size'])} · {DISPLAY.get(d['line'], d['line'])} ({d['name']})"
