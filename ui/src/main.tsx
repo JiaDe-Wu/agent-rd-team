@@ -40,6 +40,7 @@ import { KnowledgePanel } from './board/Knowledge'
 import { SignOff } from './board/SignOff'
 import { ReplayBar, useReplay } from './board/Replay'
 import { CtoView } from './cto/CtoView'
+import { SetupPanel } from './setup/SetupPanel'
 import { ItemView } from './cto/ItemView'
 import { AppBar, APP_CSS } from './AppBar'
 import { KIT_CSS } from './kit'
@@ -685,6 +686,7 @@ export default function AidlcTeamApp({ pollMs }: { pollMs?: number } = {}) {
       <AppBar view={view.kind} projection={projection} item={ctx.run ?? ctx.issue}
         onView={(k) => (k === 'item' ? toItem({ run: ctx.run, issue: ctx.issue }) : k === 'board' ? toBoard(ctx.run ? { run: ctx.run } : {}) : toCto(ctx.run || ctx.issue ? { hl: ctx.run ?? ctx.issue } : {}))}
         onProjection={() => onProjection(!projection)} />
+      <SetupPanel onOpenRun={(rid) => toBoard({ run: rid })} />
       {body}
     </div>
   )
