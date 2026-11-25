@@ -73,6 +73,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--with-model", action="store_true", help="also run a delivery on a real model (spends credits)")
     ap.add_argument("--copy-kiro-login", action="store_true", help="copy ~/.local/share/kiro-cli into the fresh HOME (for --with-model)")
     ap.add_argument("--promo", action="store_true", help="also run the example Black Friday delivery on a real model, approving its gates as the owner (spends many credits; implies --with-model's setup)")
+    ap.add_argument("--requirement", default="", help="with --promo: use this requirement instead of the example the page offers")
     ap.add_argument("--model", default="", help="the model for --with-model (default: the first the gateway offers)")
     a = ap.parse_args(argv)
 
@@ -306,7 +307,7 @@ def with_promo(a: argparse.Namespace, owner) -> None:
     code, body = owner.call("GET", f"/api/apps/{APP}/models")
     models = [m["id"] for m in body.get("models", [])]
     model = a.model or (models[0] if models else "")
-    code, body = owner.call("POST", f"/api/apps/{APP}/runs", {"requirement": example.get("requirement", ""), "team": example.get("team", ""),
+    code, body = owner.call("POST", f"/api/apps/{APP}/runs", {"requirement": a.requirement or example.get("requirement", ""), "team": example.get("team", ""),
                                                            **({"model": model} if model else {})})
     rid = body.get("run", "")
     if not check(code == 200 and bool(rid), "the example delivery starts", f"HTTP {code} {body}"):
@@ -343,7 +344,7 @@ def with_promo(a: argparse.Namespace, owner) -> None:
     tests = run.get("tests") or {}
     check((tests.get("failed") or 0) == 0 and (tests.get("total") or 0) > 0, "the company checks pass", json.dumps(tests)[:200])
     check(len(approved) >= 1, "a person (here: the script) decided at the gates", f"approved {sorted(approved)}")
-    print(f"     credits {run.get('credits')}, tests {tests.get('passed')}/{tests.get('total')}, bounces {run.get('bounces')}, risks {run.get('risks')}", flush=True)
+    print(f"     credits {run.get('credits')}, tests {tests.get('passed')}/{tests.get('total')}, send-backs {sum(1 for e in rows_of(owner.call('GET', f'/api/apps/{APP}/runs/{rid}/events')[1], 'events') if e.get('kind') == 'bounce')}, risks {run.get('risks')}", flush=True)
     if run.get("status") == "done":
         code, body = owner.call("POST", f"/api/apps/{APP}/runs/{rid}/signoff", {"by": "E2E test", "note": "Signed off by the end-to-end test script."})
         check(code == 200, "the delivery is signed off", f"HTTP {code} {str(body)[:140]}")
