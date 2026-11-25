@@ -17,6 +17,10 @@ The page has three views that share one app bar: the **CTO view** (all deliverie
 
 ## See it in 30 seconds
 
+![A 60-second tour: install, one-click setup, the company rules as checks, two real runs, and the CTO view](assets/demo.gif)
+
+The same tour as a video: [assets/demo.mp4](assets/demo.mp4). It is built from this repository's preview page and its recorded runs, with captions that say what is preview data and what is measured.
+
 You do not need Kiro Crew or any model credits to look at the app. The page is built into one HTML file with sample data:
 
 ```bash
