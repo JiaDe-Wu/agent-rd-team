@@ -26,12 +26,12 @@ APP = "agent-rd-team"
 class Owner:
     """The gateway's API, called as the dashboard owner (cookie session from ``kirocrew token``)."""
 
-    def __init__(self, port: int, kirocrew_bin: "str | list[str]", env: "dict[str, str] | None" = None) -> None:
+    def __init__(self, port: int, kirocrew_bin: "str | list[str]", env: "dict[str, str] | None" = None, ttl: str = "10m") -> None:
         """*kirocrew_bin*: the `kirocrew` command, or the argv that stands for it (``[python, "-m", "kiro_crew"]``)."""
         self.base = f"http://127.0.0.1:{port}"
         self.opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
         cmd = [kirocrew_bin] if isinstance(kirocrew_bin, str) else list(kirocrew_bin)
-        out = subprocess.run([*cmd, "token", "--port", str(port), "--ttl", "10m"], capture_output=True, text=True, check=False,
+        out = subprocess.run([*cmd, "token", "--port", str(port), "--ttl", ttl], capture_output=True, text=True, check=False,
                              env=env).stdout
         m = re.search(r"token=([^\s]+)", out)
         if not m:

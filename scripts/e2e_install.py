@@ -71,7 +71,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--root", help="where the fresh HOME goes (default: a temporary folder, removed at the end)")
     ap.add_argument("--keep", action="store_true", help="keep the fresh HOME afterwards")
     ap.add_argument("--with-model", action="store_true", help="also run a delivery on a real model (spends credits)")
-    ap.add_argument("--copy-kiro-login", action="store_true", help="copy ~/.local/share/kiro-cli into the fresh HOME (for --with-model)")
+    ap.add_argument("--copy-kiro-login", action="store_true", help="copy kiro-cli's sign-in (~/.local/share/kiro-cli, or ~/Library/Application Support/kiro-cli on macOS) into the fresh HOME (for --with-model and --promo)")
     ap.add_argument("--promo", action="store_true", help="also run the example Black Friday delivery on a real model, approving its gates as the owner (spends many credits; implies --with-model's setup)")
     ap.add_argument("--requirement", default="", help="with --promo: use this requirement instead of the example the page offers")
     ap.add_argument("--model", default="", help="the model for --with-model (default: the first the gateway offers)")
@@ -109,9 +109,11 @@ def main(argv: list[str] | None = None) -> int:
         agent["apps_trusted_local"] = [APP]
     (crew / "config.json").write_text(json.dumps({"agent": agent}), encoding="utf-8")
     if a.copy_kiro_login:
-        src = Path.home() / ".local" / "share" / "kiro-cli"
-        if src.is_dir():
-            shutil.copytree(src, home / ".local" / "share" / "kiro-cli", dirs_exist_ok=True)
+        # where kiro-cli keeps its sign-in: ~/.local/share/kiro-cli on Linux, ~/Library/Application Support/kiro-cli on macOS
+        for rel in (Path(".local") / "share" / "kiro-cli", Path("Library") / "Application Support" / "kiro-cli"):
+            src = Path.home() / rel
+            if src.is_dir():
+                shutil.copytree(src, home / rel, dirs_exist_ok=True)
 
     log = (root / "gateway.log").open("w")
     gw = subprocess.Popen([*kirocrew, "gateway", "--port", str(a.port), "--no-open", "--no-tunnel", "--no-crons"], env=env,
@@ -160,7 +162,7 @@ def run(a: argparse.Namespace, env: dict, kirocrew: list[str], home: Path, crew:
             return False
     if not check(bool(until(healthy, 90, 1.0)), "the gateway answers /api/health"):
         return
-    owner = plan_mod.Owner(a.port, kirocrew, env=env)
+    owner = plan_mod.Owner(a.port, kirocrew, env=env, ttl="2h")  # a real delivery can take longer than the default 10 minutes
 
     print("2  install")
     r = subprocess.run([*kirocrew, "app", "install", app_source], env=env, capture_output=True, text=True, timeout=300)
@@ -317,11 +319,19 @@ def with_promo(a: argparse.Namespace, owner) -> None:
     approved: set[str] = set()
     deadline = time.time() + 55 * 60
 
+    bad = {"n": 0}
+
     def board() -> dict:
-        return owner.call("GET", f"/api/apps/{APP}/board?run={rid}")[1].get("run", {})
+        code, body = owner.call("GET", f"/api/apps/{APP}/board?run={rid}")
+        bad["n"] = 0 if code == 200 else bad["n"] + 1
+        if code != 200:
+            print(f"     board answered HTTP {code}: {str(body)[:160]}", flush=True)
+        return body.get("run", {}) if code == 200 and isinstance(body, dict) else {}
     run: dict = {}
     while time.time() < deadline:
         run = board()
+        if bad["n"] >= 6:  # the session or the gateway is gone: say so now, not after the time limit
+            break
         line = ", ".join(f"{r.get('key')}:{r.get('status')}{'/' + str(r.get('gate')) if r.get('gate') else ''}" for r in run.get("roles", []))
         if line != seen.get("line"):
             seen["line"] = line
