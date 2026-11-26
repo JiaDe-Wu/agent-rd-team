@@ -106,7 +106,8 @@ A requirement that mentions a keyword gets the matching rules named in every rol
 ## Install
 
 From the App Store: open **Discover**, pick **Agent R&D Team** and press **Install**. (It is not in the catalog yet: the listing request is
-[kirodotdev/KiroCrew#41059](https://github.com/kirodotdev/KiroCrew/issues/41059).) Until then, Kiro Crew installs it straight from this repository:
+[kirodotdev/KiroCrew#41059](https://github.com/kirodotdev/KiroCrew/issues/41059), and the catalog pull request
+[kirodotdev/KiroCrewApps#105](https://github.com/kirodotdev/KiroCrewApps/pull/105) pins v0.11.0.) Until then, Kiro Crew installs it straight from this repository:
 
 ```bash
 kirocrew app install https://github.com/JiaDe-Wu/agent-rd-team    # or a clone: kirocrew app install ./agent-rd-team
